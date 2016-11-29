@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html class="ss aa  qq">
+<head>
+	<meta charset="utf-8">
+	<title>下拉菜单</title>
+	<link rel="stylesheet" type="text/css" href="http://at.alicdn.com/t/font_9usqdps86ez5mi.css">
+	<link rel="stylesheet" type="text/css" href="style.css"/>
+	
+</head>
+<body>
+	
+	<div id="header">
+		<img src="images/logo.gif"/>	
+		<span class="login">登录</span>
+		<div class="member">			
+			<span>个人中心</span>
+			<ul class="member_ul">
+				<li><a href="#">设置</a></li>
+				<li><a href="#">换肤</a></li>
+				<li><a href="#">帮助</a></li>
+				<li><a href="#">退出</a></li>
+			</ul>
+		</div>
+	</div>
+	<div id="login">
+		<div class="login_top">
+			<p>用户登录<i class="iconfont icon-cuowu close"></i></p>
+			
+		</div>
+		<div class="text">帐 号：<input type="text" name="user" ></div>
+		<div class="password">密 码：<input type="password" name="pass"></div>
+		<div class="sub"><input type="submit" name="sub" value="登录"></div>
+		<p><a href="#">注册新用户 </a> | <a href="#">忘记密码？</a></p>
+	</div>
+	
+	<!-- 放在后面，保证能获取到dom节点 -->
+	<script type="text/javascript" src="myFunction.js"></script>	<!-- 必须放在Self前面 -->
+	<script type="text/javascript" src="Self.js"></script>
+	<script type="text/javascript" src="demo.js"></script>
+</body>
+</html>
