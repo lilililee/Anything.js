@@ -1,41 +1,73 @@
 <!DOCTYPE html>
-<html class="ss aa  qq">
+<html lang="en">
 <head>
-	<meta charset="utf-8">
-	<title>下拉菜单</title>
-	<link rel="stylesheet" type="text/css" href="http://at.alicdn.com/t/font_9usqdps86ez5mi.css">
-	<link rel="stylesheet" type="text/css" href="style.css"/>
-	
+	<meta charset="UTF-8">
+	<title>Test JQuery</title>
+	<style>
+		.div1{
+			width: 200px;
+			height: 200px;
+			margin: 100px;
+			border: 1px solid red;
+			position: relative;
+		}
+		
+		.div2,.div3{
+			width: 50px;
+			height: 50px;
+			border: 1px solid blue;
+			position: absolute;
+			/*left: 30px;
+			top: 20px;*/
+			
+		}
+		.fixed{
+			position: fixed;
+			top: 100px;
+			left: 200px;
+		}
+	</style>
 </head>
 <body>
-	
+	<div class="div1">
+		<div class="div4">111</div>
+		<div class="div2">111</div>
+		<div class="div3">222</div>
+	</div>
 	<div id="header">
-		<img src="images/logo.gif"/>	
-		<span class="login">登录</span>
-		<div class="member">			
-			<span>个人中心</span>
-			<ul class="member_ul">
-				<li><a href="#">设置</a></li>
-				<li><a href="#">换肤</a></li>
-				<li><a href="#">帮助</a></li>
-				<li><a href="#">退出</a></li>
-			</ul>
-		</div>
+		
 	</div>
-	<div id="login">
-		<div class="login_top">
-			<p>用户登录<i class="iconfont icon-cuowu close"></i></p>
-			
-		</div>
-		<div class="text">帐 号：<input type="text" name="user" ></div>
-		<div class="password">密 码：<input type="password" name="pass"></div>
-		<div class="sub"><input type="submit" name="sub" value="登录"></div>
-		<p><a href="#">注册新用户 </a> | <a href="#">忘记密码？</a></p>
+	<div id="content">
+		<div id="box">
+			<h1 class=" color dzzz color">Welcome</h1>
+			<h1 class="zz color ">Welcome</h1>
+			<p>
+				Welcome to the official website of Jay Skript and the Domsters. Here, you can <a href="#">learn more about the band</a>, view <a href="#">photos of the band</a>, find out about <a href="#">tour dates</a> and <a href="#">get in touch with the band</a>.
+			</p>
+		</div>	
 	</div>
-	
-	<!-- 放在后面，保证能获取到dom节点 -->
-	<script type="text/javascript" src="myFunction.js"></script>	<!-- 必须放在Self前面 -->
-	<script type="text/javascript" src="Self.js"></script>
-	<script type="text/javascript" src="demo.js"></script>
+	<div class="test">sssadasdasdddddddddddddddddddddddddd</div>sdsf
+	<input type="text" class="uesr" value="haha1">
+	<input type="text" class="uesr" value="haha2">
+	<p>11</p><p>11</p><p>11</p><p>11</p><p>11</p><p>11</p><p>11</p><p>11</p><p>11</p><p>11</p><p>11</p><p>11</p><p>11</p><p>11</p><p>11</p><p>11</p><p>11</p><p>11</p><p>11</p><p>11</p><p>11</p><p>11</p><p>11</p><p>11</p><p>11</p><p>11</p><p>11</p><p>11</p><p>11</p><p>11</p><p>11</p><p>11</p><p>11</p><p>11</p><p>11</p><p>11</p><p>11</p><p>11</p>
+	<div class="fixed">ffffffffffffff</div>
+	<div id="test2">22222222</div>
+	<ul>
+		<li>qqq</li> 
+		<li>www</li>
+		<li>eee</li>
+	</ul>
+	<ul>
+		<li>qqq</li>
+		<li>www</li>
+		<li>eee</li>
+	</ul>
+<script src="http://lib.sinaapp.com/js/jquery/1.9.1/jquery-1.9.1.min.js"></script>
+<!-- <script src ='Anything.js'></script> -->
+<script>
+
+$('ul li').wrapAll('<div></div>');
+
+</script>
 </body>
 </html>

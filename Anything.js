@@ -1,4 +1,4 @@
-console.log('Welcome to use Anything.js!');
+//console.log('Welcome to use Anything.js!');
 function $(args){
 	return new Base(args);
 };
@@ -65,18 +65,25 @@ function Base(args) {
 		}
 	}else if(typeof args == 'object'){
 		this.elements[0] = args;
+	}else{
+		errorArgs();
 	}
 
 }
 
+//***********************************获取元素*****************************************
 //根据id获取
 Base.prototype.getById = function(id) {
+	if(typeof id != 'string') errorArgs();	//参数检测
+
 	var result = document.getElementById(id);
-	return result == null? []:[result];	//无匹配id时返回null
+	return result == null? []:[result];	//无匹配id时会返回null
 };
 
 //根据tag获取
 Base.prototype.getByTagName = function(tag_name,parent_node){
+	if(typeof tag_name != 'string') errorArgs(); //参数检测
+
 	var node = parent_node == undefined? document : parent_node;
 	var result = [];
 	var tags = node.getElementsByTagName(tag_name);
@@ -87,6 +94,8 @@ Base.prototype.getByTagName = function(tag_name,parent_node){
 }
 //根据class获取
 Base.prototype.getByClassName = function(class_name,parent_node){
+	if(typeof class_name != 'string') errorArgs(); //参数检测
+
 	var node = parent_node == undefined? document : parent_node;
 	var result = [];
 	if(document.getElementsByClassName){	//W3C   IE9+ 
@@ -112,16 +121,20 @@ Base.prototype.getByClassName = function(class_name,parent_node){
 //根据下标获取
 //示例：$('div p').eq(2)
 Base.prototype.eq = function(index){
+	if(typeof eq != 'number') errorArgs(); //参数检测
+
 	var temp = this.elements[index];
 	this.elements = [];
 	this.elements.push(temp);
 	return this;
 }
 
-//1.属性操作
+//***********************************属性操作*****************************************
 //获取和设置属性
 //示例：$('div p').attr('title')
 Base.prototype.attr = function(name,value){
+	if(typeof name != 'string') errorArgs(); //参数检测
+
 	if(value === undefined){	//当参数只有一个时表示获取属性
 			return this.elements[0].getAttribute(name);		
 	}else{				//当参数有两个时表示设置属性
@@ -134,15 +147,19 @@ Base.prototype.attr = function(name,value){
 
 //删除属性
 Base.prototype.removeAttr = function(name){
+	if(typeof name != 'string') errorArgs(); //参数检测
+
 	for(var i=0; i<this.elements.length; i++){
 		this.elements[i].removeAttribute(name);
 	}		
 	return this;
 }
 
-//2.内容操作
+//***********************************内容操作*****************************************
 //获取和设置innerHTML内容
 Base.prototype.html = function(content){
+	if(typeof content != 'string') errorArgs(); //参数检测
+
 	if(arguments.length == 0){
 		return this.elements[0].innerHTML;
 	}else{
@@ -155,6 +172,8 @@ Base.prototype.html = function(content){
 
 //获取和设置文本内容
 Base.prototype.text = function(content){
+	if(typeof content != 'string') errorArgs(); //参数检测
+
 	if(arguments.length == 0){
 		var result = '';
 		for(var i=0; i<this.elements.length; i++){
@@ -170,6 +189,7 @@ Base.prototype.text = function(content){
 
 //获取和设置表单内容
 Base.prototype.val = function(value){
+
 	if(arguments.length == 0){
 		return this.elements[0].value;
 	}else{
@@ -180,10 +200,12 @@ Base.prototype.val = function(value){
 	}
 }
 
-//获取和设置样式
+//***********************************样式操作*****************************************
 //在获取颜色时格式会有差异，ie是原本值，其他是计算后的rgb
 //不支持同时设置多个属性，可用连缀来实现
 Base.prototype.css = function(attr,value){
+	if(typeof attr != 'string' && typeof value != 'string') errorArgs(); //参数检测
+
 	if(arguments.length == 1){
 		return getStyle(this.elements[0],attr);
 	}else{
@@ -194,9 +216,11 @@ Base.prototype.css = function(attr,value){
 	}
 }
 
-//类名操作
+//***********************************类名操作*****************************************
 //添加类名
 Base.prototype.addClass = function(class_name){
+	if(typeof class_name != 'string') errorArgs(); //参数检测
+
 	for(var i=0; i<this.elements.length; i++){
 		var temp = this.elements[i].className.split(' ');
 		var flag = false;	//表示未包含当前类名
@@ -216,6 +240,8 @@ Base.prototype.addClass = function(class_name){
 
 //删除类名
 Base.prototype.removeClass = function(class_name){
+	if(typeof class_name != 'string') errorArgs(); //参数检测
+
 	for(var i=0; i<this.elements.length; i++){
 		var temp = this.elements[i].className.split(' ');
 		for(var j=0; j<temp.length; j++){	//进行类名检查
@@ -230,6 +256,8 @@ Base.prototype.removeClass = function(class_name){
 
 //切换类名
 Base.prototype.toggleClass = function(class_name){
+	if(typeof class_name != 'string') errorArgs(); //参数检测
+
 	for(var i=0; i<this.elements.length; i++){
 		var temp = this.elements[i].className.split(' ');
 		var flag = false;	//表示未包含当前类名
@@ -247,6 +275,7 @@ Base.prototype.toggleClass = function(class_name){
 	return this;
 }
 
+//***********************************大小操作*****************************************
 //获取和设置元素width
 Base.prototype.width = function(value){
 	var width = parseInt(getStyle(this.elements[0],'width'));	//将px值转化为number
@@ -368,7 +397,7 @@ Base.prototype.outerHeight = function(value){
 }
 
 
-//位置方法
+//***********************************位置操作*****************************************
 //offset(),表示元素在文档中的位置
 Base.prototype.offset = function(){
 	var parent = this.elements[0].offsetParent;
@@ -393,13 +422,15 @@ Base.prototype.position = function(){
 }
 
 
-//DOM操作
-
-//插入节点
+//***********************************DOM操作*****************************************
+//***********************************插入节点****************************************
 //内部后面插入节点
 //示例：$('ul').append('<li>haha</li>');
-//在IE8-中无法通过innerHTML添加带标签的元素，只能添加纯文本
+//在IE8-中添加非法便签格式便无效，例如<p><li>zz</li></p>
 Base.prototype.append = function(str){
+	if(typeof str.nodeType == 'number'){		//如果传入一个元素节点转化成字符串
+		str = str.outerHTML;
+	}
 	for(var i=0; i<this.elements.length; i++){
 		var html = this.elements[i].innerHTML;
 		html += str;	
@@ -412,6 +443,9 @@ Base.prototype.append = function(str){
 //示例：$('ul').prepend('<li>haha</li>');
 //在IE8-中添加非法便签格式便无效，例如<p><li>zz</li></p>
 Base.prototype.prepend = function(str){
+	if(typeof str.nodeType == 'number'){
+		str = str.outerHTML;
+	}
 	for(var i=0; i<this.elements.length; i++){
 		var html = this.elements[i].innerHTML;
 		html = str+html;	
@@ -424,6 +458,9 @@ Base.prototype.prepend = function(str){
 //示例：$('ul').prepend('<li>haha</li>');
 //在IE8-中添加非法便签格式便无效，例如<p><li>zz</li></p>
 Base.prototype.after = function(str){
+	if(typeof str.nodeType == 'number'){
+		str = str.outerHTML;
+	}
 	for(var i=0; i<this.elements.length; i++){
 		var html = this.elements[i].outerHTML;
 		html += str;	
@@ -436,6 +473,9 @@ Base.prototype.after = function(str){
 //示例：$('ul').prepend('<li>haha</li>');
 //在IE8-中添加非法便签格式便无效，例如<p><li>zz</li></p>
 Base.prototype.before = function(str){
+	if(typeof str.nodeType == 'number'){
+		str = str.outerHTML;
+	}
 	for(var i=0; i<this.elements.length; i++){
 		var html = this.elements[i].outerHTML;
 		html = str + html;	
@@ -444,13 +484,80 @@ Base.prototype.before = function(str){
 	return this;
 }
 
-//删除节点
+//***********************************删除节点*****************************************
 //删除所有选中的节点，并返回一个删除的节点数组
 Base.prototype.remove = function(){
 	for(var i=0; i<this.elements.length; i++){
 		this.elements[i].parentNode.removeChild(this.elements[i]);		
 	}
 	return this.elements;
+}
+
+//***********************************克隆节点*****************************************
+//true表示深克隆，会复制子节点，false则不会,默认为true
+//只能克隆节点，未实现JQuery的复制事件
+Base.prototype.clone = function(flag){
+	return flag === false? this.elements[0].cloneNode(false) : this.elements[0].cloneNode(true);
+}
+
+//***********************************替换节点*****************************************
+Base.prototype.replaceWith = function(str){
+	if(typeof str.nodeType == 'number'){
+		str = str.outerHTML;
+	}
+	for(var i=0; i<this.elements.length; i++){
+		this.elements[i].outerHTML = str;
+	}
+}
+
+//***********************************包裹节点*****************************************
+//只能传入字符串，例如：'<div></div>'，只能有一个节点
+//单独包裹每个节点
+Base.prototype.wrap = function(str){
+	if(typeof str != 'string')	errorArgs();  //参数检测	
+	var temp = str.split('></');
+	if(temp.length != 2)  errorArgs();  //参数检测
+
+	for(var i=0; i<this.elements.length; i++){
+		var html = this.elements[i].outerHTML;
+		html = temp[0] + '>' + html + '</' + temp[1]; 
+		this.elements[i].outerHTML = html;
+	}
+}
+
+//整体包裹
+//只包裹第一组连续的节点
+Base.prototype.wrapAll = function(str){
+	if(typeof str != 'string')	errorArgs();  //参数检测	
+	var temp = str.split('></');
+	if(temp.length != 2)  errorArgs();  //参数检测
+	//找到第一组连续的节点
+	var html = this.elements[0].outerHTML;
+	for(var i=1; i<this.elements.length; i++){	
+		//根据上一兄弟节点是否为数值上一元素来判断是否连续
+		if(getPreviousSibling(this.elements[i]) == this.elements[i-1]){
+			html += this.elements[i].outerHTML;
+		}else{
+			break;
+		}
+	}
+	//把连续节点的outerHTML拼接起来，统一作为this.elements[0]的outerHTML,后面的节点删除
+	for(var j=1; j<i; j++){
+		this.elements[j].parentNode.removeChild(this.elements[j]);
+	}
+	this.elements[0].outerHTML = temp[0] + '>' + html + '</' + temp[1];
+}
+
+//包裹内部元素
+Base.prototype.wrapInner = function(str){
+	if(typeof str != 'string')	errorArgs();  //参数检测	
+	var temp = str.split('></');
+	if(temp.length != 2)  errorArgs();  //参数检测
+
+	for(var i=0; i<this.elements.length; i++){	
+		this.elements[i].innerHTML = temp[0] + '>' + this.elements[i].innerHTML + '</' + temp[1];
+	}
+
 }
 
 
@@ -463,6 +570,18 @@ Base.prototype.remove = function(){
 
 
 
+
+
+
+
+
+
+
+
+//参数不合法报错
+function errorArgs(){
+	throw new Error('参数不合法！');
+}
 
 
 
@@ -529,6 +648,15 @@ function setScrollTop(scroll_top) {
 	document.body.scrollTop = scroll_top;
 }
 
-
+//获取上一个兄弟节点，过滤掉空格和回车生成的文本节点
+function getPreviousSibling(node){
+	var result = node.previousSibling;
+	var reg = /^\s+$/;		// \s匹配空格和换行符
+	//当某个节点没有上一个兄弟节点时会返回null或undefined，导致test方法报错
+	while(result != null && reg.test(result.nodeValue)){	
+		result = result.previousSibling;		
+	}
+	return result;
+}
 
  
