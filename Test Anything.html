@@ -16,22 +16,24 @@
 			width: 50px;
 			height: 50px;
 			border: 1px solid blue;
-			position: absolute;
+			/*position: absolute;*/
+			margin: 20px;
 			/*left: 30px;
 			top: 20px;*/
 			
 		}
-		.fixed{
-			position: fixed;
-			top: 100px;
-			left: 200px;
-		}
+		
 	</style>
+	<script>
+		
+		
+	</script>
+	
 </head>
 <body>
 	<div class="div1">
-		<div class="div4">111</div>
-		<div class="div2">111</div>
+		<!-- <div class="div4">111</div>
+		<div class="div2">111</div> -->
 		<div class="div3">222</div>
 	</div>
 	<div id="header">
@@ -49,26 +51,41 @@
 	<div class="test">sssadasdasdddddddddddddddddddddddddd</div>sdsf
 	<input type="text" class="uesr" value="haha1">
 	<input type="text" class="uesr" value="haha2">
-	<p>11</p><p>11</p><p>11</p><p>11</p><p>11</p><p>11</p><p>11</p><p>11</p><p>11</p><p>11</p><p>11</p><p>11</p><p>11</p><p>11</p><p>11</p><p>11</p><p>11</p><p>11</p><p>11</p><p>11</p><p>11</p><p>11</p><p>11</p><p>11</p><p>11</p><p>11</p><p>11</p><p>11</p><p>11</p><p>11</p><p>11</p><p>11</p><p>11</p><p>11</p><p>11</p><p>11</p><p>11</p><p>11</p>
-	<div class="fixed">ffffffffffffff</div>
 	<div id="test2">22222222</div>
-	<ul>
-		<li>qqq</li>
-	<li class="sss">www</li>	<li>eee</li>
+	<ul class="ul1">
+		<li class="li1">qqq</li>
+		<li class="li2">www</li>	
+		<li class="li3">eee</li>
 	</ul>
-	<ul>
-		<li>qqq</li>
-		<li>www</li>
-		<li>eee</li>
+	<ul class="ul2">
+		<li class="li4">qqq</li>
+		<li class="li5">www</li>
+		<li class="li6">eee</li>
 	</ul>
 <!-- <script src="http://lib.sinaapp.com/js/jquery/1.9.1/jquery-1.9.1.min.js"></script> -->
 <script src ='Anything.js'></script>
 <script>
+// window.onload = function(){
+// 	alert('window')
+// }
+// //$('p').remove();
+var li = document.getElementsByTagName('li');
 
-//$('p').remove();
+for(var i=0;i<li.length;i++){
+	(li[i].onclick = function(){
+		alert(i)
+	})(i)
+}
 
 
-$('p').wrapInner('<strong class="ss"></strong>');
+ $(function(){
+ 	//alert(22)
+	// $('ul').mouseenter(function(){
+	// 	//alert(111)
+	// })
+})
+
+
 </script>
 </body>
 </html>

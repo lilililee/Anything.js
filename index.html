@@ -53,7 +53,7 @@
 	<div class="fixed">ffffffffffffff</div>
 	<div id="test2">22222222</div>
 	<ul>
-		<li>qqq</li> 
+		<li>qqq1</li> 
 		<li>www</li>
 		<li>eee</li>
 	</ul>
@@ -66,8 +66,10 @@
 <!-- <script src ='Anything.js'></script> -->
 <script>
 
-$('ul li').wrapAll('<div></div>');
-
+var t = $('ul li').each(function(index){
+	console.log(this)
+});
+console.log(t)
 </script>
 </body>
 </html>

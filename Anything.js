@@ -65,7 +65,10 @@ function Base(args) {
 		}
 	}else if(typeof args == 'object'){
 		this.elements[0] = args;
-	}else{
+	}else if(typeof args == 'function'){
+		documentReady(args);
+	}
+	else{
 		errorArgs();
 	}
 
@@ -421,8 +424,7 @@ Base.prototype.position = function(){
 	}
 }
 
-
-//***********************************DOM操作*****************************************
+//-------------------------------------DOM操作---------------------------------------
 //***********************************插入节点****************************************
 //内部后面插入节点
 //示例：$('ul').append('<li>haha</li>');
@@ -485,12 +487,22 @@ Base.prototype.before = function(str){
 }
 
 //***********************************删除节点*****************************************
-//删除所有选中的节点，并返回一个删除的节点数组
+//删除所有选中的节点(自身节点和后代节点)，并返回一个删除的节点数组
 Base.prototype.remove = function(){
 	for(var i=0; i<this.elements.length; i++){
 		this.elements[i].parentNode.removeChild(this.elements[i]);		
 	}
 	return this.elements;
+}
+
+//删除选中节点的后代节点（不包括自身）
+Base.prototype.empty = function(){
+	for(var i=0; i<this.elements.length; i++){
+		console.log(this.elements[i].outerHTML)
+		console.log(this.elements[i].innerHTML)
+		this.elements[i].outerHTML = this.elements[i].outerHTML.replace(this.elements[i].innerHTML,'');		
+	}
+	return this;
 }
 
 //***********************************克隆节点*****************************************
@@ -560,14 +572,92 @@ Base.prototype.wrapInner = function(str){
 
 }
 
+//***********************************遍历节点*****************************************
+//callback的第一个参数表示节点数组index
+//callback中this指向当前节点
+Base.prototype.each = function(callback){
+	for(var i=0; i<this.elements.length; i++){
+		this.elements[i].fn = callback;
+		this.elements[i].fn(i);
+		this.elements[i].fn = null;
+	}
+}
 
 
 
 
+//-------------------------------------事件-------------------------------------------
+//***********************************载入事件*****************************************
+//在JQuery中采用$(document).ready(fn)的格式
+//传入document时只需等dom元素加载完成，而传入window时需要等外部图片加载
+//采用JQuery的写法，document加载后即执行
+//示例1：
+// $(document).ready(function(){
+// 	alert('document')
+// });
+//实例2：
+// $(function(){
+// 	alert('document');
+// });
+Base.prototype.ready = function(callback){
+	if(this.elements[0] == document){
+		documentReady(callback);
+	}else{
+		addEvent(window,'load',callback);
+	}	
+}
 
+//***********************************鼠标事件*****************************************
+//单击
+Base.prototype.click = function(callback){
+	for(var i=0; i<this.elements.length; i++){
+		addEvent(this.elements[i],'click',callback);
+	}
+}
 
+//双击，js本身没有双击事件，根据两次click事件的时间间距来实现
+Base.prototype.dbclick = function(callback){
+	var start = 0;
+	for(var i=0; i<this.elements.length; i++){
+		addEvent(this.elements[i],'click',function(){
+			if(new Date - start < 500){
+				callback();
+				start = 0;
+			}else{
+				start = new Date;
+			}
+			
+		});
+	}
+}
 
+//移入事件(子节点有移入事件也会触发)
+Base.prototype.mouseover = function(callback){
+	for(var i=0; i<this.elements.length; i++){
+		addEvent(this.elements[i],'mouseover',callback);
+	}
+}
 
+//移出事件(子节点有移出事件也会触发)
+Base.prototype.mouseout = function(callback){
+	for(var i=0; i<this.elements.length; i++){
+		addEvent(this.elements[i],'mouseout',callback);
+	}
+}
+
+//移入事件(子节点有移入事件不会触发)
+Base.prototype.mouseenter = function(callback){
+	for(var i=0; i<this.elements.length; i++){
+		addEvent(this.elements[i],'mouseover',function(event){
+			var e = getEvent(event);
+			var target = getTarget(event);
+			if( !contains( target, getFormElement(event))){//
+				alert(target.className)
+				callback();
+			}
+		});
+	}
+}
 
 
 
@@ -658,5 +748,88 @@ function getPreviousSibling(node){
 	}
 	return result;
 }
+
+//document加载后即执行callback函数
+function documentReady(callback) {   
+    if (document.addEventListener) {  //W3C
+        document.addEventListener('DOMContentLoaded', function () {
+            document.removeEventListener('DOMContentLoaded', arguments.callee, false);
+            callback();
+        }, false);
+     } else if (document.attachEvent) {	//IE
+        document.attachEvent('onreadystatechange', function () {
+            if (document.readyState == "complete") { 
+                document.detachEvent("onreadystatechange", arguments.callee);
+                callback();
+            }
+        });
+    }
+    /* else if (document.lastChild == document.body) {callback();} */  //此写法在IE下无法正确触发
+    else {		//兼容所有浏览器
+    	document.onreadystatechange = function(){
+    		if(document.readyState == 'complete'){
+    			callback();
+    		}
+    	}
+    }
+}
+
+//添加事件
+function addEvent(obj, type, callback){
+	if(obj.addEventListener){
+		obj.addEventListener(type, callback, false);
+	}else if(obj.attachEvent){
+		obj.attachEvent('on'+type, callback);	//attachEvent未实现this指向绑定事件的节点
+	}else{
+		obj['on'+type] = callback
+	}
+}
+
+
+//移除事件
+function removeEvent(obj,type,callback){
+	if(obj.removeEventListener){
+		obj.removeEventListener(type, callback,false);
+	}else if(obj.detachEvent){
+		obj.detachEvent('on'+type, callback);
+	}else{
+		obj['on'+type] = null;
+	}
+}
+
+//获取事件
+function getEvent(event){
+	return event || window.event;		//window.event为IE中获取事件对象的方法
+}
+
+//获取目标对象
+//即触发事件的对象，可能为某绑定了事件的节点的子节点
+function getTarget(event){
+	var e = event || window.event;
+	return e.target? e.target : e.srcElement;
+}
+
+//获取mouseover事件触发时鼠标来自的元素
+function getFormElement(event){
+	var e = event || window.event;
+	return e.relatedTarget? e.relatedTarget : e.formElement;
+}
+
+//获取mouseout事件触发时鼠标去往的元素
+function getToElement(event){
+	var e = event || window.event;
+	return e.relatedTarget? e.relatedTarget : e.toElement;
+}
+
+
+//判断一个节点是否包含另外一个节点
+//讲解：http://blog.csdn.net/huajian2008/article/details/3960343
+function contains(parent_node,child_node){
+	if(parent_node.contains){	//均支持（网上说Firefox不支持，验证后支持，可能为低版本不支持）
+		return parent_node != child_node && parent_node.contains(child_node);
+	} else {	//compareDocumentPosition是一个dom3级别的方法，很强大，IE9+支持
+		return !!(parent_node.compareDocumentPosition(child_node) & 16);
+	}
+} 
 
  
