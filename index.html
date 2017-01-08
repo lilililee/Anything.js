@@ -26,6 +26,9 @@
 			top: 100px;
 			left: 200px;
 		}
+		ul{
+			background: red;
+		}
 	</style>
 </head>
 <body>
@@ -54,6 +57,7 @@
 	<p>11</p><p>11</p><p>11</p><p>11</p><p>11</p><p>11</p><p>11</p><p>11</p><p>11</p><p>11</p><p>11</p><p>11</p><p>11</p><p>11</p><p>11</p><p>11</p><p>11</p><p>11</p><p>11</p><p>11</p><p>11</p><p>11</p><p>11</p><p>11</p><p>11</p><p>11</p><p>11</p><p>11</p><p>11</p><p>11</p><p>11</p><p>11</p><p>11</p><p>11</p><p>11</p><p>11</p><p>11</p><p>11</p>
 	<div class="fixed">ffffffffffffff</div>
 	<div id="test2">22222222</div>
+	<button class="but">动画按钮</button>
 	<ul>
 		<li>qqq1</li> 
 		<li>www</li>
@@ -69,12 +73,11 @@
 <script src="http://lib.sinaapp.com/js/jquery/1.9.1/jquery-1.9.1.min.js"></script>
 <!-- <script src ='Anything.js'></script> -->
 <script>
-$(window).keydown(function (event) {
-                console.log("你输入的字符是：" + String.fromCharCode(event.which));
-            }).click(function(){
-            	console.log(111)
-            });
-alert($('.div1>div').length)
+	$('.but').click(function () {
+	$('ul').animate({height:'1000px',opacity:'0.5',width:'800px'},2000,function(){
+		alert(111)
+	})
+})
 </script>
 </body>
 </html>

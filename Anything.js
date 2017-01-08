@@ -9,7 +9,7 @@ function Base(args) {
 		if(document.querySelectorAll  === 'dddddddddddddddddddddd'){	//IE8+
 			this.elements = document.querySelectorAll(args);
 		}else{
-			if(args.indexOf(' ') == -1){	//当只有一个参数时
+			if(args.indexOf(' ') == -1){	//当只有一个参数时,下面的多层次选择符也能实现，但这个效率更高
 				switch(args.charAt(0)){
 					case '#':
 						this.elements = this.getById(args.slice(1));
@@ -70,8 +70,7 @@ function Base(args) {
 			}
 		}else{
 				this.elements[0] = args;
-		}
-		
+		}	
 	}else if(typeof args == 'function'){
 		documentReady(args);
 	}
@@ -228,7 +227,7 @@ Base.prototype.addClass = function(class_name){
 
 	for(var i=0; i<this.elements.length; i++){
 		var temp = this.elements[i].className.split(' ');
-		var flag = false;	//表示未包含当前类名
+		var flag = false;					//表示未包含当前类名
 		for(var j=0; j<temp.length; j++){	//进行类名检查
 			if(temp[j] == class_name){
 				flag = true;
@@ -295,8 +294,8 @@ Base.prototype.width = function(value){
 //获取和设置元素innerWidth (width+padding)
 Base.prototype.innerWidth = function(value){
 	var width = parseInt(getStyle(this.elements[0],'width'));	//将px值转化为number
-	var padding_left = parseInt(getStyle(this.elements[0],'padding-left'));	//将px值转化为number
-	var padding_right = parseInt(getStyle(this.elements[0],'padding-right'));	//将px值转化为number
+	var padding_left = parseInt(getStyle(this.elements[0],'padding-left'));	
+	var padding_right = parseInt(getStyle(this.elements[0],'padding-right'));	
 	var padding = padding_left + padding_right;
 	var innerWidth = width+padding;
 	
@@ -356,8 +355,8 @@ Base.prototype.height = function(value){
 //获取和设置元素innerHeight (height+padding)
 Base.prototype.innerHeight = function(value){
 	var height = parseInt(getStyle(this.elements[0],'height'));	//将px值转化为number
-	var padding_top = parseInt(getStyle(this.elements[0],'padding-top'));	//将px值转化为number
-	var padding_bottom = parseInt(getStyle(this.elements[0],'padding-bottom'));	//将px值转化为number
+	var padding_top = parseInt(getStyle(this.elements[0],'padding-top'));	
+	var padding_bottom = parseInt(getStyle(this.elements[0],'padding-bottom'));	
 	var padding = padding_top + padding_bottom;
 	var innerHeight = height+padding;
 	
@@ -824,11 +823,132 @@ Base.prototype.one = function(type,callback){
 	return this;
 }
 
+//-----------------------------------动    画-----------------------------------------
+//***********************************显示和隐藏***************************************
+//$('img').hide();					直接设置display为none
+//$('img').hide(1000);				在1000ms内逐渐减小宽度，高度和不透明度
+//$('img').hide(1000,callback);		动画执行完后执行回调函数
+//$('img').hide(callback);			动画执行完后执行回调函数，此时动画执行时间默认为500
 
+//所有要操作的属性必须先在css中定义初始值(常用的width，height，opacity)，否则在IE8-中获取到的值为auto或undefined，导致后面无法计算
+//$(ul).animate({height:'100px',width:'20px'})
+var animate_args = {
+	interval_id : null,			
+	queue : [],						//保存时间队列
+	is_animate : false	,			//表示全局是否已开始执行动画（在设置interval 20ms后为true）
+	length : 0,						//表示已保存的动画数目
+	finished : 0,					//表示已完成的动画数目
+	start_first : false,			//表示已启动第1次动画队列
 
+	doAnimate : function(obj_base, obj_attr, time, callback){
+		//3. 对于多次触发动画事件，这里不需要处理，因为在第2步已完成判断
+		//方案一：动画开始时先清理一遍，防止多次触发动画时前面的动画累积造成影响	
+		//方案二：继续完成当前动画，在当前动画未完成前不执行其他动画
+		// if(animate_args.interval_id){				
+		// 	   clearInterval(animate_args.interval_id);
+		// 	   animate_args.interval_id = null;		//不置为null的话依然会有一个值
+		// 	   return obj_base;		
+		// }	
 
+		//4. 开始用数组保存需要用的属性值
+		var n = Math.floor(time/20);				//20ms移动一次，计算此次动画的移动次数
+		var elements = obj_base.elements;			//用一个数组保存要操作的节点
+		var len = elements.length;
+		var count = 0;								//当前已执行的动画次数
+		var all_attr = [];							//所有节点需要执行动画的属性，公有	
+		var all_attr_end = [];						//属性最终值，公有（不带单位）
+		for(var attr in obj_attr){
+			all_attr.push(attr);	
+			all_attr_end.push(parseFloat(obj_attr[attr]));	//以数值形式保存，去除单位，方便计算
+		}	
+		for(var i=0;i<len;i++){						//遍历节点
+			elements[i].all_attr_start = [];		//当前节点属性初始值，私有
+			elements[i].all_attr_now = [];			//当前节点属性当前值，私有
+			elements[i].all_attr_dis = [];			//当前节点属性每次动画的增加值，私有
+			for(var j=0;j<all_attr.length;j++){		//遍历需要执行动画的属性
+				var temp = parseFloat(getStyle(elements[i],all_attr[j]));	
+				elements[i].all_attr_start.push(temp);					//保存节点的初始属性值
+				elements[i].all_attr_now.push(temp);					//保存节点的当前属性值
+				elements[i].all_attr_dis.push((all_attr_end[j]-temp)/n);//保存节点的当前属性每次动画的增加值
+			}
+		}
 
+		//5. 准备执行动画
+		animate_args.interval_id = setInterval(function(){
+			animate_args.is_animate = true;		
+			//6. 开始同时操作所有节点的所有属性，每20ms执行一次	
+			if(count<n){	
+				for(var i=0; i<len; i++){
+					for(var j=0;j<all_attr.length;j++){		//遍历需要执行动画的属性						
+						elements[i].all_attr_now[j] += elements[i].all_attr_dis[j];
+						switch(all_attr[j]){
+							case 'opacity':					
+								elements[i].style['filter'] = 'alpha(opacity='+elements[i].all_attr_now[j]*100+')';
+								elements[i].style['zoom'] = 1;
+								elements[i].style['opacity'] = elements[i].all_attr_now[j];
+								break;
+							default :
+								//console.log(elements[i].all_attr_now[j])
+								//elements[i].style[all_attr[j]] = elements[i].all_attr_now[j]+'px';
+								elements[i].style[all_attr[j]] = elements[i].all_attr_now[j]+'px';
 
+						}
+						
+					}	
+				}
+				count++;
+				
+			}
+			//7. 此次动画自行完毕
+			else{		
+				//8. 清空动画，最后一次设置最终的属性值
+				if(animate_args.interval_id){
+					//最后一次，把属性设为最终值，保证结果与最初设置的值一样，也可省略该步，因为结果误差很小。
+					clearInterval(animate_args.interval_id);
+					
+				}	
+				//9. 动画执行完后执行回调函数
+				if(typeof callback == 'function'){	
+					for(var i=0; i<len; i++){
+						callback.call(elements[i]);
+					}
+					
+				}
+				//10. 准备执行下一个动画
+				var temp = ++animate_args.finished;			//完成动画数目+1
+				if(animate_args.finished < animate_args.length){					
+					animate_args.doAnimate(obj_base, animate_args.queue[temp].obj_attr, animate_args.queue[temp].time, animate_args.queue[temp].callback);
+				}
+				//11. 此时所有动画已执行完毕，恢复默认参数，为下一次队列动画做准备
+				else{	
+					animate_args.queue = [];					//保存动画队列
+					animate_args.is_animate = false	;			//表示全局是否已开始执行动画（在设置interval 20ms后为true）
+					animate_args.length = 0;					//表示已保存的动画数目
+					animate_args.finished = 0;					//表示已完成的动画数目
+					animate_args.start_first = false;			//表示已启动第1次动画队列
+					animate_args.interval_id = null;			//不置为null的话依然会有一个值
+				}
+			}		
+		},20);
+	}
+}
+Base.prototype.animate = function(obj_attr, time, callback){
+	//1. 添加动画队列，通过is_animate来判断，is_animate在20ms后才会为true
+	if(!animate_args.is_animate){
+		animate_args.queue.push({
+			obj_attr : obj_attr,
+			time : time,
+			callback : callback
+		});
+		animate_args.length ++;
+	}
+	//2. 启动第一次动画，后续动画将在doAnimate中回调执行
+	if(!animate_args.start_first){
+		animate_args.start_first = true;
+		animate_args.doAnimate(this, animate_args.queue[0].obj_attr, animate_args.queue[0].time, animate_args.queue[0].callback);
+	}
+	return this;	
+}
 
 //-----------------------------------功能函数-----------------------------------------
 
@@ -848,6 +968,8 @@ function isHostMethod(obj, property){
 
 //***********************************dom节点函数***************************************
 //获取节点计算样式
+//在IE8-中，如果没有在css中明确指定某些属性的值，会返回auto
+//该函数在animate方法使用中该函数，最开始一定要在css中指定要操作的属性值
 function getStyle(element,attr) {
 	var style = null;
 	if(window.getComputedStyle){	//W3C
@@ -857,7 +979,28 @@ function getStyle(element,attr) {
 	}else{
 		throw new Error('Get style failed！')
 	}
-	return style[attr];
+	var result = style[attr];
+	//在IE8-中
+	//未设置width和height返回auto
+	//未设置opacity返回undefined
+	if(result == 'auto' || typeof result == 'undefined'){
+		console.log('Get style is failed！')
+		switch(attr){
+			case 'opacity':
+				return 1;
+			case 'width':
+				return ;
+
+
+			default :
+				throw new Error('Get style is failed！');
+				return;
+		}
+	}else{
+		//console.log(style[attr])
+		return style[attr];
+	}
+	
 }
 
 //获取上一个兄弟节点，过滤掉空格和回车生成的文本节点

@@ -23,7 +23,15 @@
 			
 		}
 		ul{
-			border: 1px solid red
+			border: 1px solid red;
+			background: red;
+			width: 20%;
+			height: 80%;
+			/*filter: alpha(opacity = 10)*/
+			/*zoom:1;
+			filter: alpha(opacity=50);
+			*/
+			/*opacity: 1;*/
 		}
 		li{
 			border: 1px solid green
@@ -58,6 +66,7 @@
 	<input type="text" class="uesr" value="haha1">
 	<input type="text" class="uesr" value="haha2">
 	<div id="test2">22222222</div>
+	<button class="but">动画按钮</button>
 	<ul class="ul1">
 		<li class="li1">qqq</li>
 		<li class="li2">www</li>	
@@ -76,19 +85,17 @@
 <script>
 var li = document.getElementsByTagName('li');
 var ul = document.getElementsByTagName('ul');
+//alert(isNaN('1sds'))
+// ul[0].style.zoom = 1
+// ul[0].style.filter = 'filter: alpha(opacity=10)'
+// ul[0].style.opacity = '0.2'
 var us = document.getElementById('user')
-us.onchange = function(){
-	//console.log(3333)
-}
-//console.log(isHostMethod(window,'attachEvent'))
-$(ul).click(function(){
-	//alert(11)
-})
-//console.log(document.implementation)
-$('.div1').mouseover(function(e){
-	var e = e || window.event;
-	console.log(e.fromElement);
-	console.log(e.toElement);
+$('.but').click(function () {
+	$('ul').animate({height:'1000px',opacity:'0.1',width:'800px'},500,function(){
+		//alert(this)
+	}).animate({height:'100px',opacity:'0.9',width:'100px'},1500,function(){
+		//alert(this)
+	})
 })
 
 </script>
