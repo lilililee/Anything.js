@@ -30,7 +30,9 @@
 </head>
 <body>
 	<div class="div1">
-		<div class="div4">111</div>
+		<div class="div4">111
+			<div class="div5">zzz</div>
+		</div>
 		<div class="div2">111</div>
 		<div class="div3">222</div>
 	</div>
@@ -62,14 +64,17 @@
 		<li>www</li>
 		<li>eee</li>
 	</ul>
+	<input type="text" name="uesrname" id="user"><br>
+	输入字符长度为：<span id="len">0</span>
 <script src="http://lib.sinaapp.com/js/jquery/1.9.1/jquery-1.9.1.min.js"></script>
 <!-- <script src ='Anything.js'></script> -->
 <script>
-
-var t = $('ul li').each(function(index){
-	console.log(this)
-});
-console.log(t)
+$(window).keydown(function (event) {
+                console.log("你输入的字符是：" + String.fromCharCode(event.which));
+            }).click(function(){
+            	console.log(111)
+            });
+alert($('.div1>div').length)
 </script>
 </body>
 </html>

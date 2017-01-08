@@ -64,7 +64,14 @@ function Base(args) {
 			}
 		}
 	}else if(typeof args == 'object'){
-		this.elements[0] = args;
+		if(typeof args.length == 'number' && args != window){
+			for(var i=0; i<args.length; i++){
+				this.elements.push(args[i]);
+			}
+		}else{
+				this.elements[0] = args;
+		}
+		
 	}else if(typeof args == 'function'){
 		documentReady(args);
 	}
@@ -161,8 +168,6 @@ Base.prototype.removeAttr = function(name){
 //***********************************内容操作*****************************************
 //获取和设置innerHTML内容
 Base.prototype.html = function(content){
-	if(typeof content != 'string') errorArgs(); //参数检测
-
 	if(arguments.length == 0){
 		return this.elements[0].innerHTML;
 	}else{
@@ -175,8 +180,6 @@ Base.prototype.html = function(content){
 
 //获取和设置文本内容
 Base.prototype.text = function(content){
-	if(typeof content != 'string') errorArgs(); //参数检测
-
 	if(arguments.length == 0){
 		var result = '';
 		for(var i=0; i<this.elements.length; i++){
@@ -192,7 +195,6 @@ Base.prototype.text = function(content){
 
 //获取和设置表单内容
 Base.prototype.val = function(value){
-
 	if(arguments.length == 0){
 		return this.elements[0].value;
 	}else{
@@ -207,7 +209,7 @@ Base.prototype.val = function(value){
 //在获取颜色时格式会有差异，ie是原本值，其他是计算后的rgb
 //不支持同时设置多个属性，可用连缀来实现
 Base.prototype.css = function(attr,value){
-	if(typeof attr != 'string' && typeof value != 'string') errorArgs(); //参数检测
+	if(typeof attr != 'string') errorArgs(); //参数检测
 
 	if(arguments.length == 1){
 		return getStyle(this.elements[0],attr);
@@ -587,6 +589,8 @@ Base.prototype.each = function(callback){
 
 
 //-------------------------------------事件-------------------------------------------
+//所有事件都可以在callback中同过this访问当前绑定事件的对象！！！
+
 //***********************************载入事件*****************************************
 //在JQuery中采用$(document).ready(fn)的格式
 //传入document时只需等dom元素加载完成，而传入window时需要等外部图片加载
@@ -599,7 +603,8 @@ Base.prototype.each = function(callback){
 // $(function(){
 // 	alert('document');
 // });
-Base.prototype.ready = function(callback){
+//$()中传入document和函数时在document加载后即可运行，其他都是window加载后再运行
+Base.prototype.ready = function(callback){	
 	if(this.elements[0] == document){
 		documentReady(callback);
 	}else{
@@ -607,12 +612,21 @@ Base.prototype.ready = function(callback){
 	}	
 }
 
+//窗口大小变化
+Base.prototype.resize = function(callback){
+	addEvent(window,'resize',callback);
+	return this;
+}
+
 //***********************************鼠标事件*****************************************
+//注意！！！用addEvent绑定事件，在IE8-中this不是指定当前绑定事件的节点，callback函数中有this会导致出错
+//可以按需求来调整addEvent的函数内容（在addEvent中已去除attachEvent方法）
 //单击
 Base.prototype.click = function(callback){
 	for(var i=0; i<this.elements.length; i++){
 		addEvent(this.elements[i],'click',callback);
 	}
+	return this;
 }
 
 //双击，js本身没有双击事件，根据两次click事件的时间间距来实现
@@ -621,42 +635,193 @@ Base.prototype.dbclick = function(callback){
 	for(var i=0; i<this.elements.length; i++){
 		addEvent(this.elements[i],'click',function(){
 			if(new Date - start < 500){
-				callback();
+				callback.call(this);	//此处是闭包，导致callback中this指向全局，应指向绑定事件的对象
 				start = 0;
 			}else{
 				start = new Date;
-			}
-			
+			}		
 		});
 	}
+	return this;
 }
 
-//移入事件(子节点有移入事件也会触发)
+//移入(子节点有移入事件也会触发)
 Base.prototype.mouseover = function(callback){
 	for(var i=0; i<this.elements.length; i++){
 		addEvent(this.elements[i],'mouseover',callback);
 	}
+	return this;
 }
 
-//移出事件(子节点有移出事件也会触发)
+//移出(子节点有移出事件也会触发)
 Base.prototype.mouseout = function(callback){
 	for(var i=0; i<this.elements.length; i++){
 		addEvent(this.elements[i],'mouseout',callback);
 	}
+	return this;
 }
 
-//移入事件(子节点有移入事件不会触发)
+//移入(子节点有移入事件不会触发)
+//方案1：js原生onmouseenter  IE8-也支持，但是最新火狐中表现为onmouseover一样
+//方案2：判断鼠标从元素A->B（目标对象）,如果B包含A证明是子节点冒泡触发事件，不做任何操作（推荐！）
+//方案3：也可对目标节点的所有子节点绑定mouseover事件，然后阻止冒泡，需要绑定较多事件
 Base.prototype.mouseenter = function(callback){
 	for(var i=0; i<this.elements.length; i++){
 		addEvent(this.elements[i],'mouseover',function(event){
-			var e = getEvent(event);
-			var target = getTarget(event);
-			if( !contains( target, getFormElement(event))){//
-				alert(target.className)
-				callback();
+			if(!contains(this, getFromElement(event))){	//判断绑定事件的节点是否包含鼠标来着的元素
+				callback.call(this);	//此处是闭包，导致callback中this指向全局，应指向绑定事件的对象			
 			}
 		});
 	}
+	return this;
+}
+
+//移出(子节点有移入事件不会触发) 同上
+Base.prototype.mouseleave = function(callback){
+	for(var i=0; i<this.elements.length; i++){
+		addEvent(this.elements[i],'mouseout',function(event){
+			if(!contains(this, getToElement(event))){	//判断绑定事件的节点是否包含鼠标来着的元素
+				callback.call(this);	//此处是闭包，导致callback中this指向全局，应指向绑定事件的对象			
+			}
+		});
+	}
+	return this;
+}
+
+//按下
+//click只能靠鼠标左键触发，但是mousedown和mouseup能靠鼠标的左中右键触发
+//可以通过事件对象中的button属性来确定按下了哪个键
+Base.prototype.mousedown = function(callback){
+	for(var i=0; i<this.elements.length; i++){
+		addEvent(this.elements[i],'mousedown',callback);
+	}
+	return this;
+}
+
+//弹起
+Base.prototype.mouseup = function(callback){
+	for(var i=0; i<this.elements.length; i++){
+		addEvent(this.elements[i],'mouseup',callback);
+	}
+	return this;
+}
+
+//右击
+//监听全局使用document
+Base.prototype.contextmenu = function(callback){
+	for(var i=0; i<this.elements.length; i++){
+		addEvent(this.elements[i],'contextmenu',callback);
+	}
+	return this;
+}
+
+//滚动
+//也可用document来监听onscroll事件，但IE8-不支持，推荐使用window
+Base.prototype.scroll = function(callback){
+	for(var i=0; i<this.elements.length; i++){
+		addEvent(this.elements[i],'scroll',callback);
+	}
+	return this;
+}
+
+//***********************************键盘事件*****************************************
+//详细说明：http://www.lvyestudy.com/jquery/jq_7.4.aspx
+//String.fromCharCode(event.which) 可以用该方法输出按下的字符键，功能键不可以
+//keydown，所有键（字符键+功能键）按下均会触发
+Base.prototype.keydown = function(callback){
+	for(var i=0; i<this.elements.length; i++){
+		addEvent(this.elements[i],'keydown',callback);
+	}
+	return this;
+}
+
+//keypress，按下后到松开前时触发，（字符键）按下才会触发，alt，ctrl，f1-f12等均检测不到
+Base.prototype.keypress = function(callback){
+	for(var i=0; i<this.elements.length; i++){
+		addEvent(this.elements[i],'keypress',callback);
+	}
+	return this;
+}
+
+//keyup，所有键（字符键+功能键）按下均会触发
+Base.prototype.keyup = function(callback){
+	for(var i=0; i<this.elements.length; i++){
+		addEvent(this.elements[i],'keyup',callback);
+	}
+	return this;
+}
+
+//***********************************表单事件*****************************************
+//获得焦点
+Base.prototype.focus = function(callback){
+	for(var i=0; i<this.elements.length; i++){
+		addEvent(this.elements[i],'focus',callback);
+	}
+	return this;
+}
+
+//失去焦点
+Base.prototype.blur = function(callback){
+	for(var i=0; i<this.elements.length; i++){
+		addEvent(this.elements[i],'blur',callback);
+	}
+	return this;
+}
+
+//内容改变，在失去焦点时才会检测
+//text,textarea,下拉菜单  可以触发change事件
+Base.prototype.change = function(callback){
+	for(var i=0; i<this.elements.length; i++){
+		addEvent(this.elements[i],'change',callback);
+	}
+	return this;
+}
+
+//内容选中，在选中文本后松开鼠标后才触发(在IE8-中每选中一个字符就会触发一次)
+//text,textarea 可以触发select事件，下拉菜单不会触发
+Base.prototype.select = function(callback){
+	for(var i=0; i<this.elements.length; i++){
+		addEvent(this.elements[i],'select',callback);
+	}
+	return this;
+}
+
+//***********************************绑定事件*****************************************
+//表现结果和上面的绑定方法一样
+Base.prototype.on = function(type,callback){
+	this[type](callback);
+	return this;
+}
+
+//***********************************解除事件*****************************************
+//无法解除dbclick，mouseenter，mouseleave
+//因为这三个事件是通过绑定click，mouseover，mouseout来实现的，应该解除这3个事件
+Base.prototype.off = function(type,callback){
+	for(var i=0; i<this.elements.length; i++){
+		removeEvent(this.elements[i],type,callback);
+	}
+	return this;
+}
+
+//***********************************合成事件*****************************************
+//传入移入和移出的回调函数，用mouseenter和mouseleave来实现
+Base.prototype.hover = function(callback1,callback2){
+	this.mouseenter(callback1);
+	this.mouseleave(callback2);
+	return this;
+}
+
+//***********************************一次事件*****************************************
+//使用DOM0级绑定方法
+//缺点：1.dbclick无效；2.mouseenter，mouseleave在Firefox下表现和mouseover，mouseout一样
+Base.prototype.one = function(type,callback){
+	for(var i=0; i<this.elements.length; i++){
+		this.elements[i]['on'+type] = function(){
+			callback.call(this);
+			this['on'+type] = null;
+		}
+	}
+	return this;
 }
 
 
@@ -665,37 +830,74 @@ Base.prototype.mouseenter = function(callback){
 
 
 
+//-----------------------------------功能函数-----------------------------------------
 
 
-
+//***********************************程序函数*****************************************
 //参数不合法报错
 function errorArgs(){
 	throw new Error('参数不合法！');
 }
 
+//通用能力检测函数，判断一个对象是否有某个函数
+//例子：console.log(isHostMethod(window,'attachEvent'))
+function isHostMethod(obj, property){
+	var t = typeof obj[property];
+	return t == 'function' || (!!(t=='object'&&obj[property])) || t=='unknow'
+}
 
-
-
-
-//获取计算样式
+//***********************************dom节点函数***************************************
+//获取节点计算样式
 function getStyle(element,attr) {
 	var style = null;
 	if(window.getComputedStyle){	//W3C
 		style = window.getComputedStyle(element,null);
 	}else if(element.currentStyle){			//IE
 		style = element.currentStyle;
+	}else{
+		throw new Error('Get style failed！')
 	}
 	return style[attr];
 }
 
+//获取上一个兄弟节点，过滤掉空格和回车生成的文本节点
+function getPreviousSibling(node){
+	var result = node.previousSibling;
+	var reg = /^\s+$/;		// \s匹配空格和换行符
+	//当某个节点没有上一个兄弟节点时会返回null或undefined，导致test方法报错
+	while(result != null && reg.test(result.nodeValue)){	
+		result = result.previousSibling;		
+	}
+	return result;
+}
+
+//判断一个节点是否包含另外一个节点
+//如果是自身，看作自身包含自身
+//讲解：http://blog.csdn.net/huajian2008/article/details/3960343
+function contains(parent_node,child_node){
+	if(parent_node.contains){	//均支持（网上说Firefox不支持，验证后支持，可能为低版本不支持）
+		return parent_node == child_node || parent_node.contains(child_node);
+	} else {	//compareDocumentPosition是一个dom3级别的方法，很强大，IE9+支持
+		return !!(parent_node.compareDocumentPosition(child_node) & 16);
+	}
+} 
+
+
+
+//***********************************窗口函数*****************************************
 //获取浏览器窗口大小
+//讲解：http://www.css88.com/archives/1767
+//document对象有个属性compatMode ,它有两个值
+//BackCompat 对应quirks mode (又叫怪异模式，混杂模式)
+//CSS1Compat 对应strict mode (标准模式)
+//混杂模式主要在IE中不声明DOCTYPE时出现
 function getViewport(){
-　　if (document.compatMode == "BackCompat"){	//兼容IE6
+　　if (document.compatMode == "BackCompat"){	//兼容IE中的混杂模式
 　　　　return {
 	　　　　　width: document.body.clientWidth,
 　　　　　　　height: document.body.clientHeight
 　　　　}
-　　} else {
+　　} else {alert('zzzzzzzz')
 　　　　return {
 　　　　　　　width: document.documentElement.clientWidth,
 　　　　　　　height: document.documentElement.clientHeight
@@ -706,6 +908,7 @@ function getViewport(){
 //获取页面内容大小
 function getPagearea(){
 　　　if (document.compatMode == "BackCompat"){
+
 　　　　　return {
 　　　　　　　width: Math.max(document.body.scrollWidth,
 　　　　　　　　　　　　　　　document.body.clientWidth),
@@ -713,6 +916,7 @@ function getPagearea(){
 　　　　　　　　　　　　　　　document.body.clientHeight)
 			}
 　　　} else {
+
 　　　　　return {
 　　　　　　　width: Math.max(document.documentElement.scrollWidth,
 　　　　　　　　　　　　　　　document.documentElement.clientWidth),
@@ -738,16 +942,6 @@ function setScrollTop(scroll_top) {
 	document.body.scrollTop = scroll_top;
 }
 
-//获取上一个兄弟节点，过滤掉空格和回车生成的文本节点
-function getPreviousSibling(node){
-	var result = node.previousSibling;
-	var reg = /^\s+$/;		// \s匹配空格和换行符
-	//当某个节点没有上一个兄弟节点时会返回null或undefined，导致test方法报错
-	while(result != null && reg.test(result.nodeValue)){	
-		result = result.previousSibling;		
-	}
-	return result;
-}
 
 //document加载后即执行callback函数
 function documentReady(callback) {   
@@ -774,25 +968,30 @@ function documentReady(callback) {
     }
 }
 
+
+//***********************************事件函数*****************************************
 //添加事件
+//this在事件中使用较多，而绑定多个事件使用较少，权衡利弊，决定不采用attachEvent方法
 function addEvent(obj, type, callback){
 	if(obj.addEventListener){
 		obj.addEventListener(type, callback, false);
-	}else if(obj.attachEvent){
-		obj.attachEvent('on'+type, callback);	//attachEvent未实现this指向绑定事件的节点
-	}else{
-		obj['on'+type] = callback
+	}/*else if(obj.attachEvent){				
+		obj.attachEvent('on'+type, callback);	//attachEvent未实现this指向绑定事件的节点,this指向window
+	}*/else{
+		obj['on'+type] = callback;			//同类型事件只能绑定一个
 	}
 }
 
 
 //移除事件
-function removeEvent(obj,type,callback){
+//移除事件时不能使用匿名函数，因为移除和绑定的事件必须统一
+//或者可以像上面documentReady中使用arguments.calee
+function removeEvent(obj,type,callback){	
 	if(obj.removeEventListener){
 		obj.removeEventListener(type, callback,false);
-	}else if(obj.detachEvent){
+	}/*else if(obj.detachEvent){
 		obj.detachEvent('on'+type, callback);
-	}else{
+	}*/else{
 		obj['on'+type] = null;
 	}
 }
@@ -810,9 +1009,9 @@ function getTarget(event){
 }
 
 //获取mouseover事件触发时鼠标来自的元素
-function getFormElement(event){
+function getFromElement(event){
 	var e = event || window.event;
-	return e.relatedTarget? e.relatedTarget : e.formElement;
+	return e.relatedTarget? e.relatedTarget : e.fromElement;
 }
 
 //获取mouseout事件触发时鼠标去往的元素
@@ -821,15 +1020,101 @@ function getToElement(event){
 	return e.relatedTarget? e.relatedTarget : e.toElement;
 }
 
-
-//判断一个节点是否包含另外一个节点
-//讲解：http://blog.csdn.net/huajian2008/article/details/3960343
-function contains(parent_node,child_node){
-	if(parent_node.contains){	//均支持（网上说Firefox不支持，验证后支持，可能为低版本不支持）
-		return parent_node != child_node && parent_node.contains(child_node);
-	} else {	//compareDocumentPosition是一个dom3级别的方法，很强大，IE9+支持
-		return !!(parent_node.compareDocumentPosition(child_node) & 16);
+//阻止默认事件，比如a的跳转，submit的提交，鼠标右击显示菜单等
+function preventDefault(event){
+	var e = event || window.event;
+	if(e.preventDefault){
+		e.preventDefault();
+	}else{
+		e.returnValue = false;
 	}
-} 
+}
 
- 
+//禁止冒泡
+function stopPropagation(event){
+	var e = event || window.event;
+	if(e.stopPropagation){
+		e.stopPropagation();
+	}else{
+		e.cancelBubble = true;
+	}
+}
+
+
+//跨浏览器获取键码
+//在keypress事件中，字母a在IE中为65（字符码），在Firefox中为97键码
+//尽量不使用keypress事件获取值，不同浏览器有误差
+//监控全局的按键事件时最好用document绑定事件，用window在IE8-检测不到！！！！
+//例子1：   通过字符编码来输出将键盘上A-Z，0-9（无法正确输出其他键）
+//addEvent(document,'keyup',function(e){
+//	alert(String.fromCharCode(getCharCode(e)))
+//})
+//例子2：	判断组合键
+// addEvent(document,'keydown',function(e){
+// 	if(getEvent(e).ctrlKey && getCharCode(e) == 13){	//按住ctrl再按enter（13）才会触发
+// 		alert(111)
+// 	}
+// })
+function getCharCode(event){
+	var e = event || window.event;
+	if(typeof e.charCode == 'number' && e.charCode > 0){
+		return e.charCode;
+	}else{
+		return e.keyCode;
+	}
+}
+
+//在mousedown和mousedowm事件中检测按下了哪个键
+//该函数返回0表示左键，1表示中间滚轮键，2表示右键
+//在高级程序设计中p374有详细介绍
+function getButton(event){
+	var e = event || window.event;
+	//由于都有button属性，所以不使用能力检测
+	if(document.implementation.hasFeature('MouseEvent','2.0')){
+		return e.button;
+	}else{
+		switch(e.button){
+			case 0:
+			case 1:
+			case 3:
+			case 5:
+			case 7:
+				return 0;
+			case 2:
+			case 6:
+				return 2;
+			case 4:
+				return 1;
+		}
+	}
+}
+
+//获取触发事件时鼠标的位置（在click，contextmenu，mousedown，mouseup中使用）
+//1. 获取鼠标在浏览器窗口的位置
+function getClientPosition(event){
+	var e = event || window.event;
+	return {
+		left : e.clientX,
+		top : e.clientY
+	}
+}
+
+//2. 获取鼠标在页面内容的位置
+//在IE8-中没有pageX和pageY属性
+//高级程序设计P371
+function getPagePosition(event){
+	var e = event || window.event;
+	return {
+		left : e.pageX || e.clientX + (document.body.scrollLeft || document.documentElement.scrollLeft),
+		top : e.pageY || e.clientY + (document.body.scrollTop || document.documentElement.scrollTop)
+	}
+}
+
+//3. 获取鼠标在整个屏幕的位置
+function getScreenPosition(event){
+	var e = event || window.event;
+	return {
+		left : e.screenX,
+		top : e.screenY
+	}
+}

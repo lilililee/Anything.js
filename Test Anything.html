@@ -22,6 +22,12 @@
 			top: 20px;*/
 			
 		}
+		ul{
+			border: 1px solid red
+		}
+		li{
+			border: 1px solid green
+		}
 		
 	</style>
 	<script>
@@ -62,29 +68,28 @@
 		<li class="li5">www</li>
 		<li class="li6">eee</li>
 	</ul>
+	<input type="text" name="uesrname" id="user"><br>
+	输入字符长度为：<span id="len">0</span>
 <!-- <script src="http://lib.sinaapp.com/js/jquery/1.9.1/jquery-1.9.1.min.js"></script> -->
 <script src ='Anything.js'></script>
+
 <script>
-// window.onload = function(){
-// 	alert('window')
-// }
-// //$('p').remove();
 var li = document.getElementsByTagName('li');
-
-for(var i=0;i<li.length;i++){
-	(li[i].onclick = function(){
-		alert(i)
-	})(i)
+var ul = document.getElementsByTagName('ul');
+var us = document.getElementById('user')
+us.onchange = function(){
+	//console.log(3333)
 }
-
-
- $(function(){
- 	//alert(22)
-	// $('ul').mouseenter(function(){
-	// 	//alert(111)
-	// })
+//console.log(isHostMethod(window,'attachEvent'))
+$(ul).click(function(){
+	//alert(11)
 })
-
+//console.log(document.implementation)
+$('.div1').mouseover(function(e){
+	var e = e || window.event;
+	console.log(e.fromElement);
+	console.log(e.toElement);
+})
 
 </script>
 </body>
