@@ -4,11 +4,16 @@
 	<meta charset="UTF-8">
 	<title>Test JQuery</title>
 	<style>
+		*{
+			margin: 0;
+			padding: 0;
+		}
 		.div1{
-			width: 200px;
+			/*width: 200px;*/
 			height: 200px;
-			margin: 100px;
-			border: 1px solid red;
+			margin: 200px;
+			padding: 50px;
+			border: 100px solid red;
 			position: relative;
 		}
 		
@@ -17,27 +22,41 @@
 			height: 50px;
 			border: 1px solid blue;
 			position: absolute;
+			margin: 20px;
 			/*left: 30px;
 			top: 20px;*/
 			
 		}
-		.fixed{
-			position: fixed;
-			top: 100px;
-			left: 200px;
-		}
 		ul{
+			position: relative;
+			border: 1px solid red;
 			background: red;
+			/*width: 100px;
+			height: 200px;*/
+			/*filter: alpha(opacity = 10)*/
+			/*zoom:1;
+			filter: alpha(opacity=50);
+			*/
+			/*opacity: 1;*/
 		}
+		li{
+			width: 100%;
+			height: 100%;
+			border: 1px solid green
+		}
+		
 	</style>
+	<script>
+		
+		
+	</script>
+	
 </head>
 <body>
 	<div class="div1">
-		<div class="div4">111
-			<div class="div5">zzz</div>
-		</div>
-		<div class="div2">111</div>
-		<div class="div3">222</div>
+		<!-- <div class="div4">111</div>
+		<div class="div2">111</div> -->
+		<div class="div3">22222 <p>d</p></div>
 	</div>
 	<div id="header">
 		
@@ -54,30 +73,49 @@
 	<div class="test">sssadasdasdddddddddddddddddddddddddd</div>sdsf
 	<input type="text" class="uesr" value="haha1">
 	<input type="text" class="uesr" value="haha2">
-	<p>11</p><p>11</p><p>11</p><p>11</p><p>11</p><p>11</p><p>11</p><p>11</p><p>11</p><p>11</p><p>11</p><p>11</p><p>11</p><p>11</p><p>11</p><p>11</p><p>11</p><p>11</p><p>11</p><p>11</p><p>11</p><p>11</p><p>11</p><p>11</p><p>11</p><p>11</p><p>11</p><p>11</p><p>11</p><p>11</p><p>11</p><p>11</p><p>11</p><p>11</p><p>11</p><p>11</p><p>11</p><p>11</p>
-	<div class="fixed">ffffffffffffff</div>
 	<div id="test2">22222222</div>
 	<button class="but">动画按钮</button>
-	<ul>
-		<li>qqq1</li> 
-		<li>www</li>
-		<li>eee</li>
+	<button class="but1">停止按钮</button>
+	<ul class="ul1">
+		<li class="li1">qqq</li>
+		<li class="li2">www</li>	
+		<li class="li3">eee</li>
 	</ul>
-	<ul>
-		<li>qqq</li>
-		<li>www</li>
-		<li>eee</li>
+	<ul class="ul2">
+		<li class="li4">qqq</li>
+		<li class="li5">www</li>
+		<li class="li6">eee</li>
 	</ul>
 	<input type="text" name="uesrname" id="user"><br>
 	输入字符长度为：<span id="len">0</span>
 <script src="http://lib.sinaapp.com/js/jquery/1.9.1/jquery-1.9.1.min.js"></script>
 <!-- <script src ='Anything.js'></script> -->
+
 <script>
-	$('.but').click(function () {
-	$('ul').animate({height:'1000px',opacity:'0.5',width:'800px'},2000,function(){
-		alert(111)
+var li = document.getElementsByTagName('li');
+var ul = document.getElementsByTagName('ul');
+
+//console.log(getStyle($('.div1').elements[0],'border-bottom'))
+
+//alert(isNaN('1sds'))
+// ul[0].style.zoom = 1
+// ul[0].style.filter = 'filter: alpha(opacity=10)'
+// ul[0].style.opacity = '0.2'
+//console.log($('.div1').elements[0].offsetHeight)
+console.log($('.div1').outerWidth(500))
+//console.log(getStyle(ul[0],'left'))
+var us = document.getElementById('user')
+$('.but').click(function () {
+	$('ul').animate({width:'1000px',opacity:'0.5',height:'300px'},2000,function(){
+		//alert(111)
+	}).animate({width:'100px',opacity:'0.5',height:'100px'},2000,function(){
+		//alert(111)
 	})
 })
+$('.but1').click(function () {
+	$('ul').stop();
+})
+
 </script>
 </body>
 </html>

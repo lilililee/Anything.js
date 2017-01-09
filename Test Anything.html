@@ -4,11 +4,16 @@
 	<meta charset="UTF-8">
 	<title>Test Anything</title>
 	<style>
+		*{
+			margin: 0;
+			padding: 0;
+		}
 		.div1{
-			width: 200px;
+			/*width: 200px;*/
 			height: 200px;
-			margin: 100px;
-			border: 1px solid red;
+			margin: 200px;
+			padding: 50px;
+			border: 100px solid red;
 			position: relative;
 		}
 		
@@ -16,26 +21,25 @@
 			width: 50px;
 			height: 50px;
 			border: 1px solid blue;
-			/*position: absolute;*/
+			position: absolute;
 			margin: 20px;
 			/*left: 30px;
 			top: 20px;*/
 			
 		}
-		ul{
+		.ul1,.ul2{
+			border: 1px solid blue;
+		}
+		.nav{
+			margin: 50px;
+		}
+		.nav li{
+			width: 100px;
+			height: 50px;
+			/*display: inline-block;*/
 			border: 1px solid red;
-			background: red;
-			width: 20%;
-			height: 80%;
-			/*filter: alpha(opacity = 10)*/
-			/*zoom:1;
-			filter: alpha(opacity=50);
-			*/
-			/*opacity: 1;*/
 		}
-		li{
-			border: 1px solid green
-		}
+
 		
 	</style>
 	<script>
@@ -45,10 +49,17 @@
 	
 </head>
 <body>
+	<ul class="nav">
+		<li>111</li>
+		<li>222</li>
+		<li>333</li>
+		<li>444</li>
+		<li>555</li>
+	</ul>
 	<div class="div1">
 		<!-- <div class="div4">111</div>
 		<div class="div2">111</div> -->
-		<div class="div3">222</div>
+		<div class="div3">22222 <p>d</p></div>
 	</div>
 	<div id="header">
 		
@@ -67,6 +78,7 @@
 	<input type="text" class="uesr" value="haha2">
 	<div id="test2">22222222</div>
 	<button class="but">动画按钮</button>
+	<button class="but1">停止按钮</button>
 	<ul class="ul1">
 		<li class="li1">qqq</li>
 		<li class="li2">www</li>	
@@ -85,19 +97,38 @@
 <script>
 var li = document.getElementsByTagName('li');
 var ul = document.getElementsByTagName('ul');
+var arr = [1,2,3,4,5,6];
+arr.splice(0,0,'a');	//[1,2,"a",3,4,5,6]
+console.log(arr)
+//console.log(getStyle($('.div1').elements[0],'border-bottom'))
+
 //alert(isNaN('1sds'))
 // ul[0].style.zoom = 1
 // ul[0].style.filter = 'filter: alpha(opacity=10)'
 // ul[0].style.opacity = '0.2'
+//console.log($('.div1').elements[0].offsetHeight)
+//console.log($('.div1').outerWidth(500))
+//console.log(getStyle(ul[0],'left'))
 var us = document.getElementById('user')
 $('.but').click(function () {
-	$('ul').animate({height:'1000px',opacity:'0.1',width:'800px'},500,function(){
-		//alert(this)
-	}).animate({height:'100px',opacity:'0.9',width:'100px'},1500,function(){
-		//alert(this)
+	$('.ul1').delay(1000).animate({width:'1000px',opacity:'0.5',height:'300px'},2000,function(){
+		//alert(111)
+	}).delay(1000).animate({width:'100px',opacity:'0.5',height:'200px'},2000,function(){
+		//alert(111)
 	})
 })
-
+$('.nav li').click(function(){
+	console.log(11)
+	$(this).delay(2000);
+});
+$('.nav li').hover(function(){
+	$(this).animate({width:'1000px',opacity:'0.5'},2000,function(){
+		//alert(this)
+	})
+},function(){
+	//$(this).stop()
+	$(this).animate({width:'200px',opacity:'1'},2000)
+})
 </script>
 </body>
 </html>
