@@ -871,7 +871,8 @@ Base.prototype.animate = function(obj_attr, time, callback){
 		if(!temp.animate_args.start_first){
 			temp.animate_args.start_first = true;
 			//console.log(temp.animate_args.queue)
-			doAnimate(temp, temp.animate_args.queue[0].obj_attr, temp.animate_args.queue[0].time, temp.animate_args.queue[0].callback,temp.animate_args.queue[0].delay);
+			doAnimate(temp, temp.animate_args.queue[0].obj_attr, temp.animate_args.queue[0].time,
+			   			    temp.animate_args.queue[0].callback, temp.animate_args.queue[0].delay);
 		}
 		//console.log(this.elements[i].animate_args.queue)
 	}
@@ -880,29 +881,74 @@ Base.prototype.animate = function(obj_attr, time, callback){
 	return this;	
 }
 
-Base.prototype.stop = function(flag1 , falg2){
-	//1. stop(),等价于stop(false,false)，仅仅停止“当前执行”这段动画，后面的动画还可以继续执行		
-	if(!flag1){			
-
-	}
-	//2. stop(true),等价于stop(true,false)，停止所有动画，包括当前执行的动画
-	else if(flag1 && !falg2){
-
-	}
-	//3. stop(true,true),停止所有动画，但是允许执行当前动画
-	else if(flag1 && falg2){
-
-	}
-	//4. stop(false,true),停止“当前执行”这段动画，然后调到最后一个动画，并且执行最后一个动画
-	else if(!flag1 && falg2){
-
-	}
-	//5. 参数错误
-	else{
-		errorArgs();
+Base.prototype.stop = function(flag1 , flag2){
+	for(var i=0; i<this.elements.length; i++){
+		var node = this.elements[i];
+		//判断该节点是否处于动画中			
+		if(node.animate_args){	
+			//1. stop(),等价于stop(false,false)，仅仅停止“当前执行”这段动画，后面的动画还可以继续执行	
+			if(!flag1 && !flag2){					
+				//a. 停止当前动画
+				if(node.animate_args.interval_id){
+					clearInterval(node.animate_args.interval_id);
+					clearTimeout(node.animate_args.interval_id);
+				}
+				//b. 队列重置为后续动画
+				node.animate_args.queue = node.animate_args.queue.slice(node.animate_args.finished+1);								
+				if(node.animate_args.queue.length >0 ){
+					//如果停止当前动画后，后面还有动画，重新启动一次动画
+					node.animate_args.finished = 0;
+					//启动新一次动画
+					doAnimate(node, node.animate_args.queue[0].obj_attr, node.animate_args.queue[0].time,
+								    node.animate_args.queue[0].callback, node.animate_args.queue[0].delay);
+				}else{
+					node.animate_args = null;
+				}				
+			}		
+			//2. stop(true),等价于stop(true,false)，停止所有动画，包括当前执行的动画
+			else if(flag1 && !flag2){
+				if(node.animate_args.interval_id){
+					clearInterval(node.animate_args.interval_id);
+					clearTimeout(node.animate_args.interval_id);
+				}
+				node.animate_args = null;			
+			}
+			//3. stop(true,true),停止所有动画，但是允许执行当前动画
+			else if(flag1 && flag2){
+				//去除队列里面后续的动画
+				node.animate_args.queue = node.animate_args.queue.slice(0,node.animate_args.finished+1);	
+			}
+			//4. stop(false,true),停止“当前执行”这段动画，然后调到最后一个动画，并且执行最后一个动画
+			else if(!flag1 && flag2){
+				console.log(222222)
+				//a. 停止当前动画
+				if(node.animate_args.interval_id){
+					clearInterval(node.animate_args.interval_id);
+					clearTimeout(node.animate_args.interval_id);
+				}
+				//b. 如果当前动画不为最后一个动画，就把最后一个动画放到队列中
+				if(node.animate_args.finished+1 < node.animate_args.queue.length){
+					node.animate_args.queue = [node.animate_args.queue[node.animate_args.queue.length-1]];								
+					//重新启动一次动画
+					node.animate_args.finished = 0;
+					//启动新一次动画
+					doAnimate(node, node.animate_args.queue[0].obj_attr, node.animate_args.queue[0].time,
+									node.animate_args.queue[0].callback, node.animate_args.queue[0].delay);
+						
+				}else{
+					node.animate_args = null;
+				}
+				
+			}
+			//5. 参数错误
+			else{
+				errorArgs();
+			}
+		}
 	}
 }
 
+//delay会在动画队列尾部加入加入一个延时动画
 Base.prototype.delay = function(time){
 	if(typeof time == 'number'){
 		for(var i=0; i<this.elements.length; i++){
@@ -915,7 +961,6 @@ Base.prototype.delay = function(time){
 				callback : null,
 				delay : time					//延时时间，小于或等于0表示不延时
 			});
-			//console.log(this.elements[i].animate_args.queue)
 		}
 	}
 	return this;
@@ -930,25 +975,29 @@ function animateArgs(){
 	this.start_first = false;			//是否已启动动画
 }
 
+//传入要执行动画的节点，执行该节点的下一个动画
+function turnNetxAnimate(node){
+	//完成动画数目+1
+	var temp = ++node.animate_args.finished;	
+	//如果队列中还有动画，执行下一动画，否则解除该节点的动画				
+	if(node.animate_args.finished < node.animate_args.queue.length){				
+		doAnimate(node, node.animate_args.queue[temp].obj_attr, node.animate_args.queue[temp].time, 
+						node.animate_args.queue[temp].callback, node.animate_args.queue[temp].delay);
+	}else{
+		node.animate_args = null;		
+	}
+}
+
+
 
 //动画执行函数
 //每执行一次doAnimate表示完成了当前节点队列中的一个动画
 //延时也看作一个动画
 function doAnimate(node, obj_attr, time, callback, delay){
-	//console.log(delay)
-	console.log(node, obj_attr, time, callback, delay)
-	if(typeof delay == 'number' && delay > 0){
-		
-		setTimeout(function(){		
-			var temp = ++node.animate_args.finished;			//完成动画数目+1
-			console.log(temp)
-			
-			if(node.animate_args.finished < node.animate_args.queue.length){	//console.log(node.animate_args.finished +'zzz')		
-				
-				console.log(node.animate_args.queue[1].obj_attr)		
-				console.log(1111)		
-				doAnimate(node, node.animate_args.queue[temp].obj_attr, node.animate_args.queue[temp].time, node.animate_args.queue[temp].callback, node.animate_args.queue[temp].delay);
-			}
+	//判断此次动画是否为延时动画
+	if(typeof delay == 'number' && delay > 0){		
+		node.animate_args.interval_id = setTimeout(function(){	
+			turnNetxAnimate(node);	
 		},delay);
 		return;
 	}
@@ -1005,15 +1054,16 @@ function doAnimate(node, obj_attr, time, callback, delay){
 				
 			}
 			//10. 准备执行下一个动画
-			var temp = ++node.animate_args.finished;			//完成动画数目+1
-			//console.log
-			if(node.animate_args.finished < node.animate_args.queue.length){	console.log(node.animate_args.queue[temp])						
-				doAnimate(node, node.animate_args.queue[temp].obj_attr, node.animate_args.queue[temp].time, node.animate_args.queue[temp].callback);
-			}
-			//11. 此时所有动画已执行完毕，恢复默认参数，为下一次队列动画做准备
-			else{	
-				node.animate_args = null;				
-			}
+			turnNetxAnimate(node);
+			// var temp = ++node.animate_args.finished;			//完成动画数目+1
+			// //console.log
+			// if(node.animate_args.finished < node.animate_args.queue.length){						
+			// 	doAnimate(node, node.animate_args.queue[temp].obj_attr, node.animate_args.queue[temp].time, node.animate_args.queue[temp].callback, node.animate_args.queue[temp].delay);
+			// }
+			// //11. 此时所有动画已执行完毕，恢复默认参数，为下一次队列动画做准备
+			// else{	
+			// 	node.animate_args = null;				
+			// }
 		}	
 	},20);
 }
