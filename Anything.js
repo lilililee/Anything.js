@@ -858,35 +858,59 @@ Base.prototype.hide = function(time , callback){
 		callback = time;
 		time = 500;
 	}
+
+	//用数组保存hide需要获取的属性
 	var attr_list = ['opacity','width','height','padding-top','padding-right','padding-bottom','padding-left',
 					 'margin-top','margin-right','margin-bottom','margin-left'];
 	
 	for(var i=0; i<this.elements.length; i++){
-		this.elements[i].old_style = {};		//保存当前属性，为show做准备
+		//如果该节点处于隐藏状态，则不执行该节点hide动画
+		//if(getStyle(this.elements[i],'display') == 'none')	continue;
+
+		if(!this.elements[i].old_style){
+			this.elements[i].old_style = {};
+			for(var j=0; j<attr_list.length; j++){
+				var value = getStyle(this.elements[i],attr_list[j]);	//获取当前属性
+				if(parseFloat(value) != 0){
+					this.elements[i].old_style[attr_list[j]] = value;
+					//obj_attr[attr_list[j]] = '0';
+				}	
+			}
+		}
+
+		//保存当前属性，为show做准备
 		var obj_attr = {};						//生成一个animate方法的参数对象，为启动animate做准备
-		for(var j=0; j<attr_list.length; j++){
-			var value = getStyle(this.elements[i],attr_list[j]);	//获取当前属性
-			if(parseFloat(value) != 0){
-				this.elements[i].old_style[attr_list[j]] = value;
-				obj_attr[attr_list[j]] = '0';
-			}	
+		for(var attr in this.elements[i].old_style){
+			if(attr != 'display' && attr != 'overflow'){
+					obj_attr[attr] = '0';
+				}
+			//obj_attr[attr] = '0';			
+		}
+		if(this.elements[i].animate_args){
+			if(this.elements[i].animate_args.queue[this.elements[i].animate_args.queue.length-1].type == 'hide'){
+				return this;
+			}
 		}
 		//获取当前的display和overflow属性
 		this.elements[i].old_style['display'] = getStyle(this.elements[i],'display');	
+	//	console.log(this.elements[i].old_style['display'] )
 		this.elements[i].old_style['overflow'] = getStyle(this.elements[i],'overflow');
 		//设置当前overflow，避免出现在元素缩小时出现文字溢出现象
 		this.elements[i].style['overflow'] = 'hidden';
+		//设置动画类型
+		if(!this.elements[i].animate_args){
+			this.elements[i].animate_args = new animateArgs();
+		}
+		//this.elements.animate_args.type = 'hide';
 		//启动动画
 		//修改callback函数，this指向当前节点
 		$(this.elements[i]).animate(obj_attr,time,function(){
 			//先确认是否传入了callback函数，再执行
 			if(typeof callback == 'function'){
 				callback.call(this);
-			}
-			
+			}	
 			this.style['display'] = 'none';
-			alert(111)
-		});			
+		},'hide');			
 	}
 	// var that = this;
 	// setTimeout(function(){
@@ -907,7 +931,9 @@ Base.prototype.show = function(time, callback){
 	}
 
 	for(var i=0; i<this.elements.length; i++){
-		console.log(this.elements[i])
+		//如果该节点处于隐藏状态，则不执行该节点hide动画
+		//if(getStyle(this.elements[i],'display') != 'none' )	continue;
+
 		if(!this.elements[i].old_style){		//先判断是否已执行过一次hide，直接使用show无效，因为没有可设置的参数
 			return this;						//原来参数不存在时直接退出
 		}else{
@@ -922,39 +948,70 @@ Base.prototype.show = function(time, callback){
 			}
 			//如果正在执行动画，给当前的动画的回调函数后设置当前节点的display属性
 			if(this.elements[i].animate_args){
+				if(this.elements[i].animate_args.queue[this.elements[i].animate_args.queue.length-1].type == 'show'){
+					return this;
+				}
 				//获取当前动画的回调函数
-				console.log(this.elements[i].animate_args.queue[0].callback)
-				var cur_callback = this.elements[i].animate_args.queue[this.elements[i].animate_args.finished].callback;
+				//console.log(this.elements[i].animate_args.queue[0].callback)
+				var cur_callback = this.elements[i].animate_args.queue[this.elements[i].animate_args.queue.length-1].callback;
 				//修改当前动画的回调函数
-				this.elements[i].animate_args.queue[this.elements[i].animate_args.finished].callback = function(){
+				this.elements[i].animate_args.queue[this.elements[i].animate_args.queue.length-1].callback = function(){
 					//此时this指向当前节点
 					//先确认是否传入了callback函数，再执行
+					
 					if(typeof cur_callback == 'function'){
 						cur_callback.call(this);
 					}
-					alert(111)
-					console.log(this.style.old_style['display'])
-					this.style['display'] = this.style.old_style['display'];
+					this.style['display'] = this.old_style['display'];
+					//alert(this.old_style['display'])
+					
 				}
-				console.log(this.elements[i].animate_args.queue[0].callback)
 				
+			}else{
+				//alert(1111)
+				this.elements[i].style['display'] = this.elements[i].old_style['display'];
 			}
+			//设置动画类型
+			if(!this.elements[i].animate_args){
+				this.elements[i].animate_args = new animateArgs();
+			}
+			//this.elements.animate_args.type = 'show';
 			$(this.elements[i]).animate(obj_attr,time,function(){
+				this.style['overflow'] = this.old_style['overflow'];
 				//先确认是否传入了callback函数，再执行
 				if(typeof callback == 'function'){
 					callback.call(this);
 				}
-				this.old_style = null;
-			});	console.log(this.elements[i].animate_args.queue.length)
+				//this.old_style = null;
+			},'show');
 		}
 
 	}
+	return this;
+}
+
+Base.prototype.toggle = function(time, callback){
+	for(var i=0; i<this.elements.length; i++){
+		if(!this.elements[i].animate_args){
+			if( getStyle(this.elements[i],'display') != 'none'){
+				$(this.elements[i]).hide(time, callback);
+			}else{
+				$(this.elements[i]).show(time, callback);
+			}			
+		}else{
+			if(this.elements[i].animate_args.queue[this.elements[i].animate_args.queue.length-1].type == 'show'){
+				$(this.elements[i]).hide(time, callback);
+			}else{
+				$(this.elements[i]).show(time, callback);
+			}
+		}
+	}
+	return this;
 }
 
 
-
 //通用动画函数
-Base.prototype.animate = function(obj_attr, time, callback){
+Base.prototype.animate = function(obj_attr, time, callback, type){
 	//参数判断
 	if(typeof time == 'undefined'){				//$('.ul1').animate({'width' : '10px'}),默认时间为500ms
 		time = 500;
@@ -976,7 +1033,8 @@ Base.prototype.animate = function(obj_attr, time, callback){
 			obj_attr : obj_attr,
 			time : time,
 			callback : callback,
-			delay : 0					//是否延时
+			delay : 0,					//是否延时
+			type : type
 		});
 		//console.log(temp.animate_args.queue)
 		//2. 启动第一次动画，后续动画将在doAnimate中回调执行
@@ -1185,7 +1243,7 @@ function doAnimate(node, obj_attr, time, callback, delay){
 						node.style['opacity'] = all_attr_now[i];
 						break;
 					default :	
-
+						//console.log(all_attr[i])
 						node.style[all_attr[i]] = all_attr_now[i]+'px';
 				}
 				
@@ -1215,8 +1273,10 @@ function doAnimate(node, obj_attr, time, callback, delay){
 				}	
 			}	
 			//9. 动画执行完后执行回调函数
-			if(typeof callback == 'function'){				
-				callback.call(node);
+			//获取实时回调函数，在show中可能会修改当前执行动画的回调函数
+			var cur_callback = node.animate_args.queue[node.animate_args.finished].callback;
+			if(typeof cur_callback == 'function'){				
+				cur_callback.call(node);
 				
 			}
 

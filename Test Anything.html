@@ -30,6 +30,7 @@
 		.ul1,.ul2{
 			border: 50px solid blue;
 			margin-top: 10px;
+
 		}
 		.nav{
 			margin: 50px;
@@ -83,6 +84,7 @@
 	<div id="test2">22222222</div>
 	<button class="but1" id="zz">显示</button>
 	<button class="but2">隐藏</button>
+	<button class="but3">切换</button>
 	<ul class="ul1">
 		<li class="li1">qqqzzzzzzzzzzzzzzzzzzzzzzzzz</li>
 		<li class="li2">wwwzzzzzzzzzzzzzzzzzzzzzzz</li>	
@@ -103,18 +105,25 @@
 //$('ul').elements[0].style.display = 'block';
 //console.log(getStyle($('ul').elements[0],'overflow'))
 //console.log(getStyle($('ul').elements[0],'width'))
-$('.nav').hide(5000).show(5000);
+$('.nav').show(5000)//.show(5000);
 //console.log(getStyle($('.ul1').elements[0],'margin'))
 $('.but1').click(function () {
 	// $('.ul1').show(2000,function(){
 	// 	alert(111)
 	// });
-	$('.ul1').show(2000)
+	$('.ul1').show(500,function(){
+		console.log('show show')
+	})
 	
 })
 $('.but2').click(function () {
-	$('.ul1').hide(2000,function(){
-		alert(this)
+	$('.ul1').hide(500,function(){
+		console.log('hide hide')
+	});
+})
+$('.but3').click(function () {
+	$('.ul1').toggle(function(){
+		console.log('hide hide')
 	});
 })
 
