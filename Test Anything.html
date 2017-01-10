@@ -68,7 +68,7 @@
 		<div id="box">
 			<h1 class=" color dzzz color">Welcome</h1>
 			<h1 class="zz color ">Welcome</h1>
-			<p>
+			<p  class="but">
 				Welcome to the official website of Jay Skript and the Domsters. Here, you can <a href="#">learn more about the band</a>, view <a href="#">photos of the band</a>, find out about <a href="#">tour dates</a> and <a href="#">get in touch with the band</a>.
 			</p>
 		</div>	
@@ -77,8 +77,8 @@
 	<input type="text" class="uesr" value="haha1">
 	<input type="text" class="uesr" value="haha2">
 	<div id="test2">22222222</div>
-	<button class="but">动画按钮</button>
-	<button class="but1">停止按钮</button>
+	<button class="but" id="zz">动画按钮</button>
+	<button class="but">停止按钮</button>
 	<ul class="ul1">
 		<li class="li1">qqq</li>
 		<li class="li2">www</li>	
@@ -95,7 +95,9 @@
 <script src ='Anything.js'></script>
 
 <script>
-console.log(!undefined)
+var str = '          !undefined   d   '
+console.log(str.replace(/^\s+|\s+$/g,''))
+console.log(str)
 var li = document.getElementsByTagName('li');
 var ul = document.getElementsByTagName('ul');
 var arr = [1,2,3,4,5,6];
@@ -110,6 +112,7 @@ console.log(arr)
 //console.log($('.div1').elements[0].offsetHeight)
 //console.log($('.div1').outerWidth(500))
 //console.log(getStyle(ul[0],'left'))
+console.log($('ul').is(':animated'))
 var us = document.getElementById('user')
 $('.but').click(function () {
 	$('.ul1').delay(1000).animate({width:'1000px',opacity:'0.5',height:'300px'},2000,function(){
@@ -117,6 +120,7 @@ $('.but').click(function () {
 	}).delay(3000).animate({width:'100px',opacity:'0.5',height:'200px'},2000,function(){
 		//alert(111)
 	})
+	console.log($('ul').is(':animated'))
 })
 $('.nav li').click(function(){
 	console.log(11)
