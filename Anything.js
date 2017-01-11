@@ -207,7 +207,7 @@ Base.prototype.val = function(value){
 //不支持同时设置多个属性，可用连缀来实现
 Base.prototype.css = function(attr,value){
 	if(typeof attr != 'string') errorArgs(); //参数检测
-
+	//console.log(111)
 	if(arguments.length == 1){
 		return getStyle(this.elements[0],attr);
 	}else{
@@ -851,7 +851,7 @@ Base.prototype.one = function(type,callback){
 //callback不能使用alert，否则hide最后一步设置display为none会一直等待alert的执行
 //同JQuery，是先执行减小宽高->callback->设置display
 Base.prototype.hide = function(time , callback){
-	//对不同格式的参数进行调整
+	//1. 对不同格式的参数进行调整
 	if(!time && !callback){
 		time = 1;
 	}else if(typeof time == 'function'){			
@@ -859,14 +859,21 @@ Base.prototype.hide = function(time , callback){
 		time = 500;
 	}
 
-	//用数组保存hide需要获取的属性
+	//2. 用数组保存hide需要获取的属性
 	var attr_list = ['opacity','width','height','padding-top','padding-right','padding-bottom','padding-left',
-					 'margin-top','margin-right','margin-bottom','margin-left'];
+					 'margin-top','margin-right','margin-bottom','margin-left','display','overflow'];
 	
 	for(var i=0; i<this.elements.length; i++){
-		//如果该节点处于隐藏状态，则不执行该节点hide动画
-		//if(getStyle(this.elements[i],'display') == 'none')	continue;
+		//3. 如果该节点处于动画，且上一动画也是hide，则不向队列添加此次hide动画，如果不处于动画，生成动画参数
+		if(this.elements[i].animate_args){
+			if(this.elements[i].animate_args.queue[this.elements[i].animate_args.queue.length-1].type == 'hide'){
+				continue;
+			}
+		}else{
+			this.elements[i].animate_args = new animateArgs();
+		}
 
+		//4. 获取原有属性，该属性永久存在，且只在第一次hide获取
 		if(!this.elements[i].old_style){
 			this.elements[i].old_style = {};
 			for(var j=0; j<attr_list.length; j++){
@@ -878,51 +885,29 @@ Base.prototype.hide = function(time , callback){
 			}
 		}
 
-		//保存当前属性，为show做准备
+		//5. 保存需要操作的属性，为show做准备
 		var obj_attr = {};						//生成一个animate方法的参数对象，为启动animate做准备
 		for(var attr in this.elements[i].old_style){
 			if(attr != 'display' && attr != 'overflow'){
 					obj_attr[attr] = '0';
 				}
-			//obj_attr[attr] = '0';			
 		}
-		if(this.elements[i].animate_args){
-			if(this.elements[i].animate_args.queue[this.elements[i].animate_args.queue.length-1].type == 'hide'){
-				return this;
-			}
-		}
-		//获取当前的display和overflow属性
-		this.elements[i].old_style['display'] = getStyle(this.elements[i],'display');	
-	//	console.log(this.elements[i].old_style['display'] )
-		this.elements[i].old_style['overflow'] = getStyle(this.elements[i],'overflow');
-		//设置当前overflow，避免出现在元素缩小时出现文字溢出现象
-		this.elements[i].style['overflow'] = 'hidden';
-		//设置动画类型
-		if(!this.elements[i].animate_args){
-			this.elements[i].animate_args = new animateArgs();
-		}
-		//this.elements.animate_args.type = 'hide';
-		//启动动画
-		//修改callback函数，this指向当前节点
+		//6. 启动动画，分别在回调函数和初始函数加上了display和overflow的操作
 		$(this.elements[i]).animate(obj_attr,time,function(){
 			//先确认是否传入了callback函数，再执行
 			if(typeof callback == 'function'){
 				callback.call(this);
 			}	
 			this.style['display'] = 'none';
-		},'hide');			
+		},'hide',function(){
+			this.style['overflow'] = 'hidden';			//在单次动画执行前运行的函数
+		});			
 	}
-	// var that = this;
-	// setTimeout(function(){
-	// 	for(var i=0; i<that.elements.length; i++){
-	// 		that.elements[i].style['display'] = 'none';			
-	// 	}
-	// },time);		//等动画执行完后将元素display设置为none
 	return this;
 }
 
 Base.prototype.show = function(time, callback){
-	//对不同格式的参数进行调整
+	//1. 对不同格式的参数进行调整
 	if(!time && !callback){
 		time = 1;
 	}else if(typeof time == 'function'){			
@@ -931,60 +916,39 @@ Base.prototype.show = function(time, callback){
 	}
 
 	for(var i=0; i<this.elements.length; i++){
-		//如果该节点处于隐藏状态，则不执行该节点hide动画
-		//if(getStyle(this.elements[i],'display') != 'none' )	continue;
-
-		if(!this.elements[i].old_style){		//先判断是否已执行过一次hide，直接使用show无效，因为没有可设置的参数
-			return this;						//原来参数不存在时直接退出
+		//2. 如果该节点处于动画，且上一动画也是show，则不向队列添加此次show动画，如果不处于动画，生成动画参数
+		if(this.elements[i].animate_args){
+			if(this.elements[i].animate_args.queue[this.elements[i].animate_args.queue.length-1].type == 'show'){
+				continue;
+			}		
 		}else{
-			//显示动画
-			//this.elements[i].style['display'] = this.elements[i].old_style['display'];
-			var obj_attr = {};
-			//生成一个animate方法的参数对象，为启动animate做准备
-			for(attr in this.elements[i].old_style){
-				if(attr != 'display' && attr != 'overflow'){
-					obj_attr[attr] = this.elements[i].old_style[attr];
-				}
-			}
-			//如果正在执行动画，给当前的动画的回调函数后设置当前节点的display属性
-			if(this.elements[i].animate_args){
-				if(this.elements[i].animate_args.queue[this.elements[i].animate_args.queue.length-1].type == 'show'){
-					return this;
-				}
-				//获取当前动画的回调函数
-				//console.log(this.elements[i].animate_args.queue[0].callback)
-				var cur_callback = this.elements[i].animate_args.queue[this.elements[i].animate_args.queue.length-1].callback;
-				//修改当前动画的回调函数
-				this.elements[i].animate_args.queue[this.elements[i].animate_args.queue.length-1].callback = function(){
-					//此时this指向当前节点
-					//先确认是否传入了callback函数，再执行
-					
-					if(typeof cur_callback == 'function'){
-						cur_callback.call(this);
-					}
-					this.style['display'] = this.old_style['display'];
-					//alert(this.old_style['display'])
-					
-				}
-				
-			}else{
-				//alert(1111)
-				this.elements[i].style['display'] = this.elements[i].old_style['display'];
-			}
-			//设置动画类型
-			if(!this.elements[i].animate_args){
-				this.elements[i].animate_args = new animateArgs();
-			}
-			//this.elements.animate_args.type = 'show';
-			$(this.elements[i]).animate(obj_attr,time,function(){
-				this.style['overflow'] = this.old_style['overflow'];
-				//先确认是否传入了callback函数，再执行
-				if(typeof callback == 'function'){
-					callback.call(this);
-				}
-				//this.old_style = null;
-			},'show');
+			this.elements[i].animate_args = new animateArgs();
 		}
+		//3. 先判断是否已执行过一次hide，直接使用show无效，因为没有可设置的参数
+		if(!this.elements[i].old_style){	
+			continue;
+		}
+
+		//4. 生成一个animate方法的参数对象，为启动animate做准备
+		var obj_attr = {};
+		
+		for(attr in this.elements[i].old_style){
+			if(attr != 'display' && attr != 'overflow'){
+				obj_attr[attr] = this.elements[i].old_style[attr];
+			}
+		}
+		
+		//5 .启动动画
+		$(this.elements[i]).animate(obj_attr,time,function(){
+			//先确认是否传入了callback函数，再执行
+			if(typeof callback == 'function'){
+				callback.call(this);
+			}
+			this.style['overflow'] = 'visible';
+		},'show',function(){
+			this.style['display'] = this.old_style['display'];
+		});
+	
 
 	}
 	return this;
@@ -992,13 +956,16 @@ Base.prototype.show = function(time, callback){
 
 Base.prototype.toggle = function(time, callback){
 	for(var i=0; i<this.elements.length; i++){
+		//1. 当前节点不处于动画时，根据display来判断
 		if(!this.elements[i].animate_args){
 			if( getStyle(this.elements[i],'display') != 'none'){
 				$(this.elements[i]).hide(time, callback);
 			}else{
 				$(this.elements[i]).show(time, callback);
 			}			
-		}else{
+		}
+		//2. 当前节点处于动画时，根据上一函数的类型来判断
+		else{
 			if(this.elements[i].animate_args.queue[this.elements[i].animate_args.queue.length-1].type == 'show'){
 				$(this.elements[i]).hide(time, callback);
 			}else{
@@ -1009,9 +976,188 @@ Base.prototype.toggle = function(time, callback){
 	return this;
 }
 
+//***********************************淡入和淡出***************************************
+//淡入(显示)
+Base.prototype.fadeIn = function(time, callback){
+	//1. 对不同格式的参数进行调整
+	if(!time && !callback){
+		time = 1;
+	}else if(typeof time == 'function'){			
+		callback = time;
+		time = 500;
+	}
+
+	for(var i=0; i<this.elements.length; i++){
+
+		if(getStyle(this.elements[i],'opacity') == '1' && getStyle(this.elements[i],'display') != 'none'){	
+			
+			continue;
+		}
+		//2. 保存标签的默认的display（针对先用淡入再淡出的情况）
+		if(!this.elements[i].old_style){
+			this.elements[i].old_style = {};
+			this.elements[i].old_style['display'] = getDefaultDisplay(this.elements[i]);
+
+		}
+		//3. 如果该节点处于动画，且上一动画也是show，则不向队列添加此次show动画，如果不处于动画，生成动画参数
+		if(this.elements[i].animate_args){
+			if(this.elements[i].animate_args.queue[this.elements[i].animate_args.queue.length-1].type == 'fadeIn'){
+				continue;
+			}		
+		}else{
+			this.elements[i].animate_args = new animateArgs();
+		}
+
+		//4. 生成一个animate方法的参数对象，为启动animate做准备
+		var obj_attr = {
+			opacity : 1
+		};
+		
+		//5 .启动动画
+		$(this.elements[i]).animate(obj_attr, time, callback, 'fadeIn', function(){
+			this.style['filter'] = 'alpha(opacity=0)';
+			this.style['zoom'] = 1;
+			this.style['opacity'] = 0;
+			//alert(getStyle(this,'opacity'));   //在IE678得到0！！！！！！！！！后面修改了getStyle函数解决	
+			this.style['display'] = this.old_style['display'];
+		});
+	}
+	return this;
+}
+
+//淡出(隐藏)
+Base.prototype.fadeOut = function(time, callback){
+	//1. 对不同格式的参数进行调整
+	if(!time && !callback){
+		time = 1;
+	}else if(typeof time == 'function'){			
+		callback = time;
+		time = 500;
+	}
+
+	for(var i=0; i<this.elements.length; i++){
+		
+		if(getStyle(this.elements[i],'opacity') == '0' || getStyle(this.elements[i],'display') == 'none'){	
+			continue;
+		}
+		//2. 保存标签的默认的display或当前的display
+		if(!this.elements[i].old_style){
+			this.elements[i].old_style = {};
+			if(getStyle(this.elements[i],'display') == 'none'){
+				this.elements[i].old_style['display'] = getDefaultDisplay(this.elements[i]);
+				continue;
+			}else{
+				this.elements[i].old_style['display'] = getStyle(this.elements[i],'display');
+			}
+			
+		}
+		//3. 如果该节点处于动画，且上一动画也是show，则不向队列添加此次show动画，如果不处于动画，生成动画参数
+		if(this.elements[i].animate_args){
+			if(this.elements[i].animate_args.queue[this.elements[i].animate_args.queue.length-1].type == 'fadeOut'){
+				continue;
+			}		
+		}else{
+			this.elements[i].animate_args = new animateArgs();
+		}
+
+		//4. 生成一个animate方法的参数对象，为启动animate做准备
+		var obj_attr = {
+			opacity : 0
+		};
+		//console.log(2222222222)
+		//5 .启动动画
+		$(this.elements[i]).animate(obj_attr, time, function(){
+			if(typeof callback == 'function'){
+				callback.call(this);
+			}
+			this.style['display'] = 'none';
+		}, 'fadeOut', function(){
+			this.style['display'] = this.old_style['display'];
+		});
+	}
+	return this;
+}
+
+//调整到指定透明度
+//必选参数，time ，opacity
+Base.prototype.fadeTo = function(time, opacity, callback){
+	//1. 对不同格式的参数进行调整
+	if(typeof time != 'number' || typeof opacity != 'number'){
+		errorArgs();
+	}
+
+	for(var i=0; i<this.elements.length; i++){		
+		//2. 保存标签的默认的display或当前的display
+		if(!this.elements[i].old_style){
+			this.elements[i].old_style = {};
+			if(getStyle(this.elements[i],'display') == 'none'){
+				this.elements[i].old_style['display'] = getDefaultDisplay(this.elements[i]);
+			}else{
+				this.elements[i].old_style['display'] = getStyle(this.elements[i],'display');
+			}
+			
+		}
+	
+		//3. 如果该节点处于动画，且上一动画也是fadeTo，则不向队列添加此次fadeTo动画，如果不处于动画，生成动画参数
+		if(this.elements[i].animate_args){
+			if(this.elements[i].animate_args.queue[this.elements[i].animate_args.queue.length-1].type == 'fadeTo' ||
+				parseFloat(getStyle(this.elements[i],'opacity')) == opacity){
+				continue;
+			}		
+		}else{
+			this.elements[i].animate_args = new animateArgs();
+		}
+		//4. 生成一个animate方法的参数对象，为启动animate做准备
+		var obj_attr = {
+			opacity : opacity
+		};
+		
+		//5 .启动动画
+		$(this.elements[i]).animate(obj_attr, time, callback, 'fadeTo', function(){
+			if(getStyle(this,'display') == 'none'){
+				this.style['filter'] = 'alpha(opacity=0)';
+				this.style['zoom'] = 1;
+				this.style['opacity'] = 0;
+			}
+			this.style['display'] = this.old_style['display'];
+		});
+	}
+	return this;
+}
+
+//淡入淡出切换
+Base.prototype.fadeToggle = function(time, callback){
+	for(var i=0; i<this.elements.length; i++){
+		//1. 当前节点不处于动画时，根据display来判断
+		if(!this.elements[i].animate_args){
+			if( getStyle(this.elements[i],'display') != 'none'){
+				$(this.elements[i]).fadeOut(time, callback);
+			}else{
+				$(this.elements[i]).fadeIn(time, callback);
+			}			
+		}
+		//2. 当前节点处于动画时，根据上一函数的类型来判断
+		else{
+			if(this.elements[i].animate_args.queue[this.elements[i].animate_args.queue.length-1].type == 'fadeIn'){
+				$(this.elements[i]).fadeOut(time, callback);
+			}else{
+				$(this.elements[i]).fadeIn(time, callback);
+			}
+		}
+	}
+	return this;
+}
 
 //通用动画函数
-Base.prototype.animate = function(obj_attr, time, callback, type){
+//该方法的作用有以下两点
+//1. 向节点动画队列加入一个动画
+//2. 启动动画（其他方法都不能启动动画，只能向队列添加动画或者调用该方法来启动动画）
+//obj_attr  表示需要操作的属性
+//time      表示动画执行时间
+//callback  表示动画执行完好运行的函数
+//type      表示动画类型
+//start_fn  表示动画执行前需要执行的函数
+Base.prototype.animate = function(obj_attr, time, callback, type, start_fn){
 	//参数判断
 	if(typeof time == 'undefined'){				//$('.ul1').animate({'width' : '10px'}),默认时间为500ms
 		time = 500;
@@ -1021,30 +1167,28 @@ Base.prototype.animate = function(obj_attr, time, callback, type){
 	}else if(typeof time == 'number' && time<=0){	//如果传入动画时间小于或等于0，则不执行此次动画
 		return this;
 	}
-	//1. 添加动画队列，通过is_animate来判断，is_animate在20ms后才会为true
+	
 	for(var i=0; i<this.elements.length; i++){
-		//当前节点不存在动画参数对象时，先添加一个
-		var temp = this.elements[i];
-		if(!temp.animate_args){		
-			temp.animate_args = new animateArgs();	//通过构造函数生成
+		//1. 当前节点不处于动画时，先生成一个动画参数
+		var node = this.elements[i];
+		if(!node.animate_args){		
+			node.animate_args = new animateArgs();	//通过构造函数生成
 		}
-		
-		temp.animate_args.queue.push({
+		//2. 向节点队列添加一个动画
+		node.animate_args.queue.push({
 			obj_attr : obj_attr,
 			time : time,
 			callback : callback,
 			delay : 0,					//是否延时
-			type : type
+			type : type,
+			start_fn : start_fn
 		});
-		//console.log(temp.animate_args.queue)
-		//2. 启动第一次动画，后续动画将在doAnimate中回调执行
-		if(!temp.animate_args.start_first){
-			temp.animate_args.start_first = true;
-			//console.log(temp.animate_args.queue)
-			doAnimate(temp, temp.animate_args.queue[0].obj_attr, temp.animate_args.queue[0].time,
-			   			    temp.animate_args.queue[0].callback, temp.animate_args.queue[0].delay);
+		//3. 启动第一次动画，后续动画将在doAnimate中回调执行
+		if(!node.animate_args.start_first){
+			node.animate_args.start_first = true;
+			var temp = node.animate_args.queue[0];
+			doAnimate(node, temp.obj_attr, temp.time,temp.callback, temp.delay, temp.type, temp.start_fn);
 		}
-		//console.log(this.elements[i].animate_args.queue)
 	}
 	
 	
@@ -1176,12 +1320,12 @@ function animateArgs(){
 
 //传入要执行动画的节点，执行该节点的下一个动画
 function turnNetxAnimate(node){
-	//完成动画数目+1
-	var temp = ++node.animate_args.finished;	
-	//如果队列中还有动画，执行下一动画，否则解除该节点的动画				
-	if(node.animate_args.finished < node.animate_args.queue.length){				
-		doAnimate(node, node.animate_args.queue[temp].obj_attr, node.animate_args.queue[temp].time, 
-						node.animate_args.queue[temp].callback, node.animate_args.queue[temp].delay);
+	//1. 完成动画数目+1
+	var index = ++node.animate_args.finished;	
+	//2. 如果队列中还有动画，执行下一动画，否则解除该节点的动画				
+	if(node.animate_args.finished < node.animate_args.queue.length){
+		var temp = node.animate_args.queue[index];
+		doAnimate(node, temp.obj_attr, temp.time, temp.callback, temp.delay, temp.type, temp.start_fn);
 	}else{
 		node.animate_args = null;		
 	}
@@ -1193,26 +1337,21 @@ function turnNetxAnimate(node){
 //每执行一次doAnimate表示完成了当前节点队列中的一个动画
 //延时也看作一个动画
 //obj_attr中必须均为带数字的属性，display，position等不行
-function doAnimate(node, obj_attr, time, callback, delay){
-	//判断此次动画是否为延时动画
-	if(typeof delay == 'number' && delay > 0){		
+function doAnimate(node, obj_attr, time, callback, delay, type, start_fn){
+	//1. 判断此次动画是否有最开始需要执行的函数
+	if(typeof start_fn == 'function'){
+		start_fn.call(node);
+		
+	}
+	//2. 判断此次动画是否为延时动画
+	else if(typeof delay == 'number' && delay > 0){		
 		node.animate_args.interval_id = setTimeout(function(){	
 			turnNetxAnimate(node);	
 		},delay);
 		return;
-	}/*else if(typeof type == 'string'){
-		switch(type){
-			case 'hide':
-				node.style['overflow'] = 'hidden';	
-				break;
-			case 'show':
-				//node.style
-		}
-		
-	}else if(type)*/
+	}
+	//3. 计算此次动画需要的参数
 	var n = Math.floor(time/20);				//20ms移动一次，计算此次动画的移动次数
-	//var elements = obj_base.elements;			//用一个数组保存要操作的节点
-	//var len = elements.length;
 	var count = 0;								//当前已执行的动画次数
 	var all_attr = [];							//当前节点需要执行动画的属性
 	var all_attr_end = [];						//当前节点属性最终值
@@ -1228,11 +1367,10 @@ function doAnimate(node, obj_attr, time, callback, delay){
 		all_attr_now.push(cur_start);
 		all_attr_dis.push((cur_end-cur_start)/n);//保存节点的当前属性每次动画的增加值
 	}	
-	
-	//5. 准备执行动画
+	//console.log(getStyle(node,'opacity'))
+	//4. 准备执行动画
 	node.animate_args.interval_id = setInterval(function(){
-		//animate_args.is_animate = true;		
-		//6. 开始同时操作所有节点的所有属性，每20ms执行一次	
+		//5. 开始同时操作所有节点的所有属性，每20ms执行一次	
 		if(count<n-1){	
 			for(var i=0;i<all_attr.length;i++){		//遍历需要执行动画的属性						
 				all_attr_now[i] += all_attr_dis[i];
@@ -1251,14 +1389,13 @@ function doAnimate(node, obj_attr, time, callback, delay){
 			count++;
 		}
 		
-		//7. 此次动画执行完毕
+		//6. 此次动画执行完毕
 		else{		
-			//8. 清空动画，最后一次设置最终的属性值
+			//7. 清空动画，最后一次设置最终的属性值
 			if(node.animate_args.interval_id){
 				//最后一次，把属性设为最终值，保证结果与最初设置的值一样，也可省略该步，因为结果误差很小。
 				clearInterval(node.animate_args.interval_id);
 				for(var i=0;i<all_attr.length;i++){		//遍历需要执行动画的属性						
-				//all_attr_now[i] += all_attr_dis[i];
 					switch(all_attr[i]){
 						case 'opacity':					
 							node.style['filter'] = 'alpha(opacity='+all_attr_end[i]*100+')';
@@ -1266,35 +1403,19 @@ function doAnimate(node, obj_attr, time, callback, delay){
 							node.style['opacity'] = all_attr_end[i];
 							break;
 						default :	
-
 							node.style[all_attr[i]] = all_attr_end[i]+'px';
 					}
 					
 				}	
 			}	
 			//9. 动画执行完后执行回调函数
-			//获取实时回调函数，在show中可能会修改当前执行动画的回调函数
-			var cur_callback = node.animate_args.queue[node.animate_args.finished].callback;
-			if(typeof cur_callback == 'function'){				
-				cur_callback.call(node);
+			if(typeof callback == 'function'){				
+				callback.call(node);
 				
 			}
 
-			// switch(type){
-			// 	case 'hide' :
-			// 		node.style['display'] : none;
-			// }
 			//10. 准备执行下一个动画
 			turnNetxAnimate(node);
-			// var temp = ++node.animate_args.finished;			//完成动画数目+1
-			// //console.log
-			// if(node.animate_args.finished < node.animate_args.queue.length){						
-			// 	doAnimate(node, node.animate_args.queue[temp].obj_attr, node.animate_args.queue[temp].time, node.animate_args.queue[temp].callback, node.animate_args.queue[temp].delay);
-			// }
-			// //11. 此时所有动画已执行完毕，恢复默认参数，为下一次队列动画做准备
-			// else{	
-			// 	node.animate_args = null;				
-			// }
 		}	
 	},20);
 }
@@ -1321,6 +1442,10 @@ function isHostMethod(obj, property){
 //该函数始终返回的是一个带单位的字符串，如果要进行数值处理的话需要用parseFloat处理一下！！
 //getStyle($('.ul1').elements[0],'margin'),padding和margin在Firefox中一直返回0，应用padding-left等带方位的单位获取
 function getStyle(element,attr) {
+	//优先获取内联样式（解决IE678无法fadeIn正确获取opacity）
+	if(element.style[attr] !== '' && element.style[attr] !== undefined){
+		return element.style[attr];
+	}
 	var style = null;
 	if(window.getComputedStyle){	//W3C
 		style = window.getComputedStyle(element,null);
@@ -1362,10 +1487,27 @@ function getStyle(element,attr) {
 				return '0';     //其他情况默认返回0，比如padding，margin，获取不到时返回0
 		}
 	}else{
-		//console.log(style[attr])
+		
 		return result;
 	}
 	
+}
+
+//获取元素节点的默认display
+function getDefaultDisplay(node){	
+	if(node.nodeType != 1)	{ errorArgs(); }
+	var tag = node.nodeName;
+	//console.log('tag is : '+tag)
+	if(/^(H1|H2|H3|H4|H5|H6|ADDRESS|QUOTE|BODY|XMP|CENTER|COL|COLGROUP|DD|DIR|DIV|DL|DT|FIELDSET|FORM|HN|HR|IFRAME|LEGEND|LISTING|MARQUEE|MENU|OL|P|PLAINTEXT|PRE|TABLE|TD|TH|TR|UL)$/.test(tag)){
+		return 'block';
+	}else if(/^(BR|FRAME|nextID|TBODY|TFOOT|THEAD)$/.test(tag)){
+		return 'none';
+	}else if(/^(LI)$/.test(tag)){
+		return 'list-item';
+	}else{
+		return 'inline'
+	}
+
 }
 
 //获取上一个兄弟节点，过滤掉空格和回车生成的文本节点

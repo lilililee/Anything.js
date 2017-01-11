@@ -15,6 +15,7 @@
 			padding: 50px;
 			border: 100px solid red;
 			position: relative;*/
+			
 		}
 		
 		.div2,.div3{
@@ -27,12 +28,18 @@
 			top: 20px;*/
 			
 		}
-		.ul1,.ul2{
+		.ul1{
+			display: none;
 			border: 50px solid blue;
 			margin-top: 10px;
 
 		}
 		.nav{
+			/*filter:progid:DXImageTransform.Microsoft.Alpha(Opacity=50)*/
+			/*display: none;*/
+			/*filter:alpha(opacity=50);
+			zoom:1;
+			opacity: 0.3;*/
 			margin: 50px;
 			border : 100px solid red;
 		}
@@ -85,7 +92,8 @@
 	<button class="but1" id="zz">显示</button>
 	<button class="but2">隐藏</button>
 	<button class="but3">切换</button>
-	<ul class="ul1">
+	<button class="but4">停止</button>
+	<ul class="ul1" >
 		<li class="li1">qqqzzzzzzzzzzzzzzzzzzzzzzzzz</li>
 		<li class="li2">wwwzzzzzzzzzzzzzzzzzzzzzzz</li>	
 		<li class="li3">eeezzzzzzzzzzzzzzzzzzzzzzzzzz</li>
@@ -102,29 +110,43 @@
 <script src ='Anything.js'></script>
 
 <script>
+//console.log(getStyle($('.nav').elements[0],'opacity'))
 //$('ul').elements[0].style.display = 'block';
 //console.log(getStyle($('ul').elements[0],'overflow'))
 //console.log(getStyle($('ul').elements[0],'width'))
-$('.nav').show(5000)//.show(5000);
-//console.log(getStyle($('.ul1').elements[0],'margin'))
+//$('.nav').show(5000)//.show(5000);
+//console.log($('.ul1').elements[0].nodeType)
+
+// $('.ul1').elements[0].style['filter'] = 'alpha(opacity=0)';
+// $('.ul1').elements[0].style['zoom'] = 1;
+// $('.ul1').elements[0].style['opacity'] = 0;
+console.log('p' == ('z'&&'p'))
+//console.log($('.ul1').elements[0].style['left'] == '')
+//console.log(getDefaultDisplay($('span').elements[0]))
+//console.log($('.ul1').attr('style'))
+//console.log(getStyle($('.ul1').elements[0],'display'))
 $('.but1').click(function () {
 	// $('.ul1').show(2000,function(){
 	// 	alert(111)
 	// });
-	$('.ul1').show(500,function(){
-		console.log('show show')
+	//alert(11)
+	$('.ul1').fadeIn(2000,function(){
+		console.log(this)
 	})
 	
 })
 $('.but2').click(function () {
-	$('.ul1').hide(500,function(){
-		console.log('hide hide')
+	$('.ul1').fadeOut(2000,function(){
+		console.log(this)
 	});
 })
 $('.but3').click(function () {
-	$('.ul1').toggle(function(){
-		console.log('hide hide')
+	$('.ul1').fadeToggle(500,function(){
+		//alert('hide hide')
 	});
+})
+$('.but4').click(function () {
+	$('.ul1').stop(true);
 })
 
 </script>
