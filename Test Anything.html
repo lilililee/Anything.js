@@ -51,7 +51,22 @@
 		ul{
 			/*display: none;*/
 		}
+		.wrapper{
+			width: 300px;
+			display : inline-block;
+			border: 1px solid red;
+		}
 
+		.wrapper h1{
+			padding: 20px;
+			border: 1px solid blue;
+		}
+		.wrapper p{
+			/*display: none;*/
+			border: 10px solid green;
+			margin: 10px;
+			padding: 10px;
+		}
 		
 	</style>
 	<script>
@@ -61,6 +76,10 @@
 	
 </head>
 <body>
+	<div class="wrapper">
+		<h1>绿叶学习网简介</h1>
+		<p>绿叶学习网成立于2015年4月1日，是一个富有活力的技术学习网站。绿叶学习网为广大网络工作者（网页开发人员、站长等）提供各种精品教程以及最精华资料。绿叶学习网跟其他垃圾采集站不一样，绿叶学习网中的每一个课程、每一篇文章，甚至每一个知识点，都凝聚了本人的最辛勤的汗水。多少日日夜夜，本人呕心沥血在一遍一遍地编辑，为的是给广大网站爱好者提供最精华的知识。</p>
+	</div>
 	<ul class="nav">
 		<li>111</li>
 		<li>222</li>
@@ -85,10 +104,6 @@
 			</p>
 		</div>	
 	</div>
-	<div class="test">sssadasdasdddddddddddddddddddddddddd</div>sdsf
-	<input type="text" class="uesr" value="haha1">
-	<input type="text" class="uesr" value="haha2">
-	<div id="test2">22222222</div>
 	<button class="but1" id="zz">显示</button>
 	<button class="but2">隐藏</button>
 	<button class="but3">切换</button>
@@ -110,6 +125,31 @@
 <script src ='Anything.js'></script>
 
 <script>
+var flag = 1;
+$('.wrapper h1').click(function(){
+	$('.wrapper p').slideToggle(1000,0.6);
+	// $('.wrapper p').hide(2000,function(){
+	// 	//alert(11)
+	// 	});
+	// if(flag == 1){flag = 0;
+	// 	console.log('slideDown')
+	// 	$('.wrapper p').hide(2000,function(){
+	// 	//alert(11)
+	// 	});
+		
+	// }else{flag = 1;
+	// 	console.log('slideUp')
+	// 	//console.log('slideUp2')
+	// 	//console.log($('.wrapper p'))
+	// 	$('.wrapper p').show(2000,function(){
+	// 		//alert(11)
+	// 	});
+	// 	//console.log('slideUp2')
+		
+	// }
+	
+	//$('.wrapper p').slideDown();
+})
 //console.log(getStyle($('.nav').elements[0],'opacity'))
 //$('ul').elements[0].style.display = 'block';
 //console.log(getStyle($('ul').elements[0],'overflow'))
@@ -120,7 +160,7 @@
 // $('.ul1').elements[0].style['filter'] = 'alpha(opacity=0)';
 // $('.ul1').elements[0].style['zoom'] = 1;
 // $('.ul1').elements[0].style['opacity'] = 0;
-console.log('p' == ('z'&&'p'))
+//console.log('p' == ('z'&&'p'))
 //console.log($('.ul1').elements[0].style['left'] == '')
 //console.log(getDefaultDisplay($('span').elements[0]))
 //console.log($('.ul1').attr('style'))
@@ -141,9 +181,10 @@ $('.but2').click(function () {
 	});
 })
 $('.but3').click(function () {
-	$('.ul1').fadeToggle(500,function(){
-		//alert('hide hide')
-	});
+	// $('.ul1').fadeToggle(500,function(){
+	// 	//alert('hide hide')
+	// });
+	$('.ul1').slideToggle(1000);
 })
 $('.but4').click(function () {
 	$('.ul1').stop(true);
