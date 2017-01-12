@@ -31,11 +31,12 @@ function Anything(args) {
 				temp = '',					//临时保存分割后的单个选择器字符串
 				i = 0,
 				j = 0;
-				
+				console.log(select_arg)
 
 			for ( i = 0; i < select_arg.length; i++){
 				select_arr[i] = [];
-				select_arg[i] = ' ' + select_arg[i];	//在选择符前加一空格，保证第一个字符均为层次选择符
+				select_arg[i] = ' ' + select_arg[i] + ' ';	//在选择符前后加一空格，保证第一个字符均为层次选择符
+				console.log(select_arg[i])
 				for( j = 0; j < select_arg[i].length; j++){
 					//console.log(select_arg[i][j])
 
@@ -49,26 +50,31 @@ function Anything(args) {
 						start = j;
 					}
 				}
-				if( temp != '' && temp != ' '){
-					select_arr[i].push( temp );
-				}
+				// if( temp != '' && temp != ' '){
+				// 	select_arr[i].push( temp );
+				// }
 				//select_arr[i].push( select_arg[i].slice(start,j) )	
 				console.log(select_arr[i])			
 			}
 
 			//根据处理后的参数进行元素匹配
 			var temp = [],
-
 				childs = [], 
-				result = [];
-
+				result = [],
+				k = 0,
+				parent_node = null,
+				next_node = null,
+				previous_node = null,
+				is_find = false,
+				temp_result = [];
+				//console.log(select_arr)
 			for( i=0; i < select_arr.length; i++){
 				//当前选择器数组为空数组时跳过此次操作
-				temp = select_arr[i];
+				temp = select_arr[i];	//temp为用,分割后的选择符数组
 				if( temp.length == 0) continue;
 
-				console.log(temp[temp.length-1])
-				//从后向前筛选元素
+				//console.log(temp[temp.length-1])
+				//先根据最后一个选择符来获取元素
 				switch( temp[temp.length-1].charAt(1) ){
 					case '#' :
 						result = this.getById(temp[temp.length-1].slice(2));
@@ -81,9 +87,170 @@ function Anything(args) {
 					default : 
 						result = this.getByTagName(temp[temp.length-1].slice(1));
 				}
-				console.log(result)
+
+				console.log('第一次筛选结果：'+result)
+				//从后向前筛选元素
+				for( j = temp.length-2; j >= 0; j--){
+					//通过层次选择符判断筛选的方法
+					switch( temp[j+1].charAt(0)){
+						case ' ':
+							for( k = 0; k < result.length; k++ ){
+								is_find = false;
+								temp_result = [];
+								parent_node = result[k].parentNode;
+
+								if( parent_node == document){		//针对选择符为'html'时
+									is_find = true;
+								}	
+
+								while( parent_node != document){									
+									switch( temp[j].charAt(1)){
+										case '#':
+											if( parent_node.id == temp[j].slice(2) ){
+												is_find = true;	
+											} 
+											break;
+
+										case '.':
+											if( $(parent_node).hasClass(temp[j].slice(2)) ){
+												is_find = true;
+											} 
+											break;
+
+										default :
+											if( parent_node.tagName.toLowerCase() == temp[j].slice(1) ){
+												is_find = true;	
+											} 
+									}
+									if( is_find ){								
+										temp_result.push(result[k]);//如果找到了，先用一个临时数组保存下
+										break;	
+									} else {
+										parent_node = parent_node.parentNode;
+									}
+								}
+							}
+							//将result修改为此次筛选后的数组
+							result = temp_result;
+							
+							//console.log(result);
+						break;
+
+						case '>':
+							for( k = 0; k < result.length; k++){
+								is_find = false;
+								temp_result = [];
+								parent_node = result[k].parentNode;	
+
+								switch( temp[j].charAt(1)){
+									case '#':
+										if( parent_node.id == temp[j].slice(2) ){
+											is_find = true;
+										} 
+										break;
+									case '.':
+										if( $(parent_node).hasClass(temp[j].slice(2)) ){
+											is_find = true;
+										} 
+										break;
+									default :
+										if( parent_node.tagName.toLowerCase() == temp[j].slice(1)){
+											is_find = true;
+										} 						
+								}
+
+								if( is_find ){							
+									temp_result.push(result[k]);//如果找到了，先用一个临时数组保存下	
+								} 
+							}
+							//将result修改为此次筛选后的数组
+							result = temp_result;
+							
+							//console.log(result);
+						break;
+
+						case '~':
+							for( k = 0; k < result.length; k++){
+								previous_node = getPreviousSibling(result[k]);
+								if(previous_node === null) continue;
+								is_find = false;
+								temp_result = [];
+
+								while( previous_node !== null){	
+									switch( temp[j].charAt(1)){
+										case '#':
+											if( previous_node.id == temp[j].slice(2) ){
+												is_find = true;
+											} 
+											break;
+										case '.':
+											if( $(previous_node).hasClass(temp[j].slice(2)) ){
+												is_find = true;											
+											} 
+											break;
+										default :
+											if( previous_node.tagName.toLowerCase() == temp[j].slice(1) ){
+												is_find = true;							
+											} 
+									}
+
+									if( is_find ){								
+										temp_result.push(result[k]);//如果找到了，先用一个临时数组保存下
+										break;	
+									} else {
+										previous_node = getPreviousSibling(previous_node);
+									}						
+								}
+					
+							}
+							//将result修改为此次筛选后的数组
+							result = temp_result;					
+							//console.log(result);
+						break;
+
+						case '+':
+							for( k = 0; k < result.length; k++){
+								previous_node = getPreviousSibling(result[k]);
+								//当没有上一兄弟节点时会返回null，跳过该节点的筛选
+								if( previous_node === null ) continue; 
+								//console.log(typeof previous_node)
+								is_find = false;
+								temp_result = [];
+								switch( temp[j].charAt(1) ){
+									case '#':
+										if( previous_node.id == temp[j].slice(2) ){
+											is_find = true;
+										} 
+										break;
+									case '.':
+										if( $(previous_node).hasClass(temp[j].slice(2)) ){
+											is_find = true;
+										} 
+										break;
+									default :
+										if( previous_node.tagName.toLowerCase() == temp[j].slice(1)){
+											is_find = true;
+										} 						
+								}
+								if( is_find ){					
+									temp_result.push(result[k]);//如果找到了，先用一个临时数组保存下
+									//break;	
+								} 
+							}
+							//将result修改为此次筛选后的数组
+							result = temp_result;
+							
+							//console.log(result);
+						break;
+
+						default :
+							errorArgs();
+					}
+				}
 				
-			}
+				
+			}console.log('result:')
+				console.log(result)
 			//console.log(select);
 			/*if(args.indexOf(' ') == -1){	//当只有一个参数时,下面的多层次选择符也能实现，但这个效率更高
 				switch(args.charAt(0)){
@@ -141,7 +308,7 @@ function Anything(args) {
 		//1. 为节点数组时
 		if(typeof args.length == 'number' && args != window){
 			for(var i=0; i<args.length; i++){
-				this.elements.push(args[i]);
+				this.push(args[i]);
 			}
 		}
 		//2. 为window, document, document.body, document.documentElement, 单个节点等对象时
@@ -1731,6 +1898,27 @@ function doAnimate(node, obj_attr, time, callback, delay, type, start_fn){
 }
 
 //------------------------------------------------------------------------------------
+//-----------------------------------过滤方法-----------------------------------------
+//------------------------------------------------------------------------------------
+
+//************************************类过滤******************************************
+Anything.prototype.hasClass = function(class_name){
+	if( typeof class_name != 'string' ) errorArgs();
+	var result = false;
+	for( var i = 0; i < this.length; i++){
+		var class_arr = this[i].className.split(' ');
+		for( var j = 0; j < class_arr.length; j++){
+			if( class_arr[j] == class_name){
+				result = true;
+				break;
+			}
+		}
+		if( result ) break;
+	}
+	return result;
+}
+
+//------------------------------------------------------------------------------------
 //-----------------------------------功能函数-----------------------------------------
 //------------------------------------------------------------------------------------
 
@@ -1827,6 +2015,17 @@ function getPreviousSibling(node){
 	//当某个节点没有上一个兄弟节点时会返回null或undefined，导致test方法报错
 	while(result != null && reg.test(result.nodeValue)){	
 		result = result.previousSibling;		
+	}
+	return result;
+}
+
+//获取下一个兄弟节点，过滤掉空格和回车生成的文本节点
+function getNextSibling(node){
+	var result = node.nextSibling;
+	var reg = /^\s+$/;		// \s匹配空格和换行符
+	//当某个节点没有上一个兄弟节点时会返回null或undefined，导致test方法报错
+	while(result != null && reg.test(result.nodeValue)){	
+		result = result.nextSibling;		
 	}
 	return result;
 }
