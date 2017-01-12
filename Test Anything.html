@@ -66,6 +66,18 @@
 			border: 10px solid green;
 			margin: 10px;
 			padding: 10px;
+			height: 100px;
+			overflow: scroll;
+		}
+
+		.fixed{
+			display: none;
+			width: 100px;
+			height: 100px;
+			position: fixed;
+			background: red;
+			top: 10;
+			left: 10;
 		}
 		
 	</style>
@@ -76,6 +88,12 @@
 	
 </head>
 <body>
+	<div class="fixed">
+		zzzzzzzzzz
+	</div>
+	<div class="scroll">
+		sssssssss
+	</div>
 	<div class="wrapper">
 		<h1>绿叶学习网简介</h1>
 		<p>绿叶学习网成立于2015年4月1日，是一个富有活力的技术学习网站。绿叶学习网为广大网络工作者（网页开发人员、站长等）提供各种精品教程以及最精华资料。绿叶学习网跟其他垃圾采集站不一样，绿叶学习网中的每一个课程、每一篇文章，甚至每一个知识点，都凝聚了本人的最辛勤的汗水。多少日日夜夜，本人呕心沥血在一遍一遍地编辑，为的是给广大网站爱好者提供最精华的知识。</p>
@@ -118,6 +136,7 @@
 		<li class="li5">www</li>
 		<li class="li6">eee</li>
 	</ul> -->
+	
 	<input type="text" name="uesrname" id="user"><br>
 	输入字符长度为：<span id="len">0</span>
 	<p>1</p><p>1</p><p>1</p><p>1</p><p>1</p><p>1</p><p>1</p><p>1</p><p>1</p><p>1</p><p>1</p><p>1</p><p>1</p><p>1</p><p>1</p><p>1</p><p>1</p><p>1</p><p>1</p><p>1</p><p>1</p>
@@ -125,70 +144,69 @@
 <script src ='Anything.js'></script>
 
 <script>
-var flag = 1;
-$('.wrapper h1').click(function(){
-	$('.wrapper p').slideToggle(1000,0.6);
-	// $('.wrapper p').hide(2000,function(){
-	// 	//alert(11)
-	// 	});
-	// if(flag == 1){flag = 0;
-	// 	console.log('slideDown')
-	// 	$('.wrapper p').hide(2000,function(){
-	// 	//alert(11)
-	// 	});
+// var flag = 1;
+//$('.wrapper p').scrollTop(100)
+console.log(document.getElementsByTagName('body')[0] === document.body)
+$(function(){
+	//$(window).scrollTop(0)
+	$(window).scroll(function(){
+		//console.log($(document.body).scrollTop())
+		//console.log($(document.documentElement).scrollTop())
 		
-	// }else{flag = 1;
-	// 	console.log('slideUp')
-	// 	//console.log('slideUp2')
-	// 	//console.log($('.wrapper p'))
-	// 	$('.wrapper p').show(2000,function(){
-	// 		//alert(11)
-	// 	});
-	// 	//console.log('slideUp2')
-		
-	// }
-	
-	//$('.wrapper p').slideDown();
-})
-//console.log(getStyle($('.nav').elements[0],'opacity'))
-//$('ul').elements[0].style.display = 'block';
-//console.log(getStyle($('ul').elements[0],'overflow'))
-//console.log(getStyle($('ul').elements[0],'width'))
-//$('.nav').show(5000)//.show(5000);
-//console.log($('.ul1').elements[0].nodeType)
-
-// $('.ul1').elements[0].style['filter'] = 'alpha(opacity=0)';
-// $('.ul1').elements[0].style['zoom'] = 1;
-// $('.ul1').elements[0].style['opacity'] = 0;
-//console.log('p' == ('z'&&'p'))
-//console.log($('.ul1').elements[0].style['left'] == '')
-//console.log(getDefaultDisplay($('span').elements[0]))
-//console.log($('.ul1').attr('style'))
-//console.log(getStyle($('.ul1').elements[0],'display'))
-$('.but1').click(function () {
-	// $('.ul1').show(2000,function(){
-	// 	alert(111)
-	// });
-	//alert(11)
-	$('.ul1').fadeIn(2000,function(){
-		console.log(this)
-	})
-	
-})
-$('.but2').click(function () {
-	$('.ul1').fadeOut(2000,function(){
-		console.log(this)
+		 // if($(this).scrollTop() > 300){
+		 // 		$('.fixed').fadeIn(1000);
+		 // }else{
+		 // 	$('.fixed').fadeOut(1000)
+		 // }
 	});
+	$(document).click(function(){
+		//$(document.body).animate({scrollTop : 0},1000);
+		// $(document.documentElement).animate({scrollTop : 0},500);
+		$(window).animate({scrollTop : 0},200);
+	})
 })
-$('.but3').click(function () {
-	// $('.ul1').fadeToggle(500,function(){
-	// 	//alert('hide hide')
-	// });
-	$('.ul1').slideToggle(1000);
-})
-$('.but4').click(function () {
-	$('.ul1').stop(true);
-})
+// $(window).scroll(function(){
+// 	console.log($(this).scrollTop())
+// })
+  // $(document).scroll(function () {
+  //               // if ($(this).scrollTop() > 100) {
+  //               // 	console.log(1111)
+  //               //    // $("#back-to-top").fadeIn(200);
+  //               // }
+  //               // else {
+  //               //     //$("#back-to-top").fadeOut(200);
+  //               // }
+  //           });
+
+// $('.wrapper h1').click(function(){
+// 	$('.wrapper p').slideToggle(1000,0.6);
+	
+// })
+
+// $('.but1').click(function () {
+// 	// $('.ul1').show(2000,function(){
+// 	// 	alert(111)
+// 	// });
+// 	//alert(11)
+// 	$('.ul1').fadeIn(2000,function(){
+// 		console.log(this)
+// 	})
+	
+// })
+// $('.but2').click(function () {
+// 	$('.ul1').fadeOut(2000,function(){
+// 		console.log(this)
+// 	});
+// })
+// $('.but3').click(function () {
+// 	// $('.ul1').fadeToggle(500,function(){
+// 	// 	//alert('hide hide')
+// 	// });
+// 	$('.ul1').slideToggle(1000);
+// })
+// $('.but4').click(function () {
+// 	$('.ul1').stop(true);
+// })
 
 </script>
 </body>

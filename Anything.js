@@ -436,6 +436,34 @@ Base.prototype.position = function(){
 		top : parseFloat(this.elements[0].offsetTop)
 	}
 }
+
+//获取和设置滚动条位置(Chrome依赖滚动事件才能正确获取和设置，否则为0)
+//多数情况下是获取和设置window的scrollTop
+//scollLeft基本不使用，实现原理一样
+Base.prototype.scrollTop = function(pos){
+	if(pos === undefined){
+		if(this.elements[0] == window){
+			//获取window的scrollTop
+			return document.documentElement.scrollTop || window.pageYOffset || document.body.scrollTop;
+		}else{
+			return this.elements[0].scrollTop;
+		}
+	}else{
+		if(this.elements[0] == window){
+			//设置window的scrollTop
+			document.documentElement.scrollTop = pos;
+			window.pageYOffset = pos;
+			document.body.scrollTop = pos;
+			return this;
+		}else{
+			this.elements[0].scrollTop = pos;
+			return this;
+		}
+	}
+	
+}
+
+
 //------------------------------------------------------------------------------------
 //----------------------------------- DOM操作 ----------------------------------------
 //------------------------------------------------------------------------------------
@@ -1541,7 +1569,12 @@ function doAnimate(node, obj_attr, time, callback, delay, type, start_fn){
 	var	all_attr_now = [];						//当前节点属性当前值
 	var	all_attr_dis = [];						//当前节点属性每次动画的增加值
 	for(var attr in obj_attr){
-		var cur_start = parseFloat(getStyle(node ,attr));	//当前属性的初始值，以数值形式保存，去除单位，方便计算
+		if(attr == 'scrollTop'){
+			var cur_start = $(node).scrollTop();	//获取当前节点的滚轮值
+		}else{
+			var cur_start = parseFloat(getStyle(node ,attr));	//当前属性的初始值，以数值形式保存，去除单位，方便计算
+		}
+		
 		var cur_end = parseFloat(obj_attr[attr]);			//当前属性的结束值，以数值形式保存，去除单位，方便计算
 		all_attr.push(attr);	
 		all_attr_end.push(cur_end);	   
@@ -1561,6 +1594,9 @@ function doAnimate(node, obj_attr, time, callback, delay, type, start_fn){
 						node.style['filter'] = 'alpha(opacity='+all_attr_now[i]*100+')';
 						node.style['zoom'] = 1;
 						node.style['opacity'] = all_attr_now[i];
+						break;
+					case 'scrollTop':
+						$(node).scrollTop(all_attr_now[i]);
 						break;
 					default :	
 						//console.log(all_attr[i])
@@ -1583,6 +1619,9 @@ function doAnimate(node, obj_attr, time, callback, delay, type, start_fn){
 							node.style['filter'] = 'alpha(opacity='+all_attr_end[i]*100+')';
 							node.style['zoom'] = 1;
 							node.style['opacity'] = all_attr_end[i];
+							break;
+						case 'scrollTop':
+							$(node).scrollTop(all_attr_end[i]);
 							break;
 						default :	
 							node.style[all_attr[i]] = all_attr_end[i]+'px';
@@ -1750,22 +1789,6 @@ function getPagearea(){
 　　　　　　　height: Math.max(document.documentElement.scrollHeight, document.documentElement.clientHeight)
 　　　    }
       }
-}
-
-//获取滚动条位置（Chrome依赖事件触发才能正确获取）
-function getScrollTop(){
-	// return {			//可获取scrollLeft
-	// 	left : document.documentElement.scrollLeft || document.body.scrollLeft,
-	// 	top : document.documentElement.scrollTop || document.body.scrollTop
-	// }
-	return document.documentElement.scrollTop || window.pageYOffset || document.body.scrollTop;
-}
-
-//设置滚动条位置（Chrome依赖事件触发才能正确获取）
-function setScrollTop(scroll_top) {
-	document.documentElement.scrollTop = scroll_top;
-	window.pageYOffset = scroll_top;
-	document.body.scrollTop = scroll_top;
 }
 
 
