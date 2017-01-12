@@ -79,6 +79,10 @@
 			top: 10;
 			left: 10;
 		}
+
+		.wrapper>span{
+			color: red
+		}
 		
 	</style>
 	<script>
@@ -95,7 +99,8 @@
 		sssssssss
 	</div>
 	<div class="wrapper">
-		<h1>绿叶学习网简介</h1>
+		<span>222</span>
+		<h1>绿叶学习网简介<span>111</span></h1>
 		<p>绿叶学习网成立于2015年4月1日，是一个富有活力的技术学习网站。绿叶学习网为广大网络工作者（网页开发人员、站长等）提供各种精品教程以及最精华资料。绿叶学习网跟其他垃圾采集站不一样，绿叶学习网中的每一个课程、每一篇文章，甚至每一个知识点，都凝聚了本人的最辛勤的汗水。多少日日夜夜，本人呕心沥血在一遍一遍地编辑，为的是给广大网站爱好者提供最精华的知识。</p>
 	</div>
 	<ul class="nav">
@@ -122,7 +127,7 @@
 			</p>
 		</div>	
 	</div>
-	<button class="but1" id="zz">显示</button>
+	<!-- <button class="but1" id="zz">显示</button>
 	<button class="but2">隐藏</button>
 	<button class="but3">切换</button>
 	<button class="but4">停止</button>
@@ -131,82 +136,69 @@
 		<li class="li2">wwwzzzzzzzzzzzzzzzzzzzzzzz</li>	
 		<li class="li3">eeezzzzzzzzzzzzzzzzzzzzzzzzzz</li>
 	</ul>
-	<!-- <ul class="ul2">
+	<ul class="ul2">
 		<li class="li4">qqq</li>
 		<li class="li5">www</li>
 		<li class="li6">eee</li>
-	</ul> -->
+	</ul>
 	
 	<input type="text" name="uesrname" id="user"><br>
 	输入字符长度为：<span id="len">0</span>
-	<p>1</p><p>1</p><p>1</p><p>1</p><p>1</p><p>1</p><p>1</p><p>1</p><p>1</p><p>1</p><p>1</p><p>1</p><p>1</p><p>1</p><p>1</p><p>1</p><p>1</p><p>1</p><p>1</p><p>1</p><p>1</p>
+	<p>1</p><p>1</p><p>1</p><p>1</p><p>1</p><p>1</p><p>1</p><p>1</p><p>1</p><p>1</p><p>1</p><p>1</p><p>1</p><p>1</p><p>1</p><p>1</p><p>1</p><p>1</p><p>1</p><p>1</p><p>1</p> -->
 <!-- <script src="http://lib.sinaapp.com/js/jquery/1.9.1/jquery-1.9.1.min.js"></script> -->
 <script src ='Anything.js'></script>
 
 <script>
-// var flag = 1;
-//$('.wrapper p').scrollTop(100)
-console.log(document.getElementsByTagName('body')[0] === document.body)
+console.log('  ' + 'sss')
 $(function(){
-	//$(window).scrollTop(0)
-	$(window).scroll(function(){
-		//console.log($(document.body).scrollTop())
-		//console.log($(document.documentElement).scrollTop())
-		
-		 // if($(this).scrollTop() > 300){
-		 // 		$('.fixed').fadeIn(1000);
-		 // }else{
-		 // 	$('.fixed').fadeOut(1000)
-		 // }
-	});
-	$(document).click(function(){
-		//$(document.body).animate({scrollTop : 0},1000);
-		// $(document.documentElement).animate({scrollTop : 0},500);
-		$(window).animate({scrollTop : 0},200);
-	})
+	$('  #id  .class>p  span    , #div~h1   z   ,p    ')
+	//$('div p .span , #div~h1   z   ,    ')
 })
-// $(window).scroll(function(){
-// 	console.log($(this).scrollTop())
-// })
-  // $(document).scroll(function () {
-  //               // if ($(this).scrollTop() > 100) {
-  //               // 	console.log(1111)
-  //               //    // $("#back-to-top").fadeIn(200);
-  //               // }
-  //               // else {
-  //               //     //$("#back-to-top").fadeOut(200);
-  //               // }
-  //           });
 
-// $('.wrapper h1').click(function(){
-// 	$('.wrapper p').slideToggle(1000,0.6);
-	
-// })
+// var str = '  #id .class>p   span  ';
+// var arr = [];
+// var start = 0;
+// for(var i=0; i<str.length; i++){
+// 	if(/[\s>~+]/.test(str.charAt(i))){
+// 		arr.push(str.slice(start,i));
+// 		start = i;
+// 	}
+// }
+// console.log(arr);
+// console.log('' == '');
 
-// $('.but1').click(function () {
-// 	// $('.ul1').show(2000,function(){
-// 	// 	alert(111)
-// 	// });
-// 	//alert(11)
-// 	$('.ul1').fadeIn(2000,function(){
-// 		console.log(this)
-// 	})
+
+// console.log(str.length)
+
+
+
+
+// var div = document.getElementsByTagName('div');
+// console.log(div.length)
+
+
+
+//console.log($('div p').length)
+//console.log($().css)
+
+// Anything.prototype = new Array();
+// function Anything() {
 	
-// })
-// $('.but2').click(function () {
-// 	$('.ul1').fadeOut(2000,function(){
-// 		console.log(this)
-// 	});
-// })
-// $('.but3').click(function () {
-// 	// $('.ul1').fadeToggle(500,function(){
-// 	// 	//alert('hide hide')
-// 	// });
-// 	$('.ul1').slideToggle(1000);
-// })
-// $('.but4').click(function () {
-// 	$('.ul1').stop(true);
-// })
+
+// }
+
+
+// Anything.prototype.say = function(){
+// 	alert(1111)
+// }
+
+// var a = new Anything();
+// a.push(1,2,3)
+// console.log(a instanceof Array)
+// console.log(a instanceof Anything)
+// console.log(a)
+// var b =[];
+// b.say()
 
 </script>
 </body>

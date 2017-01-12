@@ -1,24 +1,100 @@
 console.log('Welcome to use Anything.js!');
-function $(args){
-	return new Base(args);
-};
-function Base(args) {
-	this.elements = [];
 
+function $(args){
+	return new Anything(args);
+};
+
+//Anything对象为一个数组，所有获取到的元素保存在该数组内
+Anything.prototype = new Array();
+
+function Anything(args) {
+	//this.elements = [];
+	//1. 参数为字符串时
 	if(typeof args == 'string'){
-		if(document.querySelectorAll  === 'dddddddddddddddddddddd'){	//IE8+
-			this.elements = document.querySelectorAll(args);
-		}else{
-			if(args.indexOf(' ') == -1){	//当只有一个参数时,下面的多层次选择符也能实现，但这个效率更高
+		//1.1 优先使用querySelectorAll方法
+		if (document.querySelectorAll  === 'dddddddddddddddddddddd') {	//IE8+
+			pushElementsToAnything(this, document.querySelectorAll(args));//this.elements = document.querySelectorAll(args);
+		}
+		//1.2 使用自写的选择符匹配，兼容IE6，7
+		else {
+			//案例：
+			//args: "  #id  .class>p span  , #div~h1   z   ,    "
+			//处理后的slect_arr中保存了3个选择符数组
+			//slect_arr[0] : [" #id"," .class", ">p", " span"]
+			//slect_arr[1] : [" #div", "~h1", " z"]
+			//slect_arr[2] : []
+			//将传进来的选择器进行分割处理并保存在select_arr中
+			//select_arr中的每个元素表示一个选择器处理后的参数数组
+			var select_arg = args.split(',');	//当参数有逗号时，实现多组选择符匹配
+				select_arr = [],				//根据层次选择符(\s>~+)来分割选择器
+				start = 0,					//记录匹配到层次选择符的位置
+				temp = '',					//临时保存分割后的单个选择器字符串
+				i = 0,
+				j = 0;
+				
+
+			for ( i = 0; i < select_arg.length; i++){
+				select_arr[i] = [];
+				select_arg[i] = ' ' + select_arg[i];	//在选择符前加一空格，保证第一个字符均为层次选择符
+				for( j = 0; j < select_arg[i].length; j++){
+					//console.log(select_arg[i][j])
+
+					if(/[\s>~+]/.test(select_arg[i].charAt(j))){
+						//console.log(select_arg[i].slice(start,j))
+						temp = select_arg[i].slice(start,j);
+						if(temp != '' && temp != ' '){
+							select_arr[i].push( temp );
+						}
+						//console.log(s)
+						start = j;
+					}
+				}
+				if( temp != '' && temp != ' '){
+					select_arr[i].push( temp );
+				}
+				//select_arr[i].push( select_arg[i].slice(start,j) )	
+				console.log(select_arr[i])			
+			}
+
+			//根据处理后的参数进行元素匹配
+			var temp = [],
+
+				childs = [], 
+				result = [];
+
+			for( i=0; i < select_arr.length; i++){
+				//当前选择器数组为空数组时跳过此次操作
+				temp = select_arr[i];
+				if( temp.length == 0) continue;
+
+				console.log(temp[temp.length-1])
+				//从后向前筛选元素
+				switch( temp[temp.length-1].charAt(1) ){
+					case '#' :
+						result = this.getById(temp[temp.length-1].slice(2));
+						break;
+
+					case '.' :
+						result = this.getByClassName(temp[temp.length-1].slice(2));
+						break;
+
+					default : 
+						result = this.getByTagName(temp[temp.length-1].slice(1));
+				}
+				console.log(result)
+				
+			}
+			//console.log(select);
+			/*if(args.indexOf(' ') == -1){	//当只有一个参数时,下面的多层次选择符也能实现，但这个效率更高
 				switch(args.charAt(0)){
 					case '#':
-						this.elements = this.getById(args.slice(1));
+						pushElementsToAnything(this,this.getById(args.slice(1)));//this.elements = this.getById(args.slice(1));
 						break;
 					case '.':
-						this.elements = this.getByClassName(args.slice(1));
+						pushElementsToAnything(this,this.getByClassName(args.slice(1)));//this.elements = this.getByClassName(args.slice(1));
 						break;
 					default:
-						this.elements = this.getByTagName(args);
+						pushElementsToAnything(this,this.getByTagName(args));//this.elements = this.getByTagName(args);
 				}
 			}else{		//当有多层次选择符时
 				//.id .class p
@@ -58,16 +134,19 @@ function Base(args) {
 							break;
 					}
 				}
-				this.elements = childs;
-			}
+				pushElementsToAnything(this,childs);//this.elements = childs;
+			}*/
 		}
 	}else if(typeof args == 'object'){
+		//1. 为节点数组时
 		if(typeof args.length == 'number' && args != window){
 			for(var i=0; i<args.length; i++){
 				this.elements.push(args[i]);
 			}
-		}else{
-				this.elements[0] = args;
+		}
+		//2. 为window, document, document.body, document.documentElement, 单个节点等对象时
+		else{
+				this.push(args);
 		}	
 	}else if(typeof args == 'function'){
 		documentReady(args);
@@ -75,12 +154,22 @@ function Base(args) {
 	else{
 		errorArgs();
 	}
-
+	//this.push(111);
+	//pushElementsToAnything(this,[123,232,4343])
 }
 
 //***********************************获取元素*****************************************
+//把一个数组元素push到Anything数组
+//直接赋值不行，anything会变成一个普通数组
+function pushElementsToAnything(anything, arr){
+	for(var i=0; i<arr.length; i++){
+		anything.push(arr[i]);
+	}
+}
+
+//以下选择方法都是返回一个标准的数组对象
 //根据id获取
-Base.prototype.getById = function(id) {
+Anything.prototype.getById = function(id) {
 	if(typeof id != 'string') errorArgs();			//参数检测
 
 	var result = document.getElementById(id);
@@ -88,7 +177,7 @@ Base.prototype.getById = function(id) {
 };
 
 //根据tag获取
-Base.prototype.getByTagName = function(tag_name,parent_node){
+Anything.prototype.getByTagName = function(tag_name,parent_node){
 	if(typeof tag_name != 'string') errorArgs();    //参数检测
 
 	var node = parent_node == undefined? document : parent_node;
@@ -100,7 +189,7 @@ Base.prototype.getByTagName = function(tag_name,parent_node){
 	return result;
 }
 //根据class获取
-Base.prototype.getByClassName = function(class_name,parent_node){
+Anything.prototype.getByClassName = function(class_name,parent_node){
 	if(typeof class_name != 'string') errorArgs();  //参数检测
 
 	var node = parent_node == undefined? document : parent_node;
@@ -127,7 +216,7 @@ Base.prototype.getByClassName = function(class_name,parent_node){
 
 //根据下标获取
 //示例：$('div p').eq(2)
-Base.prototype.eq = function(index){
+Anything.prototype.eq = function(index){
 	if(typeof eq != 'number') errorArgs(); //参数检测
 
 	var temp = this.elements[index];
@@ -139,7 +228,7 @@ Base.prototype.eq = function(index){
 //***********************************属性操作*****************************************
 //获取和设置属性
 //示例：$('div p').attr('title')
-Base.prototype.attr = function(name,value){
+Anything.prototype.attr = function(name,value){
 	if(typeof name != 'string') errorArgs(); //参数检测
 
 	if(value === undefined){				//当参数只有一个时表示获取属性
@@ -153,7 +242,7 @@ Base.prototype.attr = function(name,value){
 }
 
 //删除属性
-Base.prototype.removeAttr = function(name){
+Anything.prototype.removeAttr = function(name){
 	if(typeof name != 'string') errorArgs(); //参数检测
 
 	for(var i=0; i<this.elements.length; i++){
@@ -164,7 +253,7 @@ Base.prototype.removeAttr = function(name){
 
 //***********************************内容操作*****************************************
 //获取和设置innerHTML内容
-Base.prototype.html = function(content){
+Anything.prototype.html = function(content){
 	if(arguments.length == 0){
 		return this.elements[0].innerHTML;
 	}else{
@@ -176,7 +265,7 @@ Base.prototype.html = function(content){
 }
 
 //获取和设置文本内容
-Base.prototype.text = function(content){
+Anything.prototype.text = function(content){
 	if(arguments.length == 0){
 		var result = '';
 		for(var i=0; i<this.elements.length; i++){
@@ -191,7 +280,7 @@ Base.prototype.text = function(content){
 }
 
 //获取和设置表单内容
-Base.prototype.val = function(value){
+Anything.prototype.val = function(value){
 	if(arguments.length == 0){
 		return this.elements[0].value;
 	}else{
@@ -205,7 +294,7 @@ Base.prototype.val = function(value){
 //***********************************样式操作*****************************************
 //在获取颜色时格式会有差异，ie是原本值，其他是计算后的rgb
 //不支持同时设置多个属性，可用连缀来实现
-Base.prototype.css = function(attr,value){
+Anything.prototype.css = function(attr,value){
 	if(typeof attr != 'string') errorArgs(); //参数检测
 	//console.log(111)
 	if(arguments.length == 1){
@@ -220,7 +309,7 @@ Base.prototype.css = function(attr,value){
 
 //***********************************类名操作*****************************************
 //添加类名
-Base.prototype.addClass = function(class_name){
+Anything.prototype.addClass = function(class_name){
 	if(typeof class_name != 'string') errorArgs();  //参数检测
 
 	for(var i=0; i<this.elements.length; i++){
@@ -241,7 +330,7 @@ Base.prototype.addClass = function(class_name){
 }
 
 //删除类名
-Base.prototype.removeClass = function(class_name){
+Anything.prototype.removeClass = function(class_name){
 	if(typeof class_name != 'string') errorArgs();  //参数检测
 
 	for(var i=0; i<this.elements.length; i++){
@@ -257,7 +346,7 @@ Base.prototype.removeClass = function(class_name){
 }
 
 //切换类名
-Base.prototype.toggleClass = function(class_name){
+Anything.prototype.toggleClass = function(class_name){
 	if(typeof class_name != 'string') errorArgs();  //参数检测
 
 	for(var i=0; i<this.elements.length; i++){
@@ -279,7 +368,7 @@ Base.prototype.toggleClass = function(class_name){
 
 //***********************************大小操作*****************************************
 //获取和设置元素width
-Base.prototype.width = function(value){
+Anything.prototype.width = function(value){
 	var width = parseInt(getStyle(this.elements[0],'width'));	//将px值转化为number
 	if(arguments.length == 1){
 		this.css('width',value+'px');
@@ -290,7 +379,7 @@ Base.prototype.width = function(value){
 }
 
 //获取和设置元素innerWidth (width+padding)
-Base.prototype.innerWidth = function(value){
+Anything.prototype.innerWidth = function(value){
 	//offsetHeight包括边框在内，所有浏览器都支持，所以基于该值来计算
 	var outerWidth = this.elements[0].offsetWidth;	
 	//border距离
@@ -317,7 +406,7 @@ Base.prototype.innerWidth = function(value){
 }
 
 //获取和设置元素outerWidth (width+padding+border)
-Base.prototype.outerWidth = function(value){
+Anything.prototype.outerWidth = function(value){
 	//offsetHeight包括边框在内，所有浏览器都支持，所以基于该值来计算
 	var outerWidth = this.elements[0].offsetWidth;		
 	if(arguments.length == 0){
@@ -347,7 +436,7 @@ Base.prototype.outerWidth = function(value){
 
 
 //获取和设置元素height
-Base.prototype.height = function(value){
+Anything.prototype.height = function(value){
 	var height = parseFloat(getStyle(this.elements[0],'height'));	//将px值转化为number
 	if(arguments.length == 1){
 		this.css('height',value+'px');
@@ -358,7 +447,7 @@ Base.prototype.height = function(value){
 }
 
 //获取和设置元素innerHeight (height+padding)
-Base.prototype.innerHeight = function(value){
+Anything.prototype.innerHeight = function(value){
 	//offsetHeight包括边框在内，所有浏览器都支持，所以基于该值来计算
 	var outerHeight = this.elements[0].offsetHeight;	
 	//border距离
@@ -385,7 +474,7 @@ Base.prototype.innerHeight = function(value){
 }
 
 //获取和设置元素outerHeight (height+padding+border)
-Base.prototype.outerHeight = function(value){
+Anything.prototype.outerHeight = function(value){
 	//offsetHeight包括边框在内，所有浏览器都支持，所以基于该值来计算
 	var outerHeight = this.elements[0].offsetHeight;		
 	if(arguments.length == 0){
@@ -415,7 +504,7 @@ Base.prototype.outerHeight = function(value){
 
 //***********************************位置操作*****************************************
 //offset(),表示元素在文档中的位置(根据边框左上角外层的点计算)
-Base.prototype.offset = function(){
+Anything.prototype.offset = function(){
 	var parent = this.elements[0].offsetParent;
 	var result = {};	
 	result.left = this.elements[0].offsetLeft;
@@ -430,7 +519,7 @@ Base.prototype.offset = function(){
 }
 
 //相对于定位元素的位置
-Base.prototype.position = function(){
+Anything.prototype.position = function(){
 	return {
 		left : parseFloat(this.elements[0].offsetLeft),
 		top : parseFloat(this.elements[0].offsetTop)
@@ -440,7 +529,7 @@ Base.prototype.position = function(){
 //获取和设置滚动条位置(Chrome依赖滚动事件才能正确获取和设置，否则为0)
 //多数情况下是获取和设置window的scrollTop
 //scollLeft基本不使用，实现原理一样
-Base.prototype.scrollTop = function(pos){
+Anything.prototype.scrollTop = function(pos){
 	if(pos === undefined){
 		if(this.elements[0] == window){
 			//获取window的scrollTop
@@ -472,7 +561,7 @@ Base.prototype.scrollTop = function(pos){
 //内部后面插入节点
 //示例：$('ul').append('<li>haha</li>');
 //在IE8-中添加非法便签格式便无效，例如<p><li>zz</li></p>
-Base.prototype.append = function(str){
+Anything.prototype.append = function(str){
 	if(typeof str.nodeType == 'number'){		//如果传入一个元素节点转化成字符串
 		str = str.outerHTML;
 	}
@@ -487,7 +576,7 @@ Base.prototype.append = function(str){
 //内部前面插入节点
 //示例：$('ul').prepend('<li>haha</li>');
 //在IE8-中添加非法便签格式便无效，例如<p><li>zz</li></p>
-Base.prototype.prepend = function(str){
+Anything.prototype.prepend = function(str){
 	if(typeof str.nodeType == 'number'){
 		str = str.outerHTML;
 	}
@@ -502,7 +591,7 @@ Base.prototype.prepend = function(str){
 //外部后面插入节点
 //示例：$('ul').prepend('<li>haha</li>');
 //在IE8-中添加非法便签格式便无效，例如<p><li>zz</li></p>
-Base.prototype.after = function(str){
+Anything.prototype.after = function(str){
 	if(typeof str.nodeType == 'number'){
 		str = str.outerHTML;
 	}
@@ -517,7 +606,7 @@ Base.prototype.after = function(str){
 //外部前面插入节点
 //示例：$('ul').prepend('<li>haha</li>');
 //在IE8-中添加非法便签格式便无效，例如<p><li>zz</li></p>
-Base.prototype.before = function(str){
+Anything.prototype.before = function(str){
 	if(typeof str.nodeType == 'number'){
 		str = str.outerHTML;
 	}
@@ -531,7 +620,7 @@ Base.prototype.before = function(str){
 
 //***********************************删除节点*****************************************
 //删除所有选中的节点(自身节点和后代节点)，并返回一个删除的节点数组
-Base.prototype.remove = function(){
+Anything.prototype.remove = function(){
 	for(var i=0; i<this.elements.length; i++){
 		this.elements[i].parentNode.removeChild(this.elements[i]);		
 	}
@@ -539,7 +628,7 @@ Base.prototype.remove = function(){
 }
 
 //删除选中节点的后代节点（不包括自身）
-Base.prototype.empty = function(){
+Anything.prototype.empty = function(){
 	for(var i=0; i<this.elements.length; i++){
 		console.log(this.elements[i].outerHTML)
 		console.log(this.elements[i].innerHTML)
@@ -551,12 +640,12 @@ Base.prototype.empty = function(){
 //***********************************克隆节点*****************************************
 //true表示深克隆，会复制子节点，false则不会,默认为true
 //只能克隆节点，未实现JQuery的复制事件
-Base.prototype.clone = function(flag){
+Anything.prototype.clone = function(flag){
 	return flag === false? this.elements[0].cloneNode(false) : this.elements[0].cloneNode(true);
 }
 
 //***********************************替换节点*****************************************
-Base.prototype.replaceWith = function(str){
+Anything.prototype.replaceWith = function(str){
 	if(typeof str.nodeType == 'number'){
 		str = str.outerHTML;
 	}
@@ -568,7 +657,7 @@ Base.prototype.replaceWith = function(str){
 //***********************************包裹节点*****************************************
 //只能传入字符串，例如：'<div></div>'，只能有一个节点
 //单独包裹每个节点
-Base.prototype.wrap = function(str){
+Anything.prototype.wrap = function(str){
 	if(typeof str != 'string')	errorArgs();  //参数检测	
 	var temp = str.split('></');
 	if(temp.length != 2)  errorArgs();  	  //参数检测
@@ -582,7 +671,7 @@ Base.prototype.wrap = function(str){
 
 //整体包裹
 //只包裹第一组连续的节点
-Base.prototype.wrapAll = function(str){
+Anything.prototype.wrapAll = function(str){
 	if(typeof str != 'string')	errorArgs();  //参数检测	
 	var temp = str.split('></');
 	if(temp.length != 2)  errorArgs();  //参数检测
@@ -604,7 +693,7 @@ Base.prototype.wrapAll = function(str){
 }
 
 //包裹内部元素
-Base.prototype.wrapInner = function(str){
+Anything.prototype.wrapInner = function(str){
 	if(typeof str != 'string')	errorArgs();  //参数检测	
 	var temp = str.split('></');
 	if(temp.length != 2)  errorArgs();  //参数检测
@@ -618,7 +707,7 @@ Base.prototype.wrapInner = function(str){
 //***********************************遍历节点*****************************************
 //callback的第一个参数表示节点数组index
 //callback中this指向当前节点
-Base.prototype.each = function(callback){
+Anything.prototype.each = function(callback){
 	for(var i=0; i<this.elements.length; i++){
 		this.elements[i].fn = callback;
 		this.elements[i].fn(i);
@@ -646,7 +735,7 @@ Base.prototype.each = function(callback){
 // 	alert('document');
 // });
 //$()中传入document和函数时在document加载后即可运行，其他都是window加载后再运行
-Base.prototype.ready = function(callback){	
+Anything.prototype.ready = function(callback){	
 	if(this.elements[0] == document){
 		documentReady(callback);
 	}else{
@@ -655,7 +744,7 @@ Base.prototype.ready = function(callback){
 }
 
 //窗口大小变化
-Base.prototype.resize = function(callback){
+Anything.prototype.resize = function(callback){
 	addEvent(window,'resize',callback);
 	return this;
 }
@@ -664,7 +753,7 @@ Base.prototype.resize = function(callback){
 //注意！！！用addEvent绑定事件，在IE8-中this不是指定当前绑定事件的节点，callback函数中有this会导致出错
 //可以按需求来调整addEvent的函数内容（在addEvent中已去除attachEvent方法）
 //单击
-Base.prototype.click = function(callback){
+Anything.prototype.click = function(callback){
 	for(var i=0; i<this.elements.length; i++){
 		addEvent(this.elements[i],'click',callback);
 	}
@@ -672,7 +761,7 @@ Base.prototype.click = function(callback){
 }
 
 //双击，js本身没有双击事件，根据两次click事件的时间间距来实现
-Base.prototype.dbclick = function(callback){
+Anything.prototype.dbclick = function(callback){
 	var start = 0;
 	for(var i=0; i<this.elements.length; i++){
 		addEvent(this.elements[i],'click',function(){
@@ -688,7 +777,7 @@ Base.prototype.dbclick = function(callback){
 }
 
 //移入(子节点有移入事件也会触发)
-Base.prototype.mouseover = function(callback){
+Anything.prototype.mouseover = function(callback){
 	for(var i=0; i<this.elements.length; i++){
 		addEvent(this.elements[i],'mouseover',callback);
 	}
@@ -696,7 +785,7 @@ Base.prototype.mouseover = function(callback){
 }
 
 //移出(子节点有移出事件也会触发)
-Base.prototype.mouseout = function(callback){
+Anything.prototype.mouseout = function(callback){
 	for(var i=0; i<this.elements.length; i++){
 		addEvent(this.elements[i],'mouseout',callback);
 	}
@@ -707,7 +796,7 @@ Base.prototype.mouseout = function(callback){
 //方案1：js原生onmouseenter  IE8-也支持，但是最新火狐中表现为onmouseover一样
 //方案2：判断鼠标从元素A->B（目标对象）,如果B包含A证明是子节点冒泡触发事件，不做任何操作（推荐！）
 //方案3：也可对目标节点的所有子节点绑定mouseover事件，然后阻止冒泡，需要绑定较多事件
-Base.prototype.mouseenter = function(callback){
+Anything.prototype.mouseenter = function(callback){
 	for(var i=0; i<this.elements.length; i++){
 		addEvent(this.elements[i],'mouseover',function(event){
 			if(!contains(this, getFromElement(event))){	//判断绑定事件的节点是否包含鼠标来着的元素
@@ -719,7 +808,7 @@ Base.prototype.mouseenter = function(callback){
 }
 
 //移出(子节点有移入事件不会触发) 同上
-Base.prototype.mouseleave = function(callback){
+Anything.prototype.mouseleave = function(callback){
 	for(var i=0; i<this.elements.length; i++){
 		addEvent(this.elements[i],'mouseout',function(event){
 			if(!contains(this, getToElement(event))){	//判断绑定事件的节点是否包含鼠标来着的元素
@@ -733,7 +822,7 @@ Base.prototype.mouseleave = function(callback){
 //按下
 //click只能靠鼠标左键触发，但是mousedown和mouseup能靠鼠标的左中右键触发
 //可以通过事件对象中的button属性来确定按下了哪个键
-Base.prototype.mousedown = function(callback){
+Anything.prototype.mousedown = function(callback){
 	for(var i=0; i<this.elements.length; i++){
 		addEvent(this.elements[i],'mousedown',callback);
 	}
@@ -741,7 +830,7 @@ Base.prototype.mousedown = function(callback){
 }
 
 //弹起
-Base.prototype.mouseup = function(callback){
+Anything.prototype.mouseup = function(callback){
 	for(var i=0; i<this.elements.length; i++){
 		addEvent(this.elements[i],'mouseup',callback);
 	}
@@ -750,7 +839,7 @@ Base.prototype.mouseup = function(callback){
 
 //右击
 //监听全局使用document
-Base.prototype.contextmenu = function(callback){
+Anything.prototype.contextmenu = function(callback){
 	for(var i=0; i<this.elements.length; i++){
 		addEvent(this.elements[i],'contextmenu',callback);
 	}
@@ -759,7 +848,7 @@ Base.prototype.contextmenu = function(callback){
 
 //滚动
 //也可用document来监听onscroll事件，但IE8-不支持，推荐使用window
-Base.prototype.scroll = function(callback){
+Anything.prototype.scroll = function(callback){
 	for(var i=0; i<this.elements.length; i++){
 		addEvent(this.elements[i],'scroll',callback);
 	}
@@ -770,7 +859,7 @@ Base.prototype.scroll = function(callback){
 //详细说明：http://www.lvyestudy.com/jquery/jq_7.4.aspx
 //String.fromCharCode(event.which) 可以用该方法输出按下的字符键，功能键不可以
 //keydown，所有键（字符键+功能键）按下均会触发
-Base.prototype.keydown = function(callback){
+Anything.prototype.keydown = function(callback){
 	for(var i=0; i<this.elements.length; i++){
 		addEvent(this.elements[i],'keydown',callback);
 	}
@@ -778,7 +867,7 @@ Base.prototype.keydown = function(callback){
 }
 
 //keypress，按下后到松开前时触发，（字符键）按下才会触发，alt，ctrl，f1-f12等均检测不到
-Base.prototype.keypress = function(callback){
+Anything.prototype.keypress = function(callback){
 	for(var i=0; i<this.elements.length; i++){
 		addEvent(this.elements[i],'keypress',callback);
 	}
@@ -786,7 +875,7 @@ Base.prototype.keypress = function(callback){
 }
 
 //keyup，所有键（字符键+功能键）按下均会触发
-Base.prototype.keyup = function(callback){
+Anything.prototype.keyup = function(callback){
 	for(var i=0; i<this.elements.length; i++){
 		addEvent(this.elements[i],'keyup',callback);
 	}
@@ -795,7 +884,7 @@ Base.prototype.keyup = function(callback){
 
 //***********************************表单事件*****************************************
 //获得焦点
-Base.prototype.focus = function(callback){
+Anything.prototype.focus = function(callback){
 	for(var i=0; i<this.elements.length; i++){
 		addEvent(this.elements[i],'focus',callback);
 	}
@@ -803,7 +892,7 @@ Base.prototype.focus = function(callback){
 }
 
 //失去焦点
-Base.prototype.blur = function(callback){
+Anything.prototype.blur = function(callback){
 	for(var i=0; i<this.elements.length; i++){
 		addEvent(this.elements[i],'blur',callback);
 	}
@@ -812,7 +901,7 @@ Base.prototype.blur = function(callback){
 
 //内容改变，在失去焦点时才会检测
 //text,textarea,下拉菜单  可以触发change事件
-Base.prototype.change = function(callback){
+Anything.prototype.change = function(callback){
 	for(var i=0; i<this.elements.length; i++){
 		addEvent(this.elements[i],'change',callback);
 	}
@@ -821,7 +910,7 @@ Base.prototype.change = function(callback){
 
 //内容选中，在选中文本后松开鼠标后才触发(在IE8-中每选中一个字符就会触发一次)
 //text,textarea 可以触发select事件，下拉菜单不会触发
-Base.prototype.select = function(callback){
+Anything.prototype.select = function(callback){
 	for(var i=0; i<this.elements.length; i++){
 		addEvent(this.elements[i],'select',callback);
 	}
@@ -830,7 +919,7 @@ Base.prototype.select = function(callback){
 
 //***********************************绑定事件*****************************************
 //表现结果和上面的绑定方法一样
-Base.prototype.on = function(type,callback){
+Anything.prototype.on = function(type,callback){
 	this[type](callback);
 	return this;
 }
@@ -838,7 +927,7 @@ Base.prototype.on = function(type,callback){
 //***********************************解除事件*****************************************
 //无法解除dbclick，mouseenter，mouseleave
 //因为这三个事件是通过绑定click，mouseover，mouseout来实现的，应该解除这3个事件
-Base.prototype.off = function(type,callback){
+Anything.prototype.off = function(type,callback){
 	for(var i=0; i<this.elements.length; i++){
 		removeEvent(this.elements[i],type,callback);
 	}
@@ -847,7 +936,7 @@ Base.prototype.off = function(type,callback){
 
 //***********************************合成事件*****************************************
 //传入移入和移出的回调函数，用mouseenter和mouseleave来实现
-Base.prototype.hover = function(callback1,callback2){
+Anything.prototype.hover = function(callback1,callback2){
 	this.mouseenter(callback1);
 	this.mouseleave(callback2);
 	return this;
@@ -856,7 +945,7 @@ Base.prototype.hover = function(callback1,callback2){
 //***********************************一次事件*****************************************
 //使用DOM0级绑定方法
 //缺点：1.dbclick无效；2.mouseenter，mouseleave在Firefox下表现和mouseover，mouseout一样
-Base.prototype.one = function(type,callback){
+Anything.prototype.one = function(type,callback){
 	for(var i=0; i<this.elements.length; i++){
 		this.elements[i]['on'+type] = function(){
 			callback.call(this);
@@ -878,7 +967,7 @@ Base.prototype.one = function(type,callback){
 //实现原理，将当前元素的opacity,width，height，margin，padding都设置为0
 //callback不能使用alert，否则hide最后一步设置display为none会一直等待alert的执行
 //同JQuery，是先执行减小宽高->callback->设置display
-Base.prototype.hide = function(time , callback){
+Anything.prototype.hide = function(time , callback){
 	//1. 对不同格式的参数进行调整
 	if(!time && !callback){
 		time = 1;
@@ -938,7 +1027,7 @@ Base.prototype.hide = function(time , callback){
 	return this;
 }
 
-Base.prototype.show = function(time, callback){
+Anything.prototype.show = function(time, callback){
 	//1. 对不同格式的参数进行调整
 	if(!time && !callback){
 		time = 1;
@@ -1010,7 +1099,7 @@ Base.prototype.show = function(time, callback){
 	return this;
 }
 
-Base.prototype.toggle = function(time, callback){
+Anything.prototype.toggle = function(time, callback){
 	for(var i=0; i<this.elements.length; i++){
 		//1. 当前节点不处于动画时，根据display来判断
 		if(!this.elements[i].animate_args){
@@ -1034,7 +1123,7 @@ Base.prototype.toggle = function(time, callback){
 
 //***********************************淡入和淡出***************************************
 //淡入(显示)
-Base.prototype.fadeIn = function(time, callback){
+Anything.prototype.fadeIn = function(time, callback){
 	//1. 对不同格式的参数进行调整
 	if(!time && !callback){
 		time = 1;
@@ -1080,7 +1169,7 @@ Base.prototype.fadeIn = function(time, callback){
 }
 
 //淡出(隐藏)
-Base.prototype.fadeOut = function(time, callback){
+Anything.prototype.fadeOut = function(time, callback){
 	//1. 对不同格式的参数进行调整
 	if(!time && !callback){
 		time = 1;
@@ -1134,7 +1223,7 @@ Base.prototype.fadeOut = function(time, callback){
 
 //调整到指定透明度
 //必选参数，time ，opacity
-Base.prototype.fadeTo = function(time, opacity, callback){
+Anything.prototype.fadeTo = function(time, opacity, callback){
 	//1. 对不同格式的参数进行调整
 	if(typeof time != 'number' || typeof opacity != 'number'){
 		errorArgs();
@@ -1180,7 +1269,7 @@ Base.prototype.fadeTo = function(time, opacity, callback){
 }
 
 //淡入淡出切换
-Base.prototype.fadeToggle = function(time, callback){
+Anything.prototype.fadeToggle = function(time, callback){
 	for(var i=0; i<this.elements.length; i++){
 		//1. 当前节点不处于动画时，根据display来判断
 		if(!this.elements[i].animate_args){
@@ -1204,7 +1293,7 @@ Base.prototype.fadeToggle = function(time, callback){
 
 //***********************************滑上和滑下***************************************
 //滑上，减小height，padding，margin，不操作border
-Base.prototype.slideUp = function(time, callback){
+Anything.prototype.slideUp = function(time, callback){
 	//1. 对不同格式的参数进行调整
 	if(!time && !callback){
 		time = 200;
@@ -1266,7 +1355,7 @@ Base.prototype.slideUp = function(time, callback){
 }
 
 //滑下，加大height，padding，margin，不操作border
-Base.prototype.slideDown = function(time, callback){
+Anything.prototype.slideDown = function(time, callback){
 	//1. 对不同格式的参数进行调整
 	if(!time && !callback){
 		time = 200;
@@ -1335,7 +1424,7 @@ Base.prototype.slideDown = function(time, callback){
 	return this;
 }
 
-Base.prototype.slideToggle = function(time, callback){
+Anything.prototype.slideToggle = function(time, callback){
 	for(var i=0; i<this.elements.length; i++){
 		//1. 当前节点不处于动画时，根据display来判断
 		if(!this.elements[i].animate_args){
@@ -1366,7 +1455,7 @@ Base.prototype.slideToggle = function(time, callback){
 //callback  表示动画执行完好运行的函数
 //type      表示动画类型
 //start_fn  表示动画执行前需要执行的函数
-Base.prototype.animate = function(obj_attr, time, callback, type, start_fn){
+Anything.prototype.animate = function(obj_attr, time, callback, type, start_fn){
 	//参数判断
 	if(typeof time == 'undefined'){				//$('.ul1').animate({'width' : '10px'}),默认时间为500ms
 		time = 500;
@@ -1405,7 +1494,7 @@ Base.prototype.animate = function(obj_attr, time, callback, type, start_fn){
 	return this;	
 }
 
-Base.prototype.stop = function(flag1 , flag2){
+Anything.prototype.stop = function(flag1 , flag2){
 	for(var i=0; i<this.elements.length; i++){
 		var node = this.elements[i];
 		//判断该节点是否处于动画中			
@@ -1474,7 +1563,7 @@ Base.prototype.stop = function(flag1 , flag2){
 //判断当前元素数组是否有至少一个元素满足匹配选择器，即返回true
 //$('ul').is(':animated')    	伪类选择器
 //$('ul').is('  #content p')    常规选择器
-Base.prototype.is = function(select){
+Anything.prototype.is = function(select){
 	//1. 去参数前后的空格，trim() IE8-不支持
 	var str = select.replace(/^\s+|\s+$/g,'');
 	for(var i=0; i<this.elements.length; i++){
@@ -1500,7 +1589,7 @@ Base.prototype.is = function(select){
 }
 
 //delay会在动画队列尾部加入加入一个延时动画
-Base.prototype.delay = function(time){
+Anything.prototype.delay = function(time){
 	if(typeof time == 'number'){
 		for(var i=0; i<this.elements.length; i++){
 			if(!this.elements[i].animate_args){		
