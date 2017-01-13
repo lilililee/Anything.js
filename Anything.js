@@ -31,46 +31,34 @@ function Anything(args) {
 				temp = '',					//临时保存分割后的单个选择器字符串
 				i = 0,
 				j = 0;
-				console.log(select_arg)
+				//console.log(select_arg)
 
 			for ( i = 0; i < select_arg.length; i++){
 				select_arr[i] = [];
 				select_arg[i] = ' ' + select_arg[i] + ' ';	//在选择符前后加一空格，保证第一个字符均为层次选择符
-				console.log(select_arg[i])
+				//console.log(select_arg[i])
 				for( j = 0; j < select_arg[i].length; j++){
-					//console.log(select_arg[i][j])
-
-					if(/[\s>~+]/.test(select_arg[i].charAt(j))){
-						//console.log(select_arg[i].slice(start,j))
+					if(/[\s>~+]/.test(select_arg[i].charAt(j))){					
 						temp = select_arg[i].slice(start,j);
 						if(temp != '' && temp != ' '){
 							select_arr[i].push( temp );
 						}
-						//console.log(s)
 						start = j;
 					}
 				}
-				// if( temp != '' && temp != ' '){
-				// 	select_arr[i].push( temp );
-				// }
-				//select_arr[i].push( select_arg[i].slice(start,j) )	
-				console.log(select_arr[i])			
 			}
 
 			//根据处理后的参数进行元素匹配
 			var temp = [],
-				childs = [], 
 				result = [],
 				k = 0,
-				parent_node = null,
-				next_node = null,
-				previous_node = null,
+				cur_node = null;		//当前操作的节点
 				is_find = false,
-				temp_result = [];
+				temp_result = [];		//临时保存符合css选择符的节点
 				//console.log(select_arr)
 			for( i=0; i < select_arr.length; i++){
 				//当前选择器数组为空数组时跳过此次操作
-				temp = select_arr[i];	//temp为用,分割后的选择符数组
+				temp = select_arr[i];	//temp为用,分割后的选择符数组,例如： [" #content", ">#box", ">.dzzz"]
 				if( temp.length == 0) continue;
 
 				//console.log(temp[temp.length-1])
@@ -79,230 +67,76 @@ function Anything(args) {
 					case '#' :
 						result = this.getById(temp[temp.length-1].slice(2));
 						break;
-
 					case '.' :
 						result = this.getByClassName(temp[temp.length-1].slice(2));
 						break;
-
 					default : 
 						result = this.getByTagName(temp[temp.length-1].slice(1));
 				}
 
-				console.log('第一次筛选结果：'+result)
-				//从后向前筛选元素
-				for( j = temp.length-2; j >= 0; j--){
-					//通过层次选择符判断筛选的方法
-					switch( temp[j+1].charAt(0)){
-						case ' ':
-							for( k = 0; k < result.length; k++ ){
-								is_find = false;
-								temp_result = [];
-								parent_node = result[k].parentNode;
-
-								if( parent_node == document){		//针对选择符为'html'时
-									is_find = true;
-								}	
-
-								while( parent_node != document){									
-									switch( temp[j].charAt(1)){
-										case '#':
-											if( parent_node.id == temp[j].slice(2) ){
-												is_find = true;	
-											} 
-											break;
-
-										case '.':
-											if( $(parent_node).hasClass(temp[j].slice(2)) ){
-												is_find = true;
-											} 
-											break;
-
-										default :
-											if( parent_node.tagName.toLowerCase() == temp[j].slice(1) ){
-												is_find = true;	
-											} 
-									}
-									if( is_find ){								
-										temp_result.push(result[k]);//如果找到了，先用一个临时数组保存下
-										break;	
+				//遍历所有节点
+				for( j = 0; j < result.length; j++ ){
+					//is_find表示当前节点是否符合选择器
+					//is_find = true;
+					cur_node = result[j];
+					for( k = temp.length-2; k >= 0; k-- ){
+						is_find = false;
+						switch( temp[k+1].charAt(0) ){			
+							case ' ':
+								cur_node = cur_node.parentNode;
+								if( cur_node == document ){
+									is_find = true;		//针对选择符为'html'的情况
+								}
+								while( cur_node != document ){
+									is_find = elementIsMatchSelect(cur_node, temp[k]);
+									if( is_find ){
+										break;
 									} else {
-										parent_node = parent_node.parentNode;
+										cur_node = cur_node.parentNode;
 									}
 								}
-							}
-							//将result修改为此次筛选后的数组
-							result = temp_result;
-							
-							//console.log(result);
-						break;
+								break;
 
-						case '>':
-							for( k = 0; k < result.length; k++){
-								is_find = false;
-								temp_result = [];
-								parent_node = result[k].parentNode;	
+							case '>':							
+								cur_node = cur_node.parentNode;	
+								is_find = elementIsMatchSelect(cur_node, temp[k]);								
+								break;
 
-								switch( temp[j].charAt(1)){
-									case '#':
-										if( parent_node.id == temp[j].slice(2) ){
-											is_find = true;
-										} 
+							case '~':
+								cur_node = getPreviousSibling(cur_node);
+								//当没有上一兄弟节点时会返回null,不再继续此次匹配
+								if(cur_node == null )  break;
+								while( cur_node != null ){
+									is_find = elementIsMatchSelect(cur_node, temp[k]);
+									if( is_find ){
 										break;
-									case '.':
-										if( $(parent_node).hasClass(temp[j].slice(2)) ){
-											is_find = true;
-										} 
-										break;
-									default :
-										if( parent_node.tagName.toLowerCase() == temp[j].slice(1)){
-											is_find = true;
-										} 						
-								}
-
-								if( is_find ){							
-									temp_result.push(result[k]);//如果找到了，先用一个临时数组保存下	
-								} 
-							}
-							//将result修改为此次筛选后的数组
-							result = temp_result;
-							
-							//console.log(result);
-						break;
-
-						case '~':
-							for( k = 0; k < result.length; k++){
-								previous_node = getPreviousSibling(result[k]);
-								if(previous_node === null) continue;
-								is_find = false;
-								temp_result = [];
-
-								while( previous_node !== null){	
-									switch( temp[j].charAt(1)){
-										case '#':
-											if( previous_node.id == temp[j].slice(2) ){
-												is_find = true;
-											} 
-											break;
-										case '.':
-											if( $(previous_node).hasClass(temp[j].slice(2)) ){
-												is_find = true;											
-											} 
-											break;
-										default :
-											if( previous_node.tagName.toLowerCase() == temp[j].slice(1) ){
-												is_find = true;							
-											} 
-									}
-
-									if( is_find ){								
-										temp_result.push(result[k]);//如果找到了，先用一个临时数组保存下
-										break;	
 									} else {
-										previous_node = getPreviousSibling(previous_node);
-									}						
+										cur_node = getPreviousSibling(cur_node);
+									}
 								}
-					
-							}
-							//将result修改为此次筛选后的数组
-							result = temp_result;					
-							//console.log(result);
-						break;
+								break;
 
-						case '+':
-							for( k = 0; k < result.length; k++){
-								previous_node = getPreviousSibling(result[k]);
-								//当没有上一兄弟节点时会返回null，跳过该节点的筛选
-								if( previous_node === null ) continue; 
-								//console.log(typeof previous_node)
-								is_find = false;
-								temp_result = [];
-								switch( temp[j].charAt(1) ){
-									case '#':
-										if( previous_node.id == temp[j].slice(2) ){
-											is_find = true;
-										} 
-										break;
-									case '.':
-										if( $(previous_node).hasClass(temp[j].slice(2)) ){
-											is_find = true;
-										} 
-										break;
-									default :
-										if( previous_node.tagName.toLowerCase() == temp[j].slice(1)){
-											is_find = true;
-										} 						
-								}
-								if( is_find ){					
-									temp_result.push(result[k]);//如果找到了，先用一个临时数组保存下
-									//break;	
-								} 
-							}
-							//将result修改为此次筛选后的数组
-							result = temp_result;
-							
-							//console.log(result);
-						break;
+							case '+':
+								cur_node = getPreviousSibling(cur_node);
+								if( cur_node == null ) break;
+								is_find = elementIsMatchSelect(cur_node, temp[k]);
+								break;
 
-						default :
-							errorArgs();
+							default :
+								errorArgs();
+						}
+						//表示此次查找失败，不再继续后续的查找
+						if( !is_find ){
+							break;
+						}
+					}
+					if( k == -1){
+						temp_result.push(result[j]);
 					}
 				}
-				
-				
-			}console.log('result:')
-				console.log(result)
-			//console.log(select);
-			/*if(args.indexOf(' ') == -1){	//当只有一个参数时,下面的多层次选择符也能实现，但这个效率更高
-				switch(args.charAt(0)){
-					case '#':
-						pushElementsToAnything(this,this.getById(args.slice(1)));//this.elements = this.getById(args.slice(1));
-						break;
-					case '.':
-						pushElementsToAnything(this,this.getByClassName(args.slice(1)));//this.elements = this.getByClassName(args.slice(1));
-						break;
-					default:
-						pushElementsToAnything(this,this.getByTagName(args));//this.elements = this.getByTagName(args);
-				}
-			}else{		//当有多层次选择符时
-				//.id .class p
-				var parents = [document],				//父节点初始为document
-					childs = [];						//临时存储查找到的节点
-				var arr_args = args.split(' ');			//把选择符分成一个数组
-				//console.log(arr_args)
-				for(var i=0,len=arr_args.length; i<len; i++){
-					if(arr_args[i] === '') continue;	//保证在不小心输入多个空格时也能正确获取
-					switch(arr_args[i].charAt(0)){
-						case '#':
-							childs = [];
-							childs = this.getById(arr_args[i].slice(1));
-							parents = childs;
-							break;
-
-						case '.':
-							childs = [];
-							for(var j = 0; j < parents.length; j++){
-								var temp = this.getByClassName(arr_args[i].slice(1),parents[j]);	
-								for(var k = 0; k < temp.length; k++){
-									childs.push(temp[k]);
-								}						
-							}
-							parents = childs;
-							break;
-
-						default:
-							childs = [];
-							for(var j = 0; j < parents.length; j++){
-								var temp = this.getByTagName(arr_args[i],parents[j]);
-								for(var k = 0; k < temp.length; k++){
-									childs.push(temp[k]);
-								}	
-							}
-							parents = childs;
-							break;
-					}
-				}
-				pushElementsToAnything(this,childs);//this.elements = childs;
-			}*/
+				result = temp_result;			
+			}
+			pushElementsToAnything(this, result);
 		}
 	}else if(typeof args == 'object'){
 		//1. 为节点数组时
@@ -313,7 +147,7 @@ function Anything(args) {
 		}
 		//2. 为window, document, document.body, document.documentElement, 单个节点等对象时
 		else{
-				this.push(args);
+				this.push(args);console.log(1112)
 		}	
 	}else if(typeof args == 'function'){
 		documentReady(args);
@@ -323,6 +157,7 @@ function Anything(args) {
 	}
 	//this.push(111);
 	//pushElementsToAnything(this,[123,232,4343])
+	
 }
 
 //***********************************获取元素*****************************************
@@ -332,6 +167,29 @@ function pushElementsToAnything(anything, arr){
 	for(var i=0; i<arr.length; i++){
 		anything.push(arr[i]);
 	}
+}
+
+//判断一个节点是否满足css选择符
+//css选择符第一位必须为为层次选择符，比如： ' p', '>.class'
+function elementIsMatchSelect(node, select){
+	var is_match = false;
+	switch( select.charAt(1)){
+		case '#':
+			if( node.id == select.slice(2) ){
+				is_match = true;
+			} 
+			break;
+		case '.':
+			if( $(node).hasClass(select.slice(2)) ){
+				is_match = true;
+			} 
+			break;
+		default :
+			if( node.tagName.toLowerCase() == select.slice(1)){
+				is_match = true;
+			} 						
+	}
+	return is_match;
 }
 
 //以下选择方法都是返回一个标准的数组对象

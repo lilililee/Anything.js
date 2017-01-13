@@ -41,7 +41,7 @@
 			zoom:1;
 			opacity: 0.3;*/
 			margin: 50px;
-			border : 100px solid red;
+			/*border : 100px solid red;*/
 		}
 		.nav li{
 			width: 100px;
@@ -94,12 +94,13 @@
 <body class="z">
 	<div class="fixed">
 		zzzzzzzzzz
+		<span></span>
 	</div>
 	<div class="scroll">
 		sssssssss
 	</div>
 	<div class="wrapper classz">
-		<span>222</span>
+		<span class="classz">222</span>
 		<!-- <p></p> -->
 		<h1>绿叶学习网简介<span>111</span><p>zz</p></h1>
 		<p>绿叶学习网成立于2015年4月1日，是一个富有活力的技术学习网站。绿叶学习网为广大网络工作者（网页开发人员、站长等）提供各种精品教程以及最精华资料。绿叶学习网跟其他垃圾采集站不一样，绿叶学习网中的每一个课程、每一篇文章，甚至每一个知识点，都凝聚了本人的最辛勤的汗水。多少日日夜夜，本人呕心沥血在一遍一遍地编辑，为的是给广大网站爱好者提供最精华的知识。</p>
@@ -137,10 +138,12 @@
 		<li class="li2 zzq">wwwzzzzzzzzzzzzzzzzzzzzzzz</li>	
 		<li class="li3">eeezzzzzzzzzzzzzzzzzzzzzzzzzz</li>
 	</ul>
-	<ul class="ul2">
+	<ul class="ul2" id="lee">
 		<li class="z">qqq</li>
 		<li class="li5">www</li>
-		<li class="li6">eee</li>
+		<li class="li6">eeespan <span></span></li>
+		<li class="li6">eeespan <span></span></li>
+		<li class="li6">eeespan <span></span></li>
 	</ul>
 	
 	<input type="text" name="uesrname" id="user"><br>
@@ -150,17 +153,25 @@
 <script src ='Anything.js'></script>
 
 <script>
+console.log($('#lee li '))
+console.log(document.querySelectorAll('#lee li '))
 
-$(function(){
+
+//alert(111)
+// $(function(){
 	
-	//var li = document.getElementsByClassName('zzq')[0];
-	//console.log(getNextSibling(li))
+// 	// var li = document.getElementsByClassName('classz');
+// 	// console.log(li.length)
+// 	//console.log(getNextSibling(li))
 	
-	//console.log($(li).hasClass('li4'))
-	//console.log($(li).hasClass('li4'))
-	$('div>p,div span')
-	//$('div p .span , #div~h1   z   ,    ')
-})
+// 	//console.log($(li).hasClass('li4'))
+// 	//console.log($(li).hasClass('li4'))
+// 	//var a=
+	
+// 	//console.log(document.querySelectorAll('#content h1'))
+
+// 	//$('div p .span , #div~h1   z   ,    ')
+// })
 
 // var str = '  #id .class>p   span  ';
 // var arr = [];
