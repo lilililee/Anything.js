@@ -6,15 +6,13 @@ function $(args){
 };
 
 //Anything对象为一个数组，所有获取到的元素保存在该数组内
-Anything.prototype = new Array();
-
 function Anything(args) {
 
 	//1. 参数为字符串时
 	if(typeof args == 'string'){
 		//1.1 优先使用querySelectorAll方法
 		if (document.querySelectorAll  === 'dddddddddddddddddddddd') {	//IE8+
-			pushElementsToAnything(this, document.querySelectorAll(args));//this.elements = document.querySelectorAll(args);
+			pushElementsToAnything(this, document.querySelectorAll(args));//this = document.querySelectorAll(args);
 		}
 		//1.2 使用自写的选择符匹配，兼容IE6，7
 		else {
@@ -160,12 +158,12 @@ function Anything(args) {
 		//添加document.onload事件
 		documentReady(args);
 	}
-	//4. 其他参数均不合法
-	else{
-		errorArgs();
-	}
 	
 }
+
+//继承Array
+Anything.prototype = new Array();
+Anything.prototype.constructor = Anything;
 
 //***********************************获取元素*****************************************
 
@@ -216,16 +214,6 @@ Anything.prototype.getByClassName = function(class_name,parent_node){
 	return result;
 }
 
-//根据下标获取
-//示例：$('div p').eq(2)
-Anything.prototype.eq = function(index){
-	if(typeof eq != 'number') errorArgs(); //参数检测
-
-	var temp = this.elements[index];
-	this.elements = [];
-	this.elements.push(temp);
-	return this;
-}
 
 //***********************************属性操作*****************************************
 //获取和设置属性
@@ -234,10 +222,10 @@ Anything.prototype.attr = function(name,value){
 	if(typeof name != 'string') errorArgs(); //参数检测
 
 	if(value === undefined){				//当参数只有一个时表示获取属性
-			return this.elements[0].getAttribute(name);		
+			return this[0].getAttribute(name);		
 	}else{									//当参数有两个时表示设置属性
-		for(var i=0; i<this.elements.length; i++){
-			this.elements[i].setAttribute(name,value);
+		for(var i=0; i<this.length; i++){
+			this[i].setAttribute(name,value);
 		}		
 		return this;
 	}
@@ -247,8 +235,8 @@ Anything.prototype.attr = function(name,value){
 Anything.prototype.removeAttr = function(name){
 	if(typeof name != 'string') errorArgs(); //参数检测
 
-	for(var i=0; i<this.elements.length; i++){
-		this.elements[i].removeAttribute(name);
+	for(var i=0; i<this.length; i++){
+		this[i].removeAttribute(name);
 	}		
 	return this;
 }
@@ -257,10 +245,10 @@ Anything.prototype.removeAttr = function(name){
 //获取和设置innerHTML内容
 Anything.prototype.html = function(content){
 	if(arguments.length == 0){
-		return this.elements[0].innerHTML;
+		return this[0].innerHTML;
 	}else{
-		for(var i=0; i<this.elements.length; i++){
-			this.elements[i].innerHTML = content;
+		for(var i=0; i<this.length; i++){
+			this[i].innerHTML = content;
 		}		
 		return this;
 	}
@@ -270,12 +258,12 @@ Anything.prototype.html = function(content){
 Anything.prototype.text = function(content){
 	if(arguments.length == 0){
 		var result = '';
-		for(var i=0; i<this.elements.length; i++){
-			result += this.elements[i].innerText;
+		for(var i=0; i<this.length; i++){
+			result += this[i].innerText;
 		}
 	}else{
-		for(var i=0; i<this.elements.length; i++){
-			this.elements[i].innerText = content;
+		for(var i=0; i<this.length; i++){
+			this[i].innerText = content;
 		}		
 		return this;
 	}
@@ -284,10 +272,10 @@ Anything.prototype.text = function(content){
 //获取和设置表单内容
 Anything.prototype.val = function(value){
 	if(arguments.length == 0){
-		return this.elements[0].value;
+		return this[0].value;
 	}else{
-		for(var i=0; i<this.elements.length; i++){
-			this.elements[i].value = value;
+		for(var i=0; i<this.length; i++){
+			this[i].value = value;
 		}		
 		return this;
 	}
@@ -300,10 +288,10 @@ Anything.prototype.css = function(attr,value){
 	if(typeof attr != 'string') errorArgs(); //参数检测
 	//console.log(111)
 	if(arguments.length == 1){
-		return getStyle(this.elements[0],attr);
+		return getStyle(this[0],attr);
 	}else{
-		for(var i=0; i<this.elements.length; i++){
-			this.elements[i].style[attr] = value;
+		for(var i=0; i<this.length; i++){
+			this[i].style[attr] = value;
 		}
 		return this;
 	}
@@ -314,8 +302,8 @@ Anything.prototype.css = function(attr,value){
 Anything.prototype.addClass = function(class_name){
 	if(typeof class_name != 'string') errorArgs();  //参数检测
 
-	for(var i=0; i<this.elements.length; i++){
-		var temp = this.elements[i].className.split(' ');
+	for(var i=0; i<this.length; i++){
+		var temp = this[i].className.split(' ');
 		var flag = false;							//表示未包含当前类名
 		for(var j=0; j<temp.length; j++){			//进行类名检查
 			if(temp[j] == class_name){
@@ -325,7 +313,7 @@ Anything.prototype.addClass = function(class_name){
 		}
 		if(flag == false){
 			temp.push(class_name);
-			this.elements[i].className = temp.join(' ');
+			this[i].className = temp.join(' ');
 		}
 	}
 	return this;
@@ -335,14 +323,14 @@ Anything.prototype.addClass = function(class_name){
 Anything.prototype.removeClass = function(class_name){
 	if(typeof class_name != 'string') errorArgs();  //参数检测
 
-	for(var i=0; i<this.elements.length; i++){
-		var temp = this.elements[i].className.split(' ');
+	for(var i=0; i<this.length; i++){
+		var temp = this[i].className.split(' ');
 		for(var j=0; j<temp.length; j++){			//进行类名检查
 			if(temp[j] == class_name){
 				temp[j] = '';
 			}
 		}
-		this.elements[i].className = temp.join(' ');
+		this[i].className = temp.join(' ');
 	}
 	return this;
 }
@@ -351,8 +339,8 @@ Anything.prototype.removeClass = function(class_name){
 Anything.prototype.toggleClass = function(class_name){
 	if(typeof class_name != 'string') errorArgs();  //参数检测
 
-	for(var i=0; i<this.elements.length; i++){
-		var temp = this.elements[i].className.split(' ');
+	for(var i=0; i<this.length; i++){
+		var temp = this[i].className.split(' ');
 		var flag = false;							//表示未包含当前类名
 		for(var j=0; j<temp.length; j++){			//进行类名检查
 			if(temp[j] == class_name){
@@ -363,7 +351,7 @@ Anything.prototype.toggleClass = function(class_name){
 		if(flag == false){
 			temp.push(class_name);			
 		}
-		this.elements[i].className = temp.join(' ');
+		this[i].className = temp.join(' ');
 	}
 	return this;
 }
@@ -371,7 +359,7 @@ Anything.prototype.toggleClass = function(class_name){
 //***********************************大小操作*****************************************
 //获取和设置元素width
 Anything.prototype.width = function(value){
-	var width = parseInt(getStyle(this.elements[0],'width'));	//将px值转化为number
+	var width = parseInt(getStyle(this[0],'width'));	//将px值转化为number
 	if(arguments.length == 1){
 		this.css('width',value+'px');
 	}else{
@@ -383,18 +371,18 @@ Anything.prototype.width = function(value){
 //获取和设置元素innerWidth (width+padding)
 Anything.prototype.innerWidth = function(value){
 	//offsetHeight包括边框在内，所有浏览器都支持，所以基于该值来计算
-	var outerWidth = this.elements[0].offsetWidth;	
+	var outerWidth = this[0].offsetWidth;	
 	//border距离
-	var border_left = parseFloat(getStyle(this.elements[0],'border-left'));
-	var border_right = parseFloat(getStyle(this.elements[0],'border-right'));
+	var border_left = parseFloat(getStyle(this[0],'border-left'));
+	var border_right = parseFloat(getStyle(this[0],'border-right'));
 	var border = border_left + border_right;
 	var innerWidth = outerWidth - border;
 	if(arguments.length == 0){
 		return innerWidth;
 	}else if(typeof arguments[0] == 'number'){
 		//padding距离
-		var padding_left = parseFloat(getStyle(this.elements[0],'padding-left'));	
-		var padding_right = parseFloat(getStyle(this.elements[0],'padding-right'));	
+		var padding_left = parseFloat(getStyle(this[0],'padding-left'));	
+		var padding_right = parseFloat(getStyle(this[0],'padding-right'));	
 		var padding = padding_left + padding_right;
 		if(value > padding){
 			this.css('width',value-padding+'px');
@@ -410,17 +398,17 @@ Anything.prototype.innerWidth = function(value){
 //获取和设置元素outerWidth (width+padding+border)
 Anything.prototype.outerWidth = function(value){
 	//offsetHeight包括边框在内，所有浏览器都支持，所以基于该值来计算
-	var outerWidth = this.elements[0].offsetWidth;		
+	var outerWidth = this[0].offsetWidth;		
 	if(arguments.length == 0){
 		return outerWidth;
 	}else if(typeof arguments[0] == 'number'){	
 		//padding距离
-		var padding_left = parseFloat(getStyle(this.elements[0],'padding-left'));	
-		var padding_right = parseFloat(getStyle(this.elements[0],'padding-right'));	
+		var padding_left = parseFloat(getStyle(this[0],'padding-left'));	
+		var padding_right = parseFloat(getStyle(this[0],'padding-right'));	
 		var padding = padding_left + padding_right;
 		//border距离
-		var border_left = parseFloat(getStyle(this.elements[0],'border-left'));
-		var border_right = parseFloat(getStyle(this.elements[0],'border-right'));
+		var border_left = parseFloat(getStyle(this[0],'border-left'));
+		var border_right = parseFloat(getStyle(this[0],'border-right'));
 		var border = border_left + border_right;
 
 		//通过设置Width来控制outerWidth大小，不会改变padding和border大小
@@ -439,7 +427,7 @@ Anything.prototype.outerWidth = function(value){
 
 //获取和设置元素height
 Anything.prototype.height = function(value){
-	var height = parseFloat(getStyle(this.elements[0],'height'));	//将px值转化为number
+	var height = parseFloat(getStyle(this[0],'height'));	//将px值转化为number
 	if(arguments.length == 1){
 		this.css('height',value+'px');
 	}else{
@@ -451,18 +439,18 @@ Anything.prototype.height = function(value){
 //获取和设置元素innerHeight (height+padding)
 Anything.prototype.innerHeight = function(value){
 	//offsetHeight包括边框在内，所有浏览器都支持，所以基于该值来计算
-	var outerHeight = this.elements[0].offsetHeight;	
+	var outerHeight = this[0].offsetHeight;	
 	//border距离
-	var border_top = parseFloat(getStyle(this.elements[0],'border-top'));
-	var border_bottom = parseFloat(getStyle(this.elements[0],'border-bottom'));
+	var border_top = parseFloat(getStyle(this[0],'border-top'));
+	var border_bottom = parseFloat(getStyle(this[0],'border-bottom'));
 	var border = border_top + border_bottom;
 	var innerHeight = outerHeight - border;
 	if(arguments.length == 0){
 		return innerHeight;
 	}else if(typeof arguments[0] == 'number'){
 		//padding距离
-		var padding_top = parseFloat(getStyle(this.elements[0],'padding-top'));	
-		var padding_bottom = parseFloat(getStyle(this.elements[0],'padding-bottom'));	
+		var padding_top = parseFloat(getStyle(this[0],'padding-top'));	
+		var padding_bottom = parseFloat(getStyle(this[0],'padding-bottom'));	
 		var padding = padding_top + padding_bottom;
 		if(value > padding){
 			this.css('height',value-padding+'px');
@@ -478,17 +466,17 @@ Anything.prototype.innerHeight = function(value){
 //获取和设置元素outerHeight (height+padding+border)
 Anything.prototype.outerHeight = function(value){
 	//offsetHeight包括边框在内，所有浏览器都支持，所以基于该值来计算
-	var outerHeight = this.elements[0].offsetHeight;		
+	var outerHeight = this[0].offsetHeight;		
 	if(arguments.length == 0){
 		return outerHeight;
 	}else if(typeof arguments[0] == 'number'){	
 		//padding距离
-		var padding_top = parseFloat(getStyle(this.elements[0],'padding-top'));	
-		var padding_bottom = parseFloat(getStyle(this.elements[0],'padding-bottom'));	
+		var padding_top = parseFloat(getStyle(this[0],'padding-top'));	
+		var padding_bottom = parseFloat(getStyle(this[0],'padding-bottom'));	
 		var padding = padding_top + padding_bottom;
 		//border距离
-		var border_top = parseFloat(getStyle(this.elements[0],'border-top'));
-		var border_bottom = parseFloat(getStyle(this.elements[0],'border-bottom'));
+		var border_top = parseFloat(getStyle(this[0],'border-top'));
+		var border_bottom = parseFloat(getStyle(this[0],'border-bottom'));
 		var border = border_top + border_bottom;
 
 		//通过设置height来控制outerHeight大小，不会改变padding和border大小
@@ -507,10 +495,10 @@ Anything.prototype.outerHeight = function(value){
 //***********************************位置操作*****************************************
 //offset(),表示元素在文档中的位置(根据边框左上角外层的点计算)
 Anything.prototype.offset = function(){
-	var parent = this.elements[0].offsetParent;
+	var parent = this[0].offsetParent;
 	var result = {};	
-	result.left = this.elements[0].offsetLeft;
-	result.top = this.elements[0].offsetTop;
+	result.left = this[0].offsetLeft;
+	result.top = this[0].offsetTop;
 	//console.log(parent)
 	while(parent !== null){
 		result.left += parent.offsetLeft;
@@ -523,8 +511,8 @@ Anything.prototype.offset = function(){
 //相对于定位元素的位置
 Anything.prototype.position = function(){
 	return {
-		left : parseFloat(this.elements[0].offsetLeft),
-		top : parseFloat(this.elements[0].offsetTop)
+		left : parseFloat(this[0].offsetLeft),
+		top : parseFloat(this[0].offsetTop)
 	}
 }
 
@@ -533,21 +521,21 @@ Anything.prototype.position = function(){
 //scollLeft基本不使用，实现原理一样
 Anything.prototype.scrollTop = function(pos){
 	if(pos === undefined){
-		if(this.elements[0] == window){
+		if(this[0] == window){
 			//获取window的scrollTop
 			return document.documentElement.scrollTop || window.pageYOffset || document.body.scrollTop;
 		}else{
-			return this.elements[0].scrollTop;
+			return this[0].scrollTop;
 		}
 	}else{
-		if(this.elements[0] == window){
+		if(this[0] == window){
 			//设置window的scrollTop
 			document.documentElement.scrollTop = pos;
 			window.pageYOffset = pos;
 			document.body.scrollTop = pos;
 			return this;
 		}else{
-			this.elements[0].scrollTop = pos;
+			this[0].scrollTop = pos;
 			return this;
 		}
 	}
@@ -567,10 +555,10 @@ Anything.prototype.append = function(str){
 	if(typeof str.nodeType == 'number'){		//如果传入一个元素节点转化成字符串
 		str = str.outerHTML;
 	}
-	for(var i=0; i<this.elements.length; i++){
-		var html = this.elements[i].innerHTML;
+	for(var i=0; i<this.length; i++){
+		var html = this[i].innerHTML;
 		html += str;	
-		this.elements[i].innerHTML = html;	
+		this[i].innerHTML = html;	
 	}
 	return this;
 }
@@ -582,10 +570,10 @@ Anything.prototype.prepend = function(str){
 	if(typeof str.nodeType == 'number'){
 		str = str.outerHTML;
 	}
-	for(var i=0; i<this.elements.length; i++){
-		var html = this.elements[i].innerHTML;
+	for(var i=0; i<this.length; i++){
+		var html = this[i].innerHTML;
 		html = str+html;	
-		this.elements[i].innerHTML = html;			
+		this[i].innerHTML = html;			
 	}
 	return this;
 }
@@ -597,10 +585,10 @@ Anything.prototype.after = function(str){
 	if(typeof str.nodeType == 'number'){
 		str = str.outerHTML;
 	}
-	for(var i=0; i<this.elements.length; i++){
-		var html = this.elements[i].outerHTML;
+	for(var i=0; i<this.length; i++){
+		var html = this[i].outerHTML;
 		html += str;	
-		this.elements[i].outerHTML = html;			
+		this[i].outerHTML = html;			
 	}
 	return this;
 }
@@ -612,10 +600,10 @@ Anything.prototype.before = function(str){
 	if(typeof str.nodeType == 'number'){
 		str = str.outerHTML;
 	}
-	for(var i=0; i<this.elements.length; i++){
-		var html = this.elements[i].outerHTML;
+	for(var i=0; i<this.length; i++){
+		var html = this[i].outerHTML;
 		html = str + html;	
-		this.elements[i].outerHTML = html;			
+		this[i].outerHTML = html;			
 	}
 	return this;
 }
@@ -623,18 +611,18 @@ Anything.prototype.before = function(str){
 //***********************************删除节点*****************************************
 //删除所有选中的节点(自身节点和后代节点)，并返回一个删除的节点数组
 Anything.prototype.remove = function(){
-	for(var i=0; i<this.elements.length; i++){
-		this.elements[i].parentNode.removeChild(this.elements[i]);		
+	for(var i=0; i<this.length; i++){
+		this[i].parentNode.removeChild(this[i]);		
 	}
-	return this.elements;
+	return this;
 }
 
 //删除选中节点的后代节点（不包括自身）
 Anything.prototype.empty = function(){
-	for(var i=0; i<this.elements.length; i++){
-		console.log(this.elements[i].outerHTML)
-		console.log(this.elements[i].innerHTML)
-		this.elements[i].outerHTML = this.elements[i].outerHTML.replace(this.elements[i].innerHTML,'');		
+	for(var i=0; i<this.length; i++){
+		console.log(this[i].outerHTML)
+		console.log(this[i].innerHTML)
+		this[i].outerHTML = this[i].outerHTML.replace(this[i].innerHTML,'');		
 	}
 	return this;
 }
@@ -643,7 +631,7 @@ Anything.prototype.empty = function(){
 //true表示深克隆，会复制子节点，false则不会,默认为true
 //只能克隆节点，未实现JQuery的复制事件
 Anything.prototype.clone = function(flag){
-	return flag === false? this.elements[0].cloneNode(false) : this.elements[0].cloneNode(true);
+	return flag === false? this[0].cloneNode(false) : this[0].cloneNode(true);
 }
 
 //***********************************替换节点*****************************************
@@ -651,8 +639,8 @@ Anything.prototype.replaceWith = function(str){
 	if(typeof str.nodeType == 'number'){
 		str = str.outerHTML;
 	}
-	for(var i=0; i<this.elements.length; i++){
-		this.elements[i].outerHTML = str;
+	for(var i=0; i<this.length; i++){
+		this[i].outerHTML = str;
 	}
 }
 
@@ -664,10 +652,10 @@ Anything.prototype.wrap = function(str){
 	var temp = str.split('></');
 	if(temp.length != 2)  errorArgs();  	  //参数检测
 
-	for(var i=0; i<this.elements.length; i++){
-		var html = this.elements[i].outerHTML;
+	for(var i=0; i<this.length; i++){
+		var html = this[i].outerHTML;
 		html = temp[0] + '>' + html + '</' + temp[1]; 
-		this.elements[i].outerHTML = html;
+		this[i].outerHTML = html;
 	}
 }
 
@@ -678,20 +666,20 @@ Anything.prototype.wrapAll = function(str){
 	var temp = str.split('></');
 	if(temp.length != 2)  errorArgs();  //参数检测
 	//找到第一组连续的节点
-	var html = this.elements[0].outerHTML;
-	for(var i=1; i<this.elements.length; i++){	
+	var html = this[0].outerHTML;
+	for(var i=1; i<this.length; i++){	
 		//根据上一兄弟节点是否为数值上一元素来判断是否连续
-		if(getPreviousSibling(this.elements[i]) == this.elements[i-1]){
-			html += this.elements[i].outerHTML;
+		if(getPreviousSibling(this[i]) == this[i-1]){
+			html += this[i].outerHTML;
 		}else{
 			break;
 		}
 	}
-	//把连续节点的outerHTML拼接起来，统一作为this.elements[0]的outerHTML,后面的节点删除
+	//把连续节点的outerHTML拼接起来，统一作为this[0]的outerHTML,后面的节点删除
 	for(var j=1; j<i; j++){
-		this.elements[j].parentNode.removeChild(this.elements[j]);
+		this[j].parentNode.removeChild(this[j]);
 	}
-	this.elements[0].outerHTML = temp[0] + '>' + html + '</' + temp[1];
+	this[0].outerHTML = temp[0] + '>' + html + '</' + temp[1];
 }
 
 //包裹内部元素
@@ -700,8 +688,8 @@ Anything.prototype.wrapInner = function(str){
 	var temp = str.split('></');
 	if(temp.length != 2)  errorArgs();  //参数检测
 
-	for(var i=0; i<this.elements.length; i++){	
-		this.elements[i].innerHTML = temp[0] + '>' + this.elements[i].innerHTML + '</' + temp[1];
+	for(var i=0; i<this.length; i++){	
+		this[i].innerHTML = temp[0] + '>' + this[i].innerHTML + '</' + temp[1];
 	}
 
 }
@@ -710,10 +698,10 @@ Anything.prototype.wrapInner = function(str){
 //callback的第一个参数表示节点数组index
 //callback中this指向当前节点
 Anything.prototype.each = function(callback){
-	for(var i=0; i<this.elements.length; i++){
-		this.elements[i].fn = callback;
-		this.elements[i].fn(i);
-		this.elements[i].fn = null;
+	for(var i=0; i<this.length; i++){
+		this[i].fn = callback;
+		this[i].fn(i);
+		this[i].fn = null;
 	}
 }
 
@@ -738,7 +726,7 @@ Anything.prototype.each = function(callback){
 // });
 //$()中传入document和函数时在document加载后即可运行，其他都是window加载后再运行
 Anything.prototype.ready = function(callback){	
-	if(this.elements[0] == document){
+	if(this[0] == document){
 		documentReady(callback);
 	}else{
 		addEvent(window,'load',callback);
@@ -756,8 +744,8 @@ Anything.prototype.resize = function(callback){
 //可以按需求来调整addEvent的函数内容（在addEvent中已去除attachEvent方法）
 //单击
 Anything.prototype.click = function(callback){
-	for(var i=0; i<this.elements.length; i++){
-		addEvent(this.elements[i],'click',callback);
+	for(var i=0; i<this.length; i++){
+		addEvent(this[i],'click',callback);
 	}
 	return this;
 }
@@ -765,8 +753,8 @@ Anything.prototype.click = function(callback){
 //双击，js本身没有双击事件，根据两次click事件的时间间距来实现
 Anything.prototype.dbclick = function(callback){
 	var start = 0;
-	for(var i=0; i<this.elements.length; i++){
-		addEvent(this.elements[i],'click',function(){
+	for(var i=0; i<this.length; i++){
+		addEvent(this[i],'click',function(){
 			if(new Date - start < 500){
 				callback.call(this);	//此处是闭包，导致callback中this指向全局，应指向绑定事件的对象
 				start = 0;
@@ -780,16 +768,16 @@ Anything.prototype.dbclick = function(callback){
 
 //移入(子节点有移入事件也会触发)
 Anything.prototype.mouseover = function(callback){
-	for(var i=0; i<this.elements.length; i++){
-		addEvent(this.elements[i],'mouseover',callback);
+	for(var i=0; i<this.length; i++){
+		addEvent(this[i],'mouseover',callback);
 	}
 	return this;
 }
 
 //移出(子节点有移出事件也会触发)
 Anything.prototype.mouseout = function(callback){
-	for(var i=0; i<this.elements.length; i++){
-		addEvent(this.elements[i],'mouseout',callback);
+	for(var i=0; i<this.length; i++){
+		addEvent(this[i],'mouseout',callback);
 	}
 	return this;
 }
@@ -799,8 +787,8 @@ Anything.prototype.mouseout = function(callback){
 //方案2：判断鼠标从元素A->B（目标对象）,如果B包含A证明是子节点冒泡触发事件，不做任何操作（推荐！）
 //方案3：也可对目标节点的所有子节点绑定mouseover事件，然后阻止冒泡，需要绑定较多事件
 Anything.prototype.mouseenter = function(callback){
-	for(var i=0; i<this.elements.length; i++){
-		addEvent(this.elements[i],'mouseover',function(event){
+	for(var i=0; i<this.length; i++){
+		addEvent(this[i],'mouseover',function(event){
 			if(!contains(this, getFromElement(event))){	//判断绑定事件的节点是否包含鼠标来着的元素
 				callback.call(this);	//此处是闭包，导致callback中this指向全局，应指向绑定事件的对象			
 			}
@@ -811,8 +799,8 @@ Anything.prototype.mouseenter = function(callback){
 
 //移出(子节点有移入事件不会触发) 同上
 Anything.prototype.mouseleave = function(callback){
-	for(var i=0; i<this.elements.length; i++){
-		addEvent(this.elements[i],'mouseout',function(event){
+	for(var i=0; i<this.length; i++){
+		addEvent(this[i],'mouseout',function(event){
 			if(!contains(this, getToElement(event))){	//判断绑定事件的节点是否包含鼠标来着的元素
 				callback.call(this);	//此处是闭包，导致callback中this指向全局，应指向绑定事件的对象			
 			}
@@ -825,16 +813,16 @@ Anything.prototype.mouseleave = function(callback){
 //click只能靠鼠标左键触发，但是mousedown和mouseup能靠鼠标的左中右键触发
 //可以通过事件对象中的button属性来确定按下了哪个键
 Anything.prototype.mousedown = function(callback){
-	for(var i=0; i<this.elements.length; i++){
-		addEvent(this.elements[i],'mousedown',callback);
+	for(var i=0; i<this.length; i++){
+		addEvent(this[i],'mousedown',callback);
 	}
 	return this;
 }
 
 //弹起
 Anything.prototype.mouseup = function(callback){
-	for(var i=0; i<this.elements.length; i++){
-		addEvent(this.elements[i],'mouseup',callback);
+	for(var i=0; i<this.length; i++){
+		addEvent(this[i],'mouseup',callback);
 	}
 	return this;
 }
@@ -842,8 +830,8 @@ Anything.prototype.mouseup = function(callback){
 //右击
 //监听全局使用document
 Anything.prototype.contextmenu = function(callback){
-	for(var i=0; i<this.elements.length; i++){
-		addEvent(this.elements[i],'contextmenu',callback);
+	for(var i=0; i<this.length; i++){
+		addEvent(this[i],'contextmenu',callback);
 	}
 	return this;
 }
@@ -851,8 +839,8 @@ Anything.prototype.contextmenu = function(callback){
 //滚动
 //也可用document来监听onscroll事件，但IE8-不支持，推荐使用window
 Anything.prototype.scroll = function(callback){
-	for(var i=0; i<this.elements.length; i++){
-		addEvent(this.elements[i],'scroll',callback);
+	for(var i=0; i<this.length; i++){
+		addEvent(this[i],'scroll',callback);
 	}
 	return this;
 }
@@ -862,24 +850,24 @@ Anything.prototype.scroll = function(callback){
 //String.fromCharCode(event.which) 可以用该方法输出按下的字符键，功能键不可以
 //keydown，所有键（字符键+功能键）按下均会触发
 Anything.prototype.keydown = function(callback){
-	for(var i=0; i<this.elements.length; i++){
-		addEvent(this.elements[i],'keydown',callback);
+	for(var i=0; i<this.length; i++){
+		addEvent(this[i],'keydown',callback);
 	}
 	return this;
 }
 
 //keypress，按下后到松开前时触发，（字符键）按下才会触发，alt，ctrl，f1-f12等均检测不到
 Anything.prototype.keypress = function(callback){
-	for(var i=0; i<this.elements.length; i++){
-		addEvent(this.elements[i],'keypress',callback);
+	for(var i=0; i<this.length; i++){
+		addEvent(this[i],'keypress',callback);
 	}
 	return this;
 }
 
 //keyup，所有键（字符键+功能键）按下均会触发
 Anything.prototype.keyup = function(callback){
-	for(var i=0; i<this.elements.length; i++){
-		addEvent(this.elements[i],'keyup',callback);
+	for(var i=0; i<this.length; i++){
+		addEvent(this[i],'keyup',callback);
 	}
 	return this;
 }
@@ -887,16 +875,16 @@ Anything.prototype.keyup = function(callback){
 //***********************************表单事件*****************************************
 //获得焦点
 Anything.prototype.focus = function(callback){
-	for(var i=0; i<this.elements.length; i++){
-		addEvent(this.elements[i],'focus',callback);
+	for(var i=0; i<this.length; i++){
+		addEvent(this[i],'focus',callback);
 	}
 	return this;
 }
 
 //失去焦点
 Anything.prototype.blur = function(callback){
-	for(var i=0; i<this.elements.length; i++){
-		addEvent(this.elements[i],'blur',callback);
+	for(var i=0; i<this.length; i++){
+		addEvent(this[i],'blur',callback);
 	}
 	return this;
 }
@@ -904,8 +892,8 @@ Anything.prototype.blur = function(callback){
 //内容改变，在失去焦点时才会检测
 //text,textarea,下拉菜单  可以触发change事件
 Anything.prototype.change = function(callback){
-	for(var i=0; i<this.elements.length; i++){
-		addEvent(this.elements[i],'change',callback);
+	for(var i=0; i<this.length; i++){
+		addEvent(this[i],'change',callback);
 	}
 	return this;
 }
@@ -913,8 +901,8 @@ Anything.prototype.change = function(callback){
 //内容选中，在选中文本后松开鼠标后才触发(在IE8-中每选中一个字符就会触发一次)
 //text,textarea 可以触发select事件，下拉菜单不会触发
 Anything.prototype.select = function(callback){
-	for(var i=0; i<this.elements.length; i++){
-		addEvent(this.elements[i],'select',callback);
+	for(var i=0; i<this.length; i++){
+		addEvent(this[i],'select',callback);
 	}
 	return this;
 }
@@ -930,8 +918,8 @@ Anything.prototype.on = function(type,callback){
 //无法解除dbclick，mouseenter，mouseleave
 //因为这三个事件是通过绑定click，mouseover，mouseout来实现的，应该解除这3个事件
 Anything.prototype.off = function(type,callback){
-	for(var i=0; i<this.elements.length; i++){
-		removeEvent(this.elements[i],type,callback);
+	for(var i=0; i<this.length; i++){
+		removeEvent(this[i],type,callback);
 	}
 	return this;
 }
@@ -948,8 +936,8 @@ Anything.prototype.hover = function(callback1,callback2){
 //使用DOM0级绑定方法
 //缺点：1.dbclick无效；2.mouseenter，mouseleave在Firefox下表现和mouseover，mouseout一样
 Anything.prototype.one = function(type,callback){
-	for(var i=0; i<this.elements.length; i++){
-		this.elements[i]['on'+type] = function(){
+	for(var i=0; i<this.length; i++){
+		this[i]['on'+type] = function(){
 			callback.call(this);
 			this['on'+type] = null;
 		}
@@ -982,41 +970,41 @@ Anything.prototype.hide = function(time , callback){
 	var attr_list = ['opacity','width','height','padding-top','padding-right','padding-bottom','padding-left',
 					 'margin-top','margin-right','margin-bottom','margin-left','display','overflow'];
 	
-	for(var i=0; i<this.elements.length; i++){	
+	for(var i=0; i<this.length; i++){	
 		//3. 如果该节点处于动画，且上一动画也是hide，则不向队列添加此次hide动画，如果不处于动画，生成动画参数
-		if(this.elements[i].animate_args){
+		if(this[i].animate_args){
 			//console.log(111111111)
-			if(this.elements[i].animate_args.queue[this.elements[i].animate_args.queue.length-1].type == 'hide'){
+			if(this[i].animate_args.queue[this[i].animate_args.queue.length-1].type == 'hide'){
 				continue;
 			}
 		}
 		//4. 如果不处于动画
 		else{
-			if(getStyle(this.elements[i],'display') == 'none'){
+			if(getStyle(this[i],'display') == 'none'){
 				continue;
 			}
 			//5. 获取原有属性
-			if(!this.elements[i].old_style){
-				this.elements[i].old_style = {};
+			if(!this[i].old_style){
+				this[i].old_style = {};
 				for(var j=0; j<attr_list.length; j++){
-					var value = getStyle(this.elements[i],attr_list[j]);	//获取当前属性
+					var value = getStyle(this[i],attr_list[j]);	//获取当前属性
 					if(parseFloat(value) != 0){
-						this.elements[i].old_style[attr_list[j]] = value;
+						this[i].old_style[attr_list[j]] = value;
 						//obj_attr[attr_list[j]] = '0';
 					}	
 				}
 			}
-			this.elements[i].animate_args = new animateArgs();
+			this[i].animate_args = new animateArgs();
 		}
 		//6. 生成一个animate方法的参数对象，为启动animate做准备
 		var obj_attr = {};					
-		for(var attr in this.elements[i].old_style){
+		for(var attr in this[i].old_style){
 			if(attr != 'display' && attr != 'overflow'){
 					obj_attr[attr] = '0';
 				}
 		}
 		//7. 启动动画，分别在回调函数和初始函数加上了display和overflow的操作
-		$(this.elements[i]).animate(obj_attr,time,function(){
+		$(this[i]).animate(obj_attr,time,function(){
 			//先确认是否传入了callback函数，再执行
 			if(typeof callback == 'function'){
 				callback.call(this);
@@ -1041,45 +1029,45 @@ Anything.prototype.show = function(time, callback){
 	//2. 用数组保存hide需要获取的属性
 	var attr_list = ['opacity','width','height','padding-top','padding-right','padding-bottom','padding-left',
 					 'margin-top','margin-right','margin-bottom','margin-left','display','overflow'];
-	for(var i=0; i<this.elements.length; i++){		
+	for(var i=0; i<this.length; i++){		
 		//3. 如果该节点处于动画，且上一动画也是show，则不向队列添加此次show动画，如果不处于动画，生成动画参数
-		if(this.elements[i].animate_args){
-			if(this.elements[i].animate_args.queue[this.elements[i].animate_args.queue.length-1].type == 'show'){
+		if(this[i].animate_args){
+			if(this[i].animate_args.queue[this[i].animate_args.queue.length-1].type == 'show'){
 				continue;
 			}		
 		}
 		//4. 如果不处于动画，对display进行判断，如果不为none则跳过此次动画
 		else{
-			if(getStyle(this.elements[i],'display') != 'none'){	
+			if(getStyle(this[i],'display') != 'none'){	
 				continue;
 			}
 			//5. 获取原有属性
-			if(!this.elements[i].old_style){
-				this.elements[i].old_style = {};
-				this.elements[i].old_style['display'] = getDefaultDisplay(this.elements[i]);
-				this.elements[i].style['display'] = this.elements[i].old_style['display'];
+			if(!this[i].old_style){
+				this[i].old_style = {};
+				this[i].old_style['display'] = getDefaultDisplay(this[i]);
+				this[i].style['display'] = this[i].old_style['display'];
 				for(var j=0; j<attr_list.length; j++){
-					var value = getStyle(this.elements[i],attr_list[j]);
+					var value = getStyle(this[i],attr_list[j]);
 					if(parseFloat(value) != 0){
-						this.elements[i].old_style[attr_list[j]] = value;
+						this[i].old_style[attr_list[j]] = value;
 					}				
 				}
-				this.elements[i].style['display'] = 'none';
+				this[i].style['display'] = 'none';
 			}
-			this.elements[i].animate_args = new animateArgs();
+			this[i].animate_args = new animateArgs();
 		}		
 
 		//6. 生成一个animate方法的参数对象，为启动animate做准备
 		var obj_attr = {};
 		
-		for(attr in this.elements[i].old_style){
+		for(attr in this[i].old_style){
 			if(attr != 'display' && attr != 'overflow'){
-				obj_attr[attr] = this.elements[i].old_style[attr];
+				obj_attr[attr] = this[i].old_style[attr];
 			}
 		}
 		
 		//7 .启动动画
-		$(this.elements[i]).animate(obj_attr,time,function(){
+		$(this[i]).animate(obj_attr,time,function(){
 			//先确认是否传入了callback函数，再执行
 			if(typeof callback == 'function'){
 				callback.call(this);
@@ -1102,21 +1090,21 @@ Anything.prototype.show = function(time, callback){
 }
 
 Anything.prototype.toggle = function(time, callback){
-	for(var i=0; i<this.elements.length; i++){
+	for(var i=0; i<this.length; i++){
 		//1. 当前节点不处于动画时，根据display来判断
-		if(!this.elements[i].animate_args){
-			if( getStyle(this.elements[i],'display') != 'none'){
-				$(this.elements[i]).hide(time, callback);
+		if(!this[i].animate_args){
+			if( getStyle(this[i],'display') != 'none'){
+				$(this[i]).hide(time, callback);
 			}else{
-				$(this.elements[i]).show(time, callback);
+				$(this[i]).show(time, callback);
 			}			
 		}
 		//2. 当前节点处于动画时，根据上一函数的类型来判断
 		else{
-			if(this.elements[i].animate_args.queue[this.elements[i].animate_args.queue.length-1].type == 'show'){
-				$(this.elements[i]).hide(time, callback);
+			if(this[i].animate_args.queue[this[i].animate_args.queue.length-1].type == 'show'){
+				$(this[i]).hide(time, callback);
 			}else{
-				$(this.elements[i]).show(time, callback);
+				$(this[i]).show(time, callback);
 			}
 		}
 	}
@@ -1134,23 +1122,23 @@ Anything.prototype.fadeIn = function(time, callback){
 		time = 500;
 	}
 
-	for(var i=0; i<this.elements.length; i++){
+	for(var i=0; i<this.length; i++){
 		//2. 如果该节点处于动画，且上一动画也是fadeIn，则不向队列添加此次fadeIn动画，如果不处于动画，生成动画参数
-		if(this.elements[i].animate_args){
-			if(this.elements[i].animate_args.queue[this.elements[i].animate_args.queue.length-1].type == 'fadeIn'){
+		if(this[i].animate_args){
+			if(this[i].animate_args.queue[this[i].animate_args.queue.length-1].type == 'fadeIn'){
 				continue;
 			}		
 		}
 		//3. 如果没处于动画，则根据opacity和display来判断是否执行此次动画
 		else{
-			if(getStyle(this.elements[i],'opacity') == '1' && getStyle(this.elements[i],'display') != 'none'){				
+			if(getStyle(this[i],'opacity') == '1' && getStyle(this[i],'display') != 'none'){				
 				continue;
 			}
-			if(!this.elements[i].old_style){
-				this.elements[i].old_style = {};
-				this.elements[i].old_style['display'] = getDefaultDisplay(this.elements[i]);
+			if(!this[i].old_style){
+				this[i].old_style = {};
+				this[i].old_style['display'] = getDefaultDisplay(this[i]);
 			}
-			this.elements[i].animate_args = new animateArgs();
+			this[i].animate_args = new animateArgs();
 		}
 
 		//4. 生成一个animate方法的参数对象，为启动animate做准备
@@ -1159,7 +1147,7 @@ Anything.prototype.fadeIn = function(time, callback){
 		};
 		
 		//5 .启动动画
-		$(this.elements[i]).animate(obj_attr, time, callback, 'fadeIn', function(){
+		$(this[i]).animate(obj_attr, time, callback, 'fadeIn', function(){
 			this.style['filter'] = 'alpha(opacity=0)';
 			this.style['zoom'] = 1;
 			this.style['opacity'] = 0;
@@ -1180,29 +1168,29 @@ Anything.prototype.fadeOut = function(time, callback){
 		time = 500;
 	}
 
-	for(var i=0; i<this.elements.length; i++){
+	for(var i=0; i<this.length; i++){
 		
 		//2. 如果该节点处于动画，且上一动画也是fadeOut，则不向队列添加此次fadeOut动画，如果不处于动画，生成动画参数
-		if(this.elements[i].animate_args){
-			if(this.elements[i].animate_args.queue[this.elements[i].animate_args.queue.length-1].type == 'fadeOut'){
+		if(this[i].animate_args){
+			if(this[i].animate_args.queue[this[i].animate_args.queue.length-1].type == 'fadeOut'){
 				continue;
 			}		
 		}
 		//3. 如果没处于动画，则根据opacity和display来判断是否执行此次动画
 		else{
-			if(getStyle(this.elements[i],'opacity') == '0' || getStyle(this.elements[i],'display') == 'none'){	
+			if(getStyle(this[i],'opacity') == '0' || getStyle(this[i],'display') == 'none'){	
 				continue;
 			}
-			if(!this.elements[i].old_style){
-				this.elements[i].old_style = {};
-				if(getStyle(this.elements[i],'display') == 'none'){
-					this.elements[i].old_style['display'] = getDefaultDisplay(this.elements[i]);
+			if(!this[i].old_style){
+				this[i].old_style = {};
+				if(getStyle(this[i],'display') == 'none'){
+					this[i].old_style['display'] = getDefaultDisplay(this[i]);
 					continue;
 				}else{
-					this.elements[i].old_style['display'] = getStyle(this.elements[i],'display');
+					this[i].old_style['display'] = getStyle(this[i],'display');
 				}				
 			}
-			this.elements[i].animate_args = new animateArgs();
+			this[i].animate_args = new animateArgs();
 		}
 
 		//4. 生成一个animate方法的参数对象，为启动animate做准备
@@ -1211,7 +1199,7 @@ Anything.prototype.fadeOut = function(time, callback){
 		};
 		
 		//5 .启动动画
-		$(this.elements[i]).animate(obj_attr, time, function(){
+		$(this[i]).animate(obj_attr, time, function(){
 			if(typeof callback == 'function'){
 				callback.call(this);
 			}
@@ -1231,26 +1219,26 @@ Anything.prototype.fadeTo = function(time, opacity, callback){
 		errorArgs();
 	}
 
-	for(var i=0; i<this.elements.length; i++){			
+	for(var i=0; i<this.length; i++){			
 		//2. 如果该节点处于动画，且上一动画也是fadeTo，则不向队列添加此次fadeTo动画，如果不处于动画，生成动画参数
-		if(this.elements[i].animate_args){
-			if(this.elements[i].animate_args.queue[this.elements[i].animate_args.queue.length-1].type == 'fadeTo' ||
-				parseFloat(getStyle(this.elements[i],'opacity')) == opacity){
+		if(this[i].animate_args){
+			if(this[i].animate_args.queue[this[i].animate_args.queue.length-1].type == 'fadeTo' ||
+				parseFloat(getStyle(this[i],'opacity')) == opacity){
 				continue;
 			}		
 		}
 		//3. 如果不处于动画
 		else{
-			if(!this.elements[i].old_style){
-				this.elements[i].old_style = {};
-				if(getStyle(this.elements[i],'display') == 'none'){
-					this.elements[i].old_style['display'] = getDefaultDisplay(this.elements[i]);
+			if(!this[i].old_style){
+				this[i].old_style = {};
+				if(getStyle(this[i],'display') == 'none'){
+					this[i].old_style['display'] = getDefaultDisplay(this[i]);
 				}else{
-					this.elements[i].old_style['display'] = getStyle(this.elements[i],'display');
+					this[i].old_style['display'] = getStyle(this[i],'display');
 				}
 				
 			}
-			this.elements[i].animate_args = new animateArgs();
+			this[i].animate_args = new animateArgs();
 		}
 		//4. 生成一个animate方法的参数对象，为启动animate做准备
 		var obj_attr = {
@@ -1258,7 +1246,7 @@ Anything.prototype.fadeTo = function(time, opacity, callback){
 		};
 		
 		//5 .启动动画
-		$(this.elements[i]).animate(obj_attr, time, callback, 'fadeTo', function(){
+		$(this[i]).animate(obj_attr, time, callback, 'fadeTo', function(){
 			if(getStyle(this,'display') == 'none'){
 				this.style['filter'] = 'alpha(opacity=0)';
 				this.style['zoom'] = 1;
@@ -1272,21 +1260,21 @@ Anything.prototype.fadeTo = function(time, opacity, callback){
 
 //淡入淡出切换
 Anything.prototype.fadeToggle = function(time, callback){
-	for(var i=0; i<this.elements.length; i++){
+	for(var i=0; i<this.length; i++){
 		//1. 当前节点不处于动画时，根据display来判断
-		if(!this.elements[i].animate_args){
-			if( getStyle(this.elements[i],'display') != 'none'){
-				$(this.elements[i]).fadeOut(time, callback);
+		if(!this[i].animate_args){
+			if( getStyle(this[i],'display') != 'none'){
+				$(this[i]).fadeOut(time, callback);
 			}else{
-				$(this.elements[i]).fadeIn(time, callback);
+				$(this[i]).fadeIn(time, callback);
 			}			
 		}
 		//2. 当前节点处于动画时，根据上一函数的类型来判断
 		else{
-			if(this.elements[i].animate_args.queue[this.elements[i].animate_args.queue.length-1].type == 'fadeIn'){
-				$(this.elements[i]).fadeOut(time, callback);
+			if(this[i].animate_args.queue[this[i].animate_args.queue.length-1].type == 'fadeIn'){
+				$(this[i]).fadeOut(time, callback);
 			}else{
-				$(this.elements[i]).fadeIn(time, callback);
+				$(this[i]).fadeIn(time, callback);
 			}
 		}
 	}
@@ -1307,42 +1295,42 @@ Anything.prototype.slideUp = function(time, callback){
 	//2. 用数组保存hide需要获取的属性
 	var attr_list = ['height','padding-top','padding-bottom','margin-top','margin-bottom','display','overflow'];
 	
-	for(var i=0; i<this.elements.length; i++){
+	for(var i=0; i<this.length; i++){
 
 		//3. 如果该节点处于动画，且上一动画也是slideUp，则不向队列添加此次slideUp动画，如果不处于动画，生成动画参数
-		if(this.elements[i].animate_args){
-			if(this.elements[i].animate_args.queue[this.elements[i].animate_args.queue.length-1].type == 'slideUp'){
+		if(this[i].animate_args){
+			if(this[i].animate_args.queue[this[i].animate_args.queue.length-1].type == 'slideUp'){
 				continue;
 			}		
 		}
 		//4. 如果不处于动画，根据display来判断是否执行此次动画
 		else{
-			if(getStyle(this.elements[i],'display') == 'none'){				
+			if(getStyle(this[i],'display') == 'none'){				
 				continue;
 			}
-			if(!this.elements[i].old_style){		
-				this.elements[i].old_style = {};
+			if(!this[i].old_style){		
+				this[i].old_style = {};
 				for(var j=0; j<attr_list.length; j++){
-					var value = getStyle(this.elements[i],attr_list[j]);
+					var value = getStyle(this[i],attr_list[j]);
 					//console.log(value)
 					if(parseFloat(value) != 0){
-						this.elements[i].old_style[attr_list[j]] = value;
+						this[i].old_style[attr_list[j]] = value;
 					}				
 				}
 			}
-			this.elements[i].animate_args = new animateArgs();
+			this[i].animate_args = new animateArgs();
 		}
 
 		//5. 生成一个animate方法的参数对象，为启动animate做准备
 		var obj_attr = {};
-		for(var attr in this.elements[i].old_style){		
+		for(var attr in this[i].old_style){		
 			if(attr != 'overflow' && attr != 'display'){
 				obj_attr[attr] = '0px';				
 			}			
 		}
 		
 		//6 .启动动画
-		$(this.elements[i]).animate(obj_attr, time, function(){
+		$(this[i]).animate(obj_attr, time, function(){
 
 			if(typeof callback == 'function'){
 				callback.call(this);
@@ -1369,46 +1357,46 @@ Anything.prototype.slideDown = function(time, callback){
 	//2. 用数组保存hide需要获取的属性
 	var attr_list = ['height','padding-top','padding-bottom','margin-top','margin-bottom','display','overflow'];
 	
-	for(var i=0; i<this.elements.length; i++){
+	for(var i=0; i<this.length; i++){
 		
 		//3. 如果该节点处于动画，且上一动画也是slideUp，则不向队列添加此次slideUp动画，如果不处于动画，生成动画参数
-		if(this.elements[i].animate_args){
-			if(this.elements[i].animate_args.queue[this.elements[i].animate_args.queue.length-1].type == 'slideDown'){
+		if(this[i].animate_args){
+			if(this[i].animate_args.queue[this[i].animate_args.queue.length-1].type == 'slideDown'){
 				continue;
 			}		
 		}
 		//4. 如果不处于动画，根据display来判断是否执行此次动画
 		else{
-			if(getStyle(this.elements[i],'display') != 'none'){				
+			if(getStyle(this[i],'display') != 'none'){				
 				continue;
 			}
-			if(!this.elements[i].old_style){
-			this.elements[i].old_style = {};
-				this.elements[i].old_style['display'] = getDefaultDisplay(this.elements[i]);			
-				this.elements[i].style['display'] = this.elements[i].old_style['display'];
+			if(!this[i].old_style){
+			this[i].old_style = {};
+				this[i].old_style['display'] = getDefaultDisplay(this[i]);			
+				this[i].style['display'] = this[i].old_style['display'];
 				for(var j=0; j<attr_list.length; j++){
-					var value = getStyle(this.elements[i],attr_list[j]);
+					var value = getStyle(this[i],attr_list[j]);
 					if(parseFloat(value) != 0){
-						this.elements[i].old_style[attr_list[j]] = value;
+						this[i].old_style[attr_list[j]] = value;
 					}				
 				}
-				this.elements[i].style['display'] = 'none';
+				this[i].style['display'] = 'none';
 				//return
 
 			}
-			this.elements[i].animate_args = new animateArgs();
+			this[i].animate_args = new animateArgs();
 		}
 
 		//5. 生成一个animate方法的参数对象，为启动animate做准备
 		var obj_attr = {};
-		for(var attr in this.elements[i].old_style){			
+		for(var attr in this[i].old_style){			
 			if(attr != 'overflow' && attr != 'display'){				
-				obj_attr[attr] = this.elements[i].old_style[attr];
+				obj_attr[attr] = this[i].old_style[attr];
 			}		
 		}
 		
 		//6 .启动动画
-		$(this.elements[i]).animate(obj_attr, time, function(){
+		$(this[i]).animate(obj_attr, time, function(){
 			if(typeof callback == 'function'){
 				callback.call(this);
 			}	
@@ -1427,21 +1415,21 @@ Anything.prototype.slideDown = function(time, callback){
 }
 
 Anything.prototype.slideToggle = function(time, callback){
-	for(var i=0; i<this.elements.length; i++){
+	for(var i=0; i<this.length; i++){
 		//1. 当前节点不处于动画时，根据display来判断
-		if(!this.elements[i].animate_args){
-			if( getStyle(this.elements[i],'display') == 'none'){
-				$(this.elements[i]).slideDown(time, callback);
+		if(!this[i].animate_args){
+			if( getStyle(this[i],'display') == 'none'){
+				$(this[i]).slideDown(time, callback);
 			}else{
-				$(this.elements[i]).slideUp(time, callback);
+				$(this[i]).slideUp(time, callback);
 			}			
 		}
 		//2. 当前节点处于动画时，根据上一函数的类型来判断
 		else{
-			if(this.elements[i].animate_args.queue[this.elements[i].animate_args.queue.length-1].type == 'slideDown'){
-				$(this.elements[i]).slideUp(time, callback);
+			if(this[i].animate_args.queue[this[i].animate_args.queue.length-1].type == 'slideDown'){
+				$(this[i]).slideUp(time, callback);
 			}else{
-				$(this.elements[i]).slideDown(time, callback);
+				$(this[i]).slideDown(time, callback);
 			}
 		}
 	}
@@ -1468,9 +1456,9 @@ Anything.prototype.animate = function(obj_attr, time, callback, type, start_fn){
 		return this;
 	}
 	
-	for(var i=0; i<this.elements.length; i++){
+	for(var i=0; i<this.length; i++){
 		//1. 当前节点不处于动画时，先生成一个动画参数
-		var node = this.elements[i];
+		var node = this[i];
 		if(!node.animate_args){		
 			node.animate_args = new animateArgs();	//通过构造函数生成
 		}
@@ -1497,8 +1485,8 @@ Anything.prototype.animate = function(obj_attr, time, callback, type, start_fn){
 }
 
 Anything.prototype.stop = function(flag1 , flag2){
-	for(var i=0; i<this.elements.length; i++){
-		var node = this.elements[i];
+	for(var i=0; i<this.length; i++){
+		var node = this[i];
 		//判断该节点是否处于动画中			
 		if(node.animate_args){	
 			//1. stop(),等价于stop(false,false)，仅仅停止“当前执行”这段动画，后面的动画还可以继续执行	
@@ -1562,42 +1550,15 @@ Anything.prototype.stop = function(flag1 , flag2){
 	}
 }
 
-//判断当前元素数组是否有至少一个元素满足匹配选择器，即返回true
-//$('ul').is(':animated')    	伪类选择器
-//$('ul').is('  #content p')    常规选择器
-Anything.prototype.is = function(select){
-	//1. 去参数前后的空格，trim() IE8-不支持
-	var str = select.replace(/^\s+|\s+$/g,'');
-	for(var i=0; i<this.elements.length; i++){
-		//只要找到一个匹配元素就直接退出函数
-		//判断选择器是伪类选择器还是常规选择器
-		if(str.charAt(0) == ':'){
-			switch(str){
-				case ':animated' :		//是否处于动画
-					if(this.elements[i].animate_args) return true;
-					break;	
-				default :				
-					errorArgs();		
-			}
-		}else{
-			//根据常规选择器获取元素
-			var elements = $(str).elements;
-			for(var j=0; j<elements.length; j++){
-				if(this.elements[i] == elements[j]) return true;	
-			}
-		}
-	}
-	return false;
-}
 
 //delay会在动画队列尾部加入加入一个延时动画
 Anything.prototype.delay = function(time){
 	if(typeof time == 'number'){
-		for(var i=0; i<this.elements.length; i++){
-			if(!this.elements[i].animate_args){		
-				this.elements[i].animate_args = new animateArgs();	//通过构造函数生成
+		for(var i=0; i<this.length; i++){
+			if(!this[i].animate_args){		
+				this[i].animate_args = new animateArgs();	//通过构造函数生成
 			}
-			this.elements[i].animate_args.queue.push({	//将延时动画插入队列中
+			this[i].animate_args.queue.push({	//将延时动画插入队列中
 				obj_attr : null,
 				time : null,
 				callback : null,
@@ -1736,7 +1697,8 @@ function doAnimate(node, obj_attr, time, callback, delay, type, start_fn){
 //-----------------------------------过滤方法-----------------------------------------
 //------------------------------------------------------------------------------------
 
-//************************************类过滤******************************************
+//***********************************条件判断*****************************************
+//判断当前所有节点中是否有至少一个节点包含该类名
 Anything.prototype.hasClass = function(class_name){
 	if( typeof class_name != 'string' ) errorArgs();
 	var result = false;
@@ -1753,6 +1715,287 @@ Anything.prototype.hasClass = function(class_name){
 	return result;
 }
 
+//判断当前元素数组是否有至少一个元素满足匹配选择器，即返回true
+//$('ul').is(':animated')    	伪类选择器
+//$('ul').is('  #content p')    常规选择器
+Anything.prototype.is = function(select){
+	if(typeof select != 'string') errorArgs(); //参数检测
+
+	//1. 去参数前后的空格，trim() IE8-不支持
+	var str = select.replace(/^\s+|\s+$/g,'');
+		i,
+		j,
+		elements;
+
+	for( i = 0; i < this.length; i++ ){
+		//只要找到一个匹配元素就直接退出函数
+		//判断选择器是伪类选择器还是常规选择器
+		if(str.charAt(0) == ':'){
+			switch(str){
+				case ':animated' :		//是否处于动画
+					if(this[i].animate_args) return true;
+					break;	
+				default :				
+					errorArgs();		
+			}
+		}else{
+			//根据常规选择器获取元素
+			elements = $(str);
+			for( j = 0; j < elements.length; j++){
+				if(this[i] == elements[j]) return true;	
+			}
+		}
+	}
+	return false;
+}
+
+//**********************************过滤元素******************************************
+//根据下标获取
+//示例：$('div p').eq(2)
+Anything.prototype.eq = function(index){
+	if(typeof index != 'number') errorArgs(); //参数检测
+
+	
+	if( index < 0 ) {
+		index = this.length + index;
+	}	
+	var temp = this[index];	
+	pushElementsToAnything(this , [temp]);
+
+	return this;
+}
+
+
+
+//反向选择
+//传入css选择符，删除掉符合该选择符的元素
+Anything.prototype.not = function(select){
+	if( typeof select != 'string' )  errorArgs();
+
+	var elements = $(select),
+		temp = [],
+		i,
+		j,
+		len1 = this.length,
+		len2 = elements.length;
+
+	for( i = 0; i < len1; i++ ){
+		for( j = 0; j < len2; j++){
+			if( this[i] == elements[j] ){
+				break;
+			}
+		}
+		if( j == len2 ){
+			temp.push(this[i]);
+		}
+	}
+
+	pushElementsToAnything(this, temp);
+
+	return this;
+}
+
+//filter过滤方法,可传入css选择器和判断函数
+Anything.prototype.filter = function(args){
+	var i,
+		j,
+		elements,
+		temp = [],		//保存符合条件的元素
+		len1 = this.length,
+		len2;
+	//1. 当选择条件为css选择符时
+	if( typeof args == 'string'){
+		elements = $(args);
+		len2 = elements.length;
+		for( i = 0; i < len1; i++ ){
+			for( j = 0; j < len2; j++){
+				if( this[i] == elements[j] ){
+					temp.push(this[i]);
+					break;
+				}
+			}
+		}
+	}
+	//2. 当选择条件为函数时
+	else if( typeof args == 'function' ){
+		for( i = 0; i < len1; i++ ){
+			if( args.call(this[i]) ){
+				temp.push(this[i]);
+			}
+		}
+	}
+	//3. 其他类型参数均非法
+	else {
+		errorArgs();
+	}
+
+	pushElementsToAnything(this, temp);
+
+	return this;
+
+}
+
+//has过滤方法，仅可传入css选择器
+//筛选当前节点的后代节点中是否包含选择器中的节点
+Anything.prototype.has = function(select){
+	if( typeof select != 'string' )  errorArgs();
+
+	var i,
+		j,
+		len1 = this.length,
+		temp = [];
+
+	for( i = 0; i < len1; i++ ){
+
+		if( $(this[i]).find(select).length > 0 ){
+			temp.push(this[i]);
+		}
+	}
+
+	pushElementsToAnything(this, temp);
+
+	return this;
+}
+
+//------------------------------------------------------------------------------------
+//-----------------------------------查找方法-----------------------------------------
+//------------------------------------------------------------------------------------
+
+//***********************************祖先元素*****************************************
+//仅查找父级元素,slelect可用来过滤父级元素
+Anything.prototype.parent = function(select){
+	var i,
+		j,
+		len1 = this.length,
+		temp = [],
+		parent_node;
+
+	//1. 找到所有元素的父级元素，并过滤掉重复的
+	for( i = 0; i < len1; i++ ){
+		parent_node = this[i].parentNode;
+		
+		for( j = 0; j < temp.length; j++){
+			if( parent_node == temp[j] ){
+				break;
+			}
+		}
+
+		if( j == temp.length ){
+			temp.push(parent_node);
+		}
+	}
+	
+	//2. 如果传了参数，则进行过滤
+	if( typeof select == 'string' ){
+		temp = $(temp).filter(select);
+
+	}
+
+	//3. 将筛选后的结果替换掉this中的元素
+	pushElementsToAnything(this, temp);
+
+	return this;
+}
+
+//查找所有祖先元素，直到html,(html没有父元素)
+Anything.prototype.parents = function(select){
+	var i,
+		j,
+		len1 = this.length,
+		parent_node,
+		temp = [];
+
+	//1. 找到所有元素的祖先元素，并过滤掉重复的
+	for( i = 0; i < len1; i++ ){
+		parent_node = this[i].parentNode;
+
+		while( parent_node != document ){
+			for( j = 0; j < temp.length; j++ ){
+				if( parent_node == temp[j] ){
+					break;
+				}
+			}
+			if( j == temp.length ){
+				temp.push( parent_node )
+			} else {
+				parent_node = parent_node.parentNode;
+			}
+		}
+	}
+
+	//2. 如果传了参数，则进行过滤
+	if( typeof select == 'string' ){
+		temp = $(temp).filter(select);
+
+	}
+
+	//3. 将筛选后的结果替换掉this中的元素
+	pushElementsToAnything(this, temp);
+
+	return this;
+}
+
+//***********************************后代元素*****************************************
+//子元素，不包括文本和注释，仅仅选择标签元素
+Anything.prototype.children = function(select){
+	var i,
+		j,
+		len1 = this.length,
+		len2,
+		temp = [];
+
+	//1. 找到所有元素的子元素，文本，注释等其他元素过滤掉
+	for( i = 0; i < len1; i++ ){
+		child_nodes = this[i].childNodes;
+		len2 = child_nodes.length;
+		for( j = 0; j < len2; j++ ){
+			if( child_nodes[j].nodeType == 1){
+				temp.push(child_nodes[j]);
+			}
+		}
+	}
+
+	//2. 如果传了参数，则进行过滤
+	if( typeof select == 'string' ){
+		temp = $(temp).filter(select);
+	}
+
+	//3. 将筛选后的结果替换掉this中的元素
+	pushElementsToAnything(this, temp);
+
+	return this;
+}
+
+//查找后代元素
+Anything.prototype.find = function(select){
+	if( typeof select != 'string') errorArgs();
+
+	var i,
+		j,
+		len1,
+		parent_node = this,
+		temp = [];
+
+	//1. 找到所有元素的后代元素，文本，注释等其他元素过滤掉
+	while( parent_node.length != 0 ){
+		child_nodes = $(parent_node).children();
+		len1 = child_nodes.length;
+		for( i = 0; i < len1; i++ ){
+			temp.push(child_nodes[i]);
+		}
+		parent_node = child_nodes;
+	}
+
+	//2. 通过传入的参数进行过滤
+	temp = $(temp).filter(select);
+
+	//3. 将筛选后的结果替换掉this中的元素
+	pushElementsToAnything(this, temp);
+
+	return this;
+}
+//***********************************程序函数*****************************************
+
 //------------------------------------------------------------------------------------
 //-----------------------------------功能函数-----------------------------------------
 //------------------------------------------------------------------------------------
@@ -1765,9 +2008,10 @@ function errorArgs(){
 
 //通用能力检测函数，判断一个对象是否有某个函数
 //例子：console.log(isHostMethod(window,'attachEvent'))
+//高级程序设计P219
 function isHostMethod(obj, property){
 	var t = typeof obj[property];
-	return t == 'function' || (!!(t=='object'&&obj[property])) || t=='unknow';
+	return t == 'function' || (!!(t=='object'&&obj[property])) || t == 'unknow';
 }
 
 
@@ -1775,7 +2019,13 @@ function isHostMethod(obj, property){
 //把一个数组元素push到Anything数组
 //直接赋值不行，anything会变成一个普通数组
 function pushElementsToAnything(anything, arr){
-	for(var i=0; i<arr.length; i++){
+	if( !anything instanceof Anything  || !arr instanceof Array)  errorArgs();
+
+	var i;
+	//先清空Anything对象中的元素
+	anything.splice( 0, anything.length );
+
+	for( i = 0; i < arr.length; i++ ){
 		anything.push(arr[i]);
 	}
 }
@@ -1805,7 +2055,7 @@ function elementIsMatchSelect(node, select){
 //***********************************dom节点函数***************************************
 //获取节点计算样式
 //该函数始终返回的是一个带单位的字符串，如果要进行数值处理的话需要用parseFloat处理一下！！
-//getStyle($('.ul1').elements[0],'margin'),padding和margin在Firefox中一直返回0，应用padding-left等带方位的单位获取
+//getStyle($('.ul1')[0],'margin'),padding和margin在Firefox中一直返回0，应用padding-left等带方位的单位获取
 function getStyle(element,attr) {
 	//优先获取内联样式（解决IE678无法fadeIn正确获取opacity）
 	if(element.style[attr] !== '' && element.style[attr] !== undefined){

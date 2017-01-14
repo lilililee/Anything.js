@@ -29,7 +29,7 @@
 			
 		}
 		.ul1{
-			display: none;
+			/*display: none;*/
 			border: 50px solid blue;
 			margin-top: 10px;
 
@@ -107,7 +107,7 @@
 	</div>
 	<ul class="nav">
 		<li>111</li>
-		<li>222</li>
+		<li>222</li>sdsdf
 		<li>333</li>
 		<li>444</li>
 		<li>555</li>
@@ -136,14 +136,15 @@
 	<ul class="ul1" >
 		<li class="li1">qqqzzzzzzzzzzzzzzzzzzzzzzzzz</li>
 		<li class="li2 zzq">wwwzzzzzzzzzzzzzzzzzzzzzzz</li>	
-		<li class="li3">eeezzzzzzzzzzzzzzzzzzzzzzzzzz</li>
+		<li class="li3">eeezzzzzzzzzzzzzzzzzzzzzzzzzz <p>sssssp <span>zz</span></p></li>
 	</ul>
 	<ul class="ul2" id="lee">
-		<li class="z">qqq</li>
-		<li class="li5">www</li>
-		<li class="li6">eeespan <span></span></li>
-		<li class="li6">eeespan <span></span></li>
-		<li class="li6">eeespan <span></span></li>
+		sss
+		<li class="z">qqq</li>sss
+		<li class="ss li5">www</li>
+		<li class="li6 li2">eeespan <span class="li1"></span></li>
+		<li class="li6" id="zzzz">eeespan <span>zz</span></li>
+		<li class="li6">eeespan <span>zz</span></li>
 	</ul>
 	
 	<input type="text" name="uesrname" id="user"><br>
@@ -153,8 +154,17 @@
 <script src ='Anything.js'></script>
 
 <script>
-console.log($('#lee li '))
-console.log(document.querySelectorAll('#lee li '))
+
+//console.log($('#lee li ').hasClass('li5'))
+//console.log(window.parentNode)
+
+//console.log($(' li').prev().css('color','red'))
+console.log($(' li').wrapAll('<div></div>'))
+
+
+//var a = $('#lee li ')
+
+//console.log(document.querySelectorAll('#lee li '))
 
 
 //alert(111)
