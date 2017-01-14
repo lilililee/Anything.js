@@ -1,5 +1,6 @@
 console.log('Welcome to use Anything.js!');
 
+//使用$来生成一个Anything对象
 function $(args){
 	return new Anything(args);
 };
@@ -8,7 +9,7 @@ function $(args){
 Anything.prototype = new Array();
 
 function Anything(args) {
-	//this.elements = [];
+
 	//1. 参数为字符串时
 	if(typeof args == 'string'){
 		//1.1 优先使用querySelectorAll方法
@@ -17,26 +18,28 @@ function Anything(args) {
 		}
 		//1.2 使用自写的选择符匹配，兼容IE6，7
 		else {
+			//原理：根据css选择符args来匹配元素，从后向前进行筛选
+
 			//案例：
 			//args: "  #id  .class>p span  , #div~h1   z   ,    "
 			//处理后的slect_arr中保存了3个选择符数组
 			//slect_arr[0] : [" #id"," .class", ">p", " span"]
 			//slect_arr[1] : [" #div", "~h1", " z"]
 			//slect_arr[2] : []
-			//将传进来的选择器进行分割处理并保存在select_arr中
-			//select_arr中的每个元素表示一个选择器处理后的参数数组
+
+			//1.2.1 将传进来的选择器进行分割处理并保存在select_arg中
 			var select_arg = args.split(',');	//当参数有逗号时，实现多组选择符匹配
 				select_arr = [],				//根据层次选择符(\s>~+)来分割选择器
-				start = 0,					//记录匹配到层次选择符的位置
-				temp = '',					//临时保存分割后的单个选择器字符串
+				start = 0,						//记录匹配到层次选择符的位置
+				temp = '',						//临时保存分割后的单个选择器字符串
 				i = 0,
 				j = 0;
-				//console.log(select_arg)
-
+		
+			//1.2.2 select_arr中的每个元素表示一个选择器处理后的参数数组
 			for ( i = 0; i < select_arg.length; i++){
 				select_arr[i] = [];
 				select_arg[i] = ' ' + select_arg[i] + ' ';	//在选择符前后加一空格，保证第一个字符均为层次选择符
-				//console.log(select_arg[i])
+
 				for( j = 0; j < select_arg[i].length; j++){
 					if(/[\s>~+]/.test(select_arg[i].charAt(j))){					
 						temp = select_arg[i].slice(start,j);
@@ -48,21 +51,19 @@ function Anything(args) {
 				}
 			}
 
-			//根据处理后的参数进行元素匹配
 			var temp = [],
 				result = [],
 				k = 0,
 				cur_node = null;		//当前操作的节点
 				is_find = false,
 				temp_result = [];		//临时保存符合css选择符的节点
-				//console.log(select_arr)
-			for( i=0; i < select_arr.length; i++){
+				
+			for( i=0; i < select_arr.length; i++ ){
 				//当前选择器数组为空数组时跳过此次操作
 				temp = select_arr[i];	//temp为用,分割后的选择符数组,例如： [" #content", ">#box", ">.dzzz"]
-				if( temp.length == 0) continue;
+				if( temp.length == 0 ) continue;
 
-				//console.log(temp[temp.length-1])
-				//先根据最后一个选择符来获取元素
+				//1.2.3 先根据最后一个选择符来获取元素
 				switch( temp[temp.length-1].charAt(1) ){
 					case '#' :
 						result = this.getById(temp[temp.length-1].slice(2));
@@ -74,11 +75,12 @@ function Anything(args) {
 						result = this.getByTagName(temp[temp.length-1].slice(1));
 				}
 
-				//遍历所有节点
+				//1.2.4 遍历所有元素
 				for( j = 0; j < result.length; j++ ){
-					//is_find表示当前节点是否符合选择器
-					//is_find = true;
+					//初始化当前节点
 					cur_node = result[j];
+
+					//对每个节点根据选择符数组进行循环筛选
 					for( k = temp.length-2; k >= 0; k-- ){
 						is_find = false;
 						switch( temp[k+1].charAt(0) ){			
@@ -136,61 +138,36 @@ function Anything(args) {
 				}
 				result = temp_result;			
 			}
+			//1.2.5 把筛选后的结果保存到当前Anything对象中
 			pushElementsToAnything(this, result);
 		}
-	}else if(typeof args == 'object'){
-		//1. 为节点数组时
+	}
+	//2. 参数为对象时
+	else if(typeof args == 'object'){
+		//2.1 为节点数组时
 		if(typeof args.length == 'number' && args != window){
 			for(var i=0; i<args.length; i++){
 				this.push(args[i]);
 			}
 		}
-		//2. 为window, document, document.body, document.documentElement, 单个节点等对象时
+		//2.2 为window, document, document.body, document.documentElement, 单个节点等对象时
 		else{
-				this.push(args);console.log(1112)
+				this.push(args);
 		}	
-	}else if(typeof args == 'function'){
+	}
+	//3. 参数为函数时
+	else if(typeof args == 'function'){
+		//添加document.onload事件
 		documentReady(args);
 	}
+	//4. 其他参数均不合法
 	else{
 		errorArgs();
 	}
-	//this.push(111);
-	//pushElementsToAnything(this,[123,232,4343])
 	
 }
 
 //***********************************获取元素*****************************************
-//把一个数组元素push到Anything数组
-//直接赋值不行，anything会变成一个普通数组
-function pushElementsToAnything(anything, arr){
-	for(var i=0; i<arr.length; i++){
-		anything.push(arr[i]);
-	}
-}
-
-//判断一个节点是否满足css选择符
-//css选择符第一位必须为为层次选择符，比如： ' p', '>.class'
-function elementIsMatchSelect(node, select){
-	var is_match = false;
-	switch( select.charAt(1)){
-		case '#':
-			if( node.id == select.slice(2) ){
-				is_match = true;
-			} 
-			break;
-		case '.':
-			if( $(node).hasClass(select.slice(2)) ){
-				is_match = true;
-			} 
-			break;
-		default :
-			if( node.tagName.toLowerCase() == select.slice(1)){
-				is_match = true;
-			} 						
-	}
-	return is_match;
-}
 
 //以下选择方法都是返回一个标准的数组对象
 //根据id获取
@@ -1790,9 +1767,41 @@ function errorArgs(){
 //例子：console.log(isHostMethod(window,'attachEvent'))
 function isHostMethod(obj, property){
 	var t = typeof obj[property];
-	return t == 'function' || (!!(t=='object'&&obj[property])) || t=='unknow'
+	return t == 'function' || (!!(t=='object'&&obj[property])) || t=='unknow';
 }
 
+
+//********************************Anything辅助函数************************************
+//把一个数组元素push到Anything数组
+//直接赋值不行，anything会变成一个普通数组
+function pushElementsToAnything(anything, arr){
+	for(var i=0; i<arr.length; i++){
+		anything.push(arr[i]);
+	}
+}
+
+//判断一个节点是否满足css选择符
+//css选择符第一位必须为为层次选择符，比如： ' p', '>.class'
+function elementIsMatchSelect(node, select){
+	var is_match = false;
+	switch( select.charAt(1)){
+		case '#':
+			if( node.id == select.slice(2) ){
+				is_match = true;
+			} 
+			break;
+		case '.':
+			if( $(node).hasClass(select.slice(2)) ){
+				is_match = true;
+			} 
+			break;
+		default :
+			if( node.tagName.toLowerCase() == select.slice(1)){
+				is_match = true;
+			} 						
+	}
+	return is_match;
+}
 //***********************************dom节点函数***************************************
 //获取节点计算样式
 //该函数始终返回的是一个带单位的字符串，如果要进行数值处理的话需要用parseFloat处理一下！！
