@@ -26,22 +26,24 @@ function Anything(args) {
 			//slect_arr[2] : []
 
 			//1.2.1 将传进来的选择器进行分割处理并保存在select_arg中
-			var select_arg = args.split(',');	//当参数有逗号时，实现多组选择符匹配
+			var i,
+				j,
+				select_arg = args.split(','),	//当参数有逗号时，实现多组选择符匹配
 				select_arr = [],				//根据层次选择符(\s>~+)来分割选择器
 				start = 0,						//记录匹配到层次选择符的位置
-				temp = '',						//临时保存分割后的单个选择器字符串
-				i = 0,
-				j = 0;
+				temp = '';						//临时保存分割后的单个选择器字符串
+				
+				
 		
 			//1.2.2 select_arr中的每个元素表示一个选择器处理后的参数数组
 			for ( i = 0; i < select_arg.length; i++){
 				select_arr[i] = [];
 				select_arg[i] = ' ' + select_arg[i] + ' ';	//在选择符前后加一空格，保证第一个字符均为层次选择符
 
-				for( j = 0; j < select_arg[i].length; j++){
-					if(/[\s>~+]/.test(select_arg[i].charAt(j))){					
+				for( j = 0; j < select_arg[i].length; j++ ){
+					if( /[\s>~+]/.test(select_arg[i].charAt(j)) ){					
 						temp = select_arg[i].slice(start,j);
-						if(temp != '' && temp != ' '){
+						if( temp != '' && temp != ' ' ){
 							select_arr[i].push( temp );
 						}
 						start = j;
@@ -49,14 +51,14 @@ function Anything(args) {
 				}
 			}
 
-			var temp = [],
-				result = [],
-				k = 0,
-				cur_node = null;		//当前操作的节点
+			var k = 0,
+				temp = [],
+				result = [],			
+				cur_node = null,		//当前操作的节点
 				is_find = false,
 				temp_result = [];		//临时保存符合css选择符的节点
 				
-			for( i=0; i < select_arr.length; i++ ){
+			for( i = 0; i < select_arr.length; i++ ){
 				//当前选择器数组为空数组时跳过此次操作
 				temp = select_arr[i];	//temp为用,分割后的选择符数组,例如： [" #content", ">#box", ">.dzzz"]
 				if( temp.length == 0 ) continue;
@@ -105,7 +107,7 @@ function Anything(args) {
 							case '~':
 								cur_node = getPreviousSibling(cur_node);
 								//当没有上一兄弟节点时会返回null,不再继续此次匹配
-								if(cur_node == null )  break;
+								if( cur_node == null )  break;
 								while( cur_node != null ){
 									is_find = elementIsMatchSelect(cur_node, temp[k]);
 									if( is_find ){
@@ -130,7 +132,7 @@ function Anything(args) {
 							break;
 						}
 					}
-					if( k == -1){
+					if( k == -1 ){
 						temp_result.push(result[j]);
 					}
 				}
@@ -144,7 +146,9 @@ function Anything(args) {
 	else if(typeof args == 'object'){
 		//2.1 为节点数组时
 		if(typeof args.length == 'number' && args != window){
-			for(var i=0; i<args.length; i++){
+			var i,
+				len = args.length;
+			for( i = 0; i < len; i++ ){
 				this.push(args[i]);
 			}
 		}
@@ -165,46 +169,67 @@ function Anything(args) {
 Anything.prototype = new Array();
 Anything.prototype.constructor = Anything;
 
-//***********************************获取元素*****************************************
+//------------------------------------------------------------------------------------
+//-----------------------------------元素获取-----------------------------------------
+//------------------------------------------------------------------------------------
 
 //以下选择方法都是返回一个标准的数组对象
 //根据id获取
 Anything.prototype.getById = function(id) {
-	if(typeof id != 'string') errorArgs();			//参数检测
+	if( typeof id != 'string' ) errorArgs();			//参数检测
 
 	var result = document.getElementById(id);
+
 	return result == null? []:[result];				//无匹配id时会返回null
 };
 
 //根据tag获取
 Anything.prototype.getByTagName = function(tag_name,parent_node){
-	if(typeof tag_name != 'string') errorArgs();    //参数检测
+	if( typeof tag_name != 'string' ) errorArgs();    //参数检测
 
-	var node = parent_node == undefined? document : parent_node;
-	var result = [];
-	var tags = node.getElementsByTagName(tag_name);
-	for(var i=0; i<tags.length; i++){
+	var i,
+		node = parent_node == undefined? document : parent_node,
+		result = [],
+	    tags = node.getElementsByTagName(tag_name),
+	    len = tags.length;
+	    
+	for( i = 0; i < len; i++ ){
 		result.push(tags[i]);
 	}
+
 	return result;
 }
+
 //根据class获取
 Anything.prototype.getByClassName = function(class_name,parent_node){
-	if(typeof class_name != 'string') errorArgs();  //参数检测
+	if( typeof class_name != 'string' ) errorArgs();  //参数检测
 
-	var node = parent_node == undefined? document : parent_node;
-	var result = [];
-	if(document.getElementsByClassName){	//W3C   IE9+ 
+	var i,
+		node = parent_node == undefined? document : parent_node,
+	    result = [];
+	//1. W3C,IE9+ 
+	if(document.getElementsByClassName){	
 		var clas = node.getElementsByClassName(class_name);
-		for(var i=0; i<clas.length; i++){
+
+		for( i = 0; i < clas.length; i++){
 			result.push(clas[i]);
 		}
-	}else{				//IE6,7,8
-		var all = node.getElementsByTagName('*');
-		for(var i=0,len=all.length;i<len;i++){
-			var arr_class = all[i].className.split(' ');
-			for(var j=0,len2=arr_class.length;j<len2;j++){
-				if(arr_class[j]==class_name){
+	}
+	//2. IE6,7,8
+	else{				
+		var i,
+			j,
+			all = node.getElementsByTagName('*'),
+			len1 = all.length,
+			len2,				//单个节点的className个数
+			arr_class;			//临时保存单个节点的所有className
+
+		for( i = 0; i < len1; i++){			
+			arr_class = all[i].className.split(' ');
+			len2 = arr_class.length;
+
+			for( j = 0; j < len2; j++){
+				if( arr_class[j] == class_name ){
 					result.push(all[i]);
 					break;
 				}
@@ -214,6 +239,9 @@ Anything.prototype.getByClassName = function(class_name,parent_node){
 	return result;
 }
 
+//------------------------------------------------------------------------------------
+//-----------------------------------元素操作-----------------------------------------
+//------------------------------------------------------------------------------------
 
 //***********************************属性操作*****************************************
 //获取和设置属性
@@ -296,7 +324,9 @@ Anything.prototype.css = function(attr,value){
 		return this;
 	}
 }
-
+//------------------------------------------------------------------------------------
+//-----------------------------------样式操作-----------------------------------------
+//------------------------------------------------------------------------------------
 //***********************************类名操作*****************************************
 //添加类名
 Anything.prototype.addClass = function(class_name){
@@ -1766,6 +1796,16 @@ Anything.prototype.eq = function(index){
 	return this;
 }
 
+//获取第一个
+Anything.prototype.first = function(){
+	return this.eq(0);
+}
+
+//获取最后一个
+Anything.prototype.last = function(){
+	return this.eq(-1);
+}
+
 
 
 //反向选择
@@ -2147,13 +2187,7 @@ Anything.prototype.siblings = function(select){
 				temp.push(next_nodes[j]);
 			}
 		}
-		// all_nodes  = prev_nodes.concat(next_nodes);
-		// len2 = all_nodes.length;
-
-		// for( j = 0; j < len2; j++ ){
-		// 	len3 = temp.length;
-			
-		// }
+		
 	}
 
 	//2. 当有筛选参数时，进行过滤
@@ -2167,8 +2201,11 @@ Anything.prototype.siblings = function(select){
 	return this;
 }
 
-
-
+//***********************************插件函数*****************************************
+//插件入口
+Anything.prototype.extend = function (name, fn) {
+	Base.prototype[name] = fn;
+};
 
 
 //------------------------------------------------------------------------------------
