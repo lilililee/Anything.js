@@ -140,7 +140,7 @@
 	</ul>
 	<ul class="ul2" id="lee">
 		sss
-		<li class="z">qqq</li>sss
+		<li class="zs">qqq</li>sss
 		<li class="ss li5">www</li>
 		<li class="li6 li2">eeespan <span class="li1"></span></li>
 		<li class="li6" id="zzzz">eeespan <span>zz</span></li>
@@ -154,12 +154,16 @@
 <script src ='Anything.js'></script>
 
 <script>
-
+var arr1 = [1,2,3];
+var arr2 = [4,5,6];
+var arr3 = arr1.concat(arr2);   //[1,2,3,4,5,6]
+console.log(isInArray(1,arr1));	        //6
 //console.log($('#lee li ').hasClass('li5'))
 //console.log(window.parentNode)
 
 //console.log($(' li').prev().css('color','red'))
-console.log($(' li').wrapAll('<div></div>'))
+console.log($(' .li5').nextAll	())
+//console.log($(' .li5').wrapAll('<div></div>'))
 
 
 //var a = $('#lee li ')

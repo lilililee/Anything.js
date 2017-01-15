@@ -1997,10 +1997,175 @@ Anything.prototype.find = function(select){
 }
 
 //********************************向前查找兄弟元素************************************
+//向前查找当前节点一个兄弟元素
+Anything.prototype.prev = function(select){
+	var i,
+		len1 = this.length,
+		prev_node,
+		temp = [];
+
+	//1. 查找到所有节点的上一兄弟元素
+	for( i = 0; i < len1; i++ ){
+		var prev_node = getPreviousSibling(this[i]);
+		if( prev_node ){
+			temp.push(prev_node);
+		}
+	}
+
+	//2. 当有筛选参数时，进行过滤
+	if( typeof select == 'string' ){
+		temp = $(temp).filter(select);
+	}
+
+	//3. 将筛选后的结果替换掉this中的元素
+	pushElementsToAnything(this, temp);
+
+	return this;
+}
+
+//向前查找当前节点所有兄弟元素
+Anything.prototype.prevAll = function(select){
+	var i,
+		j,
+		len1 = this.length,
+		len2,
+		prev_node,
+		temp = [];
+
+	//1. 查找到所有节点的所有兄弟元素
+	for( i = 0; i < len1; i++ ){
+		var prev_node = getPreviousSibling(this[i]);
+		
+		while ( prev_node ){
+			if( !isInArray(prev_node, temp) ){
+				temp.push(prev_node)
+			}
+			prev_node = getPreviousSibling(prev_node);
+		}
+	}
+
+	//2. 当有筛选参数时，进行过滤
+	if( typeof select == 'string' ){
+		temp = $(temp).filter(select);
+	}
+
+	//3. 将筛选后的结果替换掉this中的元素
+	pushElementsToAnything(this, temp);
+
+	return this;
+}
 
 
+//********************************向后查找兄弟元素************************************
+//向后查找当前节点一个兄弟元素
+Anything.prototype.next = function(select){
+	var i,
+		len1 = this.length,
+		next_node,
+		temp = [];
+
+	//1. 查找到所有节点的上一兄弟元素
+	for( i = 0; i < len1; i++ ){
+		var next_node = getNextSibling(this[i]);
+		if( next_node ){
+			temp.push(next_node);
+		}
+	}
+
+	//2. 当有筛选参数时，进行过滤
+	if( typeof select == 'string' ){
+		temp = $(temp).filter(select);
+	}
+
+	//3. 将筛选后的结果替换掉this中的元素
+	pushElementsToAnything(this, temp);
+
+	return this;
+}
+
+//向后查找当前节点所有兄弟元素
+Anything.prototype.nextAll = function(select){
+	var i,
+		j,
+		len1 = this.length,
+		len2,
+		next_node,
+		temp = [];
+
+	//1. 查找到所有节点的所有兄弟元素
+	for( i = 0; i < len1; i++ ){
+		var next_node = getNextSibling(this[i]);
+		
+		while ( next_node ){
+			if( !isInArray(next_node, temp) ){
+				temp.push(next_node)
+			}
+			next_node = getNextSibling(next_node);
+		}
+	}
+
+	//2. 当有筛选参数时，进行过滤
+	if( typeof select == 'string' ){
+		temp = $(temp).filter(select);
+	}
+
+	//3. 将筛选后的结果替换掉this中的元素
+	pushElementsToAnything(this, temp);
+
+	return this;
+}
+
+//********************************向后查找兄弟元素************************************
+//查找所有兄弟元素
+Anything.prototype.siblings = function(select){
+	var i,
+		j,
+		k,
+		len1 = this.length,
+		len2,
+		len3,
+		prev_nodes,
+		next_nodes,
+		all_nodes,
+		temp = [];
 
 
+	for( i = 0; i < len1; i++ ){
+		prev_nodes = $(this[i]).prevAll();
+		
+		len2 = prev_nodes.length;
+		for( j = 0; j < len2; j++ ){
+			if( !isInArray(prev_nodes[j], temp) ){
+				temp.push(prev_nodes[j]);
+			}
+		}
+
+		next_nodes = $(this[i]).nextAll();
+		len2 = next_nodes.length;
+		for( j = 0; j < len2; j++ ){
+			if( !isInArray(next_nodes[j], temp) ){
+				temp.push(next_nodes[j]);
+			}
+		}
+		// all_nodes  = prev_nodes.concat(next_nodes);
+		// len2 = all_nodes.length;
+
+		// for( j = 0; j < len2; j++ ){
+		// 	len3 = temp.length;
+			
+		// }
+	}
+
+	//2. 当有筛选参数时，进行过滤
+	if( typeof select == 'string' ){
+		temp = $(temp).filter(select);
+	}
+
+	//3. 将筛选后的结果替换掉this中的元素
+	pushElementsToAnything(this, temp);
+
+	return this;
+}
 
 
 
@@ -2061,6 +2226,22 @@ function elementIsMatchSelect(node, select){
 			} 						
 	}
 	return is_match;
+}
+
+//判断一个元素是否存在这个数组中
+function isInArray(elem, arr){
+	if(!arr instanceof Array) errorArgs();
+	var i,
+		len = arr.length,
+		result = false;
+	for( i = 0; i < len; i++ ){
+		if( elem == arr[i] ){
+			result = true;
+			break;
+		}
+	}
+	
+	return result;
 }
 //***********************************dom节点函数***************************************
 //获取节点计算样式
@@ -2135,13 +2316,16 @@ function getDefaultDisplay(node){
 
 }
 
-//获取上一个兄弟节点，过滤掉空格和回车生成的文本节点
+//获取上一个兄弟节点，过滤掉空格和文本节点
 function getPreviousSibling(node){
 	var result = node.previousSibling;
-	var reg = /^\s+$/;		// \s匹配空格和换行符
+	//var reg = /^\s+$/;		// \s匹配空格和换行符
 	//当某个节点没有上一个兄弟节点时会返回null或undefined，导致test方法报错
-	while(result != null && reg.test(result.nodeValue)){	
-		result = result.previousSibling;		
+	// while(result != null && reg.test(result.nodeValue)){	
+	// 	result = result.previousSibling;		
+	// }
+	while( result != null && result.nodeType != 1 ){
+		result = result.previousSibling;
 	}
 	return result;
 }
@@ -2149,10 +2333,14 @@ function getPreviousSibling(node){
 //获取下一个兄弟节点，过滤掉空格和回车生成的文本节点
 function getNextSibling(node){
 	var result = node.nextSibling;
-	var reg = /^\s+$/;		// \s匹配空格和换行符
-	//当某个节点没有上一个兄弟节点时会返回null或undefined，导致test方法报错
-	while(result != null && reg.test(result.nodeValue)){	
-		result = result.nextSibling;		
+	// var reg = /^\s+$/;		// \s匹配空格和换行符
+	// 当某个节点没有上一个兄弟节点时会返回null或undefined，导致test方法报错
+	// while(result != null && reg.test(result.nodeValue)){	
+	// 	result = result.nextSibling;		
+	// }
+
+	while( result != null && result.nodeType != 1 ){
+		result = result.nextSibling;
 	}
 	return result;
 }
