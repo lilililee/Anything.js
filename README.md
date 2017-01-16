@@ -84,7 +84,7 @@
 
 返回值： Anything
 
-示例： $('p').filter('span'), $('p').filter( function(){ return this.className == '.cla' })...
+示例： $('p').filter('span'), $('p').filter( function(){ return this.className == 'cla' })...
 
 #### 2.7 类名判断
 方法名称： $(slelector1).hasClass(class_name)
@@ -104,4 +104,84 @@
 
 示例： $('p').is('.cla'), $('div').is(':animated')...
 
+### 3. 节点查找
+#### 3.1 查找父节点
+方法名称： $(slelector1).parent([slelector2])
 
+说明： 查找匹配元素的父节点，可传入css选择符进行过滤
+
+返回值： Anything
+
+示例： $('p').parent(), $('p').parent('#title')...
+
+#### 3.2 查找祖先节点
+方法名称： $(slelector1).parents([slelector2])
+
+说明： 查找匹配元素的祖先节点，可传入css选择符进行过滤
+
+返回值： Anything
+
+示例： $('p').parents(), $('p').parents('#title')...
+
+#### 3.3 查找子节点
+方法名称： $(slelector1).children([slelector2])
+
+说明： 查找匹配元素的子节点，可传入css选择符进行过滤
+
+返回值： Anything
+
+示例： $('div').children(), $('div').children('p')...
+
+#### 3.4 查找后代节点
+方法名称： $(slelector1).find([slelector2])
+
+说明： 查找匹配元素的后代节点，可传入css选择符进行过滤
+
+返回值： Anything
+
+示例： $('div').find(), $('div').find('p')...
+
+#### 3.5 查找上一兄弟节点
+方法名称： $(slelector1).prev([slelector2])
+
+说明： 查找匹配元素的上一兄弟节点，可传入css选择符进行过滤
+
+返回值： Anything
+
+示例： $('li').prev(), $('li').prev('.red')...
+
+#### 3.6 查找前面所有兄弟节点
+方法名称： $(slelector1).prevAll([slelector2])
+
+说明： 查找匹配元素的前面所有兄弟节点，可传入css选择符进行过滤
+
+返回值： Anything
+
+示例： $('li').prevAll(), $('li').prevAll('.red')...
+
+#### 3.7 查找下一兄弟节点
+方法名称： $(slelector1).next([slelector2])
+
+说明： 查找匹配元素的下一兄弟节点，可传入css选择符进行过滤
+
+返回值： Anything
+
+示例： $('li').next(), $('li').next('.red')...
+
+#### 3.8 查找后面所有兄弟节点
+方法名称： $(slelector1).nextAll([slelector2])
+
+说明： 查找匹配元素的后面所有兄弟节点，可传入css选择符进行过滤
+
+返回值： Anything
+
+示例： $('li').nextAll(), $('li').nextAll('.red')...
+
+#### 3.9 查找所有兄弟节点
+方法名称： $(slelector1).siblings([slelector2])
+
+说明： 查找匹配元素的所有兄弟节点，可传入css选择符进行过滤
+
+返回值： Anything
+
+示例： $('li').siblings(), $('li').siblings('.red')...
