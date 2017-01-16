@@ -239,6 +239,458 @@ Anything.prototype.getByClassName = function(class_name,parent_node){
 	return result;
 }
 
+
+//------------------------------------------------------------------------------------
+//-----------------------------------过滤方法-----------------------------------------
+//------------------------------------------------------------------------------------
+
+
+//**********************************过滤元素******************************************
+//根据下标获取
+//示例：$('div p').eq(2)
+Anything.prototype.eq = function(index){
+	if(typeof index != 'number') errorArgs(); //参数检测
+
+	
+	if( index < 0 ) {
+		index = this.length + index;
+	}	
+	var temp = this[index];	
+	pushElementsToAnything(this , [temp]);
+
+	return this;
+}
+
+//获取第一个
+Anything.prototype.first = function(){
+	return this.eq(0);
+}
+
+//获取最后一个
+Anything.prototype.last = function(){
+	return this.eq(-1);
+}
+
+
+
+//反向选择
+//传入css选择符，删除掉符合该选择符的元素
+Anything.prototype.not = function(select){
+	if( typeof select != 'string' )  errorArgs();
+
+	var elements = $(select),
+		temp = [],
+		i,
+		len1 = this.length;
+
+	for( i = 0; i < len1; i++ ){
+		if( elements.indexOf(this[i]) == -1 ){
+			temp.push(this[i]);
+		}
+	}
+
+	pushElementsToAnything(this, temp);
+
+	return this;
+}
+
+//has过滤方法，仅可传入css选择器
+//筛选当前节点的后代节点中是否包含选择器中的节点
+Anything.prototype.has = function(select){
+	if( typeof select != 'string' )  errorArgs();
+
+	var i,
+		j,
+		len1 = this.length,
+		temp = [];
+
+	for( i = 0; i < len1; i++ ){
+
+		if( $(this[i]).find(select).length > 0 ){
+			temp.push(this[i]);
+		}
+	}
+
+	pushElementsToAnything(this, temp);
+
+	return this;
+}
+
+//filter过滤方法,可传入css选择器和判断函数
+Anything.prototype.filter = function(args){
+	var i,
+		elements,
+		temp = [],		//保存符合条件的元素
+		len1 = this.length;
+
+
+	//1. 当选择条件为css选择符时
+	if( typeof args == 'string'){
+		elements = $(args);
+
+		for( i = 0; i < len1; i++ ){
+			if( elements.indexOf(this[i]) != -1 ){
+				temp.push(this[i]);
+			}
+		}
+	}	
+	//2. 当选择条件为函数时
+	else if( typeof args == 'function' ){
+		for( i = 0; i < len1; i++ ){
+			if( args.call(this[i]) ){
+				temp.push(this[i]);
+			}
+		}
+	}
+	//3. 其他类型参数均非法
+	else {
+		errorArgs();
+	}
+
+	pushElementsToAnything(this, temp);
+
+	return this;
+
+}
+
+//***********************************条件判断*****************************************
+//判断当前所有节点中是否有至少一个节点包含该类名
+Anything.prototype.hasClass = function(class_name){
+	if( typeof class_name != 'string' || class_name === '') errorArgs();
+	var i,
+		len1 = this.length,
+		class_arr;
+
+	for( i = 0; i < len1; i++ ){
+		class_arr = this[i].className.split(' ');
+		
+		if( class_arr.indexOf(class_name) != -1 ){
+			return true;
+			break;
+		}
+	}
+
+	return false;
+}
+
+//判断当前元素数组是否有至少一个元素满足匹配选择器，即返回true
+//$('ul').is(':animated')    	伪类选择器
+//$('ul').is('#content p')    常规选择器
+Anything.prototype.is = function(select){
+	if(typeof select != 'string') errorArgs(); //参数检测
+
+	//1. 去参数前后的空格，trim() IE8-不支持
+	var str = select.replace(/^\s+|\s+$/g,''),
+		i,
+		len1 = this.length,
+		elements = $(str);
+	//2. 只要找到一个匹配元素就直接退出函数
+	for( i = 0; i < len1; i++ ){	
+		//3. 判断选择器是伪类选择器还是常规选择器
+		if( str.charAt(0) == ':' ){
+			switch(str){
+				case ':animated' :		//是否处于动画
+					if(this[i].animate_args) return true;
+					break;	
+				default :				
+					errorArgs();		
+			}
+		} else {
+			//根据常规选择器判断元素
+			if( elements.indexOf(this[i]) != -1 ){
+				return true;
+			}			
+		}
+	}
+	return false;
+}
+
+//------------------------------------------------------------------------------------
+//-----------------------------------查找方法-----------------------------------------
+//------------------------------------------------------------------------------------
+
+//***********************************祖先元素*****************************************
+//仅查找父级元素,slelect可用来过滤父级元素
+Anything.prototype.parent = function(select){
+	var i,
+		len1 = this.length,
+		temp = [],
+		parent_node;
+
+	//1. 找到所有元素的父级元素，并过滤掉重复的
+	for( i = 0; i < len1; i++ ){
+		parent_node = this[i].parentNode;
+		
+		if( temp.indexOf(parent_node) == -1 ){
+			temp.push(parent_node);
+		}
+	}	
+	//2. 如果传了参数，则进行过滤
+	if( typeof select == 'string' ){
+		temp = $(temp).filter(select);
+
+	}
+	//3. 将筛选后的结果替换掉this中的元素
+	pushElementsToAnything(this, temp);
+
+	return this;
+}
+
+//查找所有祖先元素，直到html,(html没有父元素)
+Anything.prototype.parents = function(select){
+	var i,
+		j,
+		len1 = this.length,
+		parent_node,
+		temp = [];
+
+	//1. 找到所有元素的祖先元素，并过滤掉重复的
+	for( i = 0; i < len1; i++ ){
+		parent_node = this[i].parentNode;
+
+		while( parent_node != document ){
+			if( temp.indexOf(parent_node) == -1 ){
+				temp.push(parent_node);
+			} else {
+				parent_node = parent_node.parentNode;
+			}
+		}
+	}
+
+	//2. 如果传了参数，则进行过滤
+	if( typeof select == 'string' ){
+		temp = $(temp).filter(select);
+
+	}
+
+	//3. 将筛选后的结果替换掉this中的元素
+	pushElementsToAnything(this, temp);
+
+	return this;
+}
+
+//***********************************后代元素*****************************************
+//子元素，不包括文本和注释，仅仅选择标签元素
+Anything.prototype.children = function(select){
+	var i,
+		j,
+		len1 = this.length,
+		len2,
+		temp = [];
+
+	//1. 找到所有元素的子元素，文本，注释等其他元素过滤掉
+	for( i = 0; i < len1; i++ ){
+		child_nodes = this[i].childNodes;
+		len2 = child_nodes.length;
+
+		for( j = 0; j < len2; j++ ){
+			if( child_nodes[j].nodeType == 1 ){
+				temp.push(child_nodes[j]);
+			}
+		}
+	}
+
+	//2. 如果传了参数，则进行过滤
+	if( typeof select == 'string' ){
+		temp = $(temp).filter(select);
+	}
+
+	//3. 将筛选后的结果替换掉this中的元素
+	pushElementsToAnything(this, temp);
+
+	return this;
+}
+
+//查找后代元素
+Anything.prototype.find = function(select){
+	if( typeof select != 'string') errorArgs();
+
+	var i,
+		j,
+		len1,
+		parent_node = this,
+		temp = [];
+
+	//1. 找到所有元素的后代元素，文本，注释等其他元素过滤掉
+	while( parent_node.length != 0 ){
+		child_nodes = $(parent_node).children();
+		len1 = child_nodes.length;
+
+		for( i = 0; i < len1; i++ ){
+			temp.push(child_nodes[i]);
+		}
+		parent_node = child_nodes;
+	}
+
+	//2. 通过传入的参数进行过滤
+	temp = $(temp).filter(select);
+
+	//3. 将筛选后的结果替换掉this中的元素
+	pushElementsToAnything(this, temp);
+
+	return this;
+}
+
+//********************************向前查找兄弟元素************************************
+//向前查找当前节点一个兄弟元素
+Anything.prototype.prev = function(select){
+	var i,
+		len1 = this.length,
+		prev_node,
+		temp = [];
+
+	//1. 查找到所有节点的上一兄弟元素
+	for( i = 0; i < len1; i++ ){
+		var prev_node = getPreviousSibling(this[i]);
+		if( prev_node ){
+			temp.push(prev_node);
+		}
+	}
+
+	//2. 当有筛选参数时，进行过滤
+	if( typeof select == 'string' ){
+		temp = $(temp).filter(select);
+	}
+
+	//3. 将筛选后的结果替换掉this中的元素
+	pushElementsToAnything(this, temp);
+
+	return this;
+}
+
+//向前查找当前节点所有兄弟元素
+Anything.prototype.prevAll = function(select){
+	var i,
+		j,
+		len1 = this.length,
+		len2,
+		prev_node,
+		temp = [];
+
+	//1. 查找到所有节点的所有兄弟元素
+	for( i = 0; i < len1; i++ ){
+		var prev_node = getPreviousSibling(this[i]);
+		
+		while ( prev_node ){
+			if( temp.indexOf(prev_node) == -1 ){
+				temp.push(prev_node);
+			}
+			prev_node = getPreviousSibling(prev_node);
+		}
+	}
+
+	//2. 当有筛选参数时，进行过滤
+	if( typeof select == 'string' ){
+		temp = $(temp).filter(select);
+	}
+
+	//3. 将筛选后的结果替换掉this中的元素
+	pushElementsToAnything(this, temp);
+
+	return this;
+}
+
+
+//********************************向后查找兄弟元素************************************
+//向后查找当前节点一个兄弟元素
+Anything.prototype.next = function(select){
+	var i,
+		len1 = this.length,
+		next_node,
+		temp = [];
+
+	//1. 查找到所有节点的上一兄弟元素
+	for( i = 0; i < len1; i++ ){
+		var next_node = getNextSibling(this[i]);
+		if( next_node ){
+			temp.push(next_node);
+		}
+	}
+
+	//2. 当有筛选参数时，进行过滤
+	if( typeof select == 'string' ){
+		temp = $(temp).filter(select);
+	}
+
+	//3. 将筛选后的结果替换掉this中的元素
+	pushElementsToAnything(this, temp);
+
+	return this;
+}
+
+//向后查找当前节点所有兄弟元素
+Anything.prototype.nextAll = function(select){
+	var i,
+		len1 = this.length,
+		next_node,
+		temp = [];
+
+	//1. 查找到所有节点的所有兄弟元素
+	for( i = 0; i < len1; i++ ){
+		next_node = getNextSibling(this[i]);
+		
+		while ( next_node ){
+			if( temp.indexOf(next_node) ==-1 ){
+				temp.push(next_node);
+			}
+			next_node = getNextSibling(next_node);
+		}
+	}
+
+	//2. 当有筛选参数时，进行过滤
+	if( typeof select == 'string' ){
+		temp = $(temp).filter(select);
+	}
+
+	//3. 将筛选后的结果替换掉this中的元素
+	pushElementsToAnything(this, temp);
+
+	return this;
+}
+
+//********************************向后查找兄弟元素************************************
+//查找所有兄弟元素
+Anything.prototype.siblings = function(select){
+	var i,
+		j,
+		len1 = this.length,
+		len2,
+		prev_nodes,
+		next_nodes,
+		temp = [];
+
+
+	for( i = 0; i < len1; i++ ){
+		
+		prev_nodes = $(this[i]).prevAll();		
+		len2 = prev_nodes.length;
+		for( j = 0; j < len2; j++ ){
+			if( temp.indexOf(prev_nodes[j]) == -1 ){
+				temp.push(prev_nodes[j]);
+			}
+		}
+
+		next_nodes = $(this[i]).nextAll();
+		len2 = next_nodes.length;
+		for( j = 0; j < len2; j++ ){
+			if( temp.indexOf(next_nodes[j]) == -1 ){
+				temp.push(next_nodes[j]);
+			}
+		}
+		
+	}
+
+	//2. 当有筛选参数时，进行过滤
+	if( typeof select == 'string' ){
+		temp = $(temp).filter(select);
+	}
+
+	//3. 将筛选后的结果替换掉this中的元素
+	pushElementsToAnything(this, temp);
+
+	return this;
+}
+
 //------------------------------------------------------------------------------------
 //-----------------------------------元素操作-----------------------------------------
 //------------------------------------------------------------------------------------
@@ -1724,482 +2176,6 @@ function doAnimate(node, obj_attr, time, callback, delay, type, start_fn){
 	},20);
 }
 
-//------------------------------------------------------------------------------------
-//-----------------------------------过滤方法-----------------------------------------
-//------------------------------------------------------------------------------------
-
-//***********************************条件判断*****************************************
-//判断当前所有节点中是否有至少一个节点包含该类名
-Anything.prototype.hasClass = function(class_name){
-	if( typeof class_name != 'string' ) errorArgs();
-	var result = false;
-	for( var i = 0; i < this.length; i++){
-		var class_arr = this[i].className.split(' ');
-		for( var j = 0; j < class_arr.length; j++){
-			if( class_arr[j] == class_name){
-				result = true;
-				break;
-			}
-		}
-		if( result ) break;
-	}
-	return result;
-}
-
-//判断当前元素数组是否有至少一个元素满足匹配选择器，即返回true
-//$('ul').is(':animated')    	伪类选择器
-//$('ul').is('  #content p')    常规选择器
-Anything.prototype.is = function(select){
-	if(typeof select != 'string') errorArgs(); //参数检测
-
-	//1. 去参数前后的空格，trim() IE8-不支持
-	var str = select.replace(/^\s+|\s+$/g,'');
-		i,
-		j,
-		elements;
-
-	for( i = 0; i < this.length; i++ ){
-		//只要找到一个匹配元素就直接退出函数
-		//判断选择器是伪类选择器还是常规选择器
-		if(str.charAt(0) == ':'){
-			switch(str){
-				case ':animated' :		//是否处于动画
-					if(this[i].animate_args) return true;
-					break;	
-				default :				
-					errorArgs();		
-			}
-		}else{
-			//根据常规选择器获取元素
-			elements = $(str);
-			for( j = 0; j < elements.length; j++){
-				if(this[i] == elements[j]) return true;	
-			}
-		}
-	}
-	return false;
-}
-
-//**********************************过滤元素******************************************
-//根据下标获取
-//示例：$('div p').eq(2)
-Anything.prototype.eq = function(index){
-	if(typeof index != 'number') errorArgs(); //参数检测
-
-	
-	if( index < 0 ) {
-		index = this.length + index;
-	}	
-	var temp = this[index];	
-	pushElementsToAnything(this , [temp]);
-
-	return this;
-}
-
-//获取第一个
-Anything.prototype.first = function(){
-	return this.eq(0);
-}
-
-//获取最后一个
-Anything.prototype.last = function(){
-	return this.eq(-1);
-}
-
-
-
-//反向选择
-//传入css选择符，删除掉符合该选择符的元素
-Anything.prototype.not = function(select){
-	if( typeof select != 'string' )  errorArgs();
-
-	var elements = $(select),
-		temp = [],
-		i,
-		j,
-		len1 = this.length,
-		len2 = elements.length;
-
-	for( i = 0; i < len1; i++ ){
-		for( j = 0; j < len2; j++){
-			if( this[i] == elements[j] ){
-				break;
-			}
-		}
-		if( j == len2 ){
-			temp.push(this[i]);
-		}
-	}
-
-	pushElementsToAnything(this, temp);
-
-	return this;
-}
-
-//filter过滤方法,可传入css选择器和判断函数
-Anything.prototype.filter = function(args){
-	var i,
-		j,
-		elements,
-		temp = [],		//保存符合条件的元素
-		len1 = this.length,
-		len2;
-	//1. 当选择条件为css选择符时
-	if( typeof args == 'string'){
-		elements = $(args);
-		len2 = elements.length;
-		for( i = 0; i < len1; i++ ){
-			for( j = 0; j < len2; j++){
-				if( this[i] == elements[j] ){
-					temp.push(this[i]);
-					break;
-				}
-			}
-		}
-	}
-	//2. 当选择条件为函数时
-	else if( typeof args == 'function' ){
-		for( i = 0; i < len1; i++ ){
-			if( args.call(this[i]) ){
-				temp.push(this[i]);
-			}
-		}
-	}
-	//3. 其他类型参数均非法
-	else {
-		errorArgs();
-	}
-
-	pushElementsToAnything(this, temp);
-
-	return this;
-
-}
-
-//has过滤方法，仅可传入css选择器
-//筛选当前节点的后代节点中是否包含选择器中的节点
-Anything.prototype.has = function(select){
-	if( typeof select != 'string' )  errorArgs();
-
-	var i,
-		j,
-		len1 = this.length,
-		temp = [];
-
-	for( i = 0; i < len1; i++ ){
-
-		if( $(this[i]).find(select).length > 0 ){
-			temp.push(this[i]);
-		}
-	}
-
-	pushElementsToAnything(this, temp);
-
-	return this;
-}
-
-//------------------------------------------------------------------------------------
-//-----------------------------------查找方法-----------------------------------------
-//------------------------------------------------------------------------------------
-
-//***********************************祖先元素*****************************************
-//仅查找父级元素,slelect可用来过滤父级元素
-Anything.prototype.parent = function(select){
-	var i,
-		j,
-		len1 = this.length,
-		temp = [],
-		parent_node;
-
-	//1. 找到所有元素的父级元素，并过滤掉重复的
-	for( i = 0; i < len1; i++ ){
-		parent_node = this[i].parentNode;
-		
-		for( j = 0; j < temp.length; j++){
-			if( parent_node == temp[j] ){
-				break;
-			}
-		}
-
-		if( j == temp.length ){
-			temp.push(parent_node);
-		}
-	}
-	
-	//2. 如果传了参数，则进行过滤
-	if( typeof select == 'string' ){
-		temp = $(temp).filter(select);
-
-	}
-
-	//3. 将筛选后的结果替换掉this中的元素
-	pushElementsToAnything(this, temp);
-
-	return this;
-}
-
-//查找所有祖先元素，直到html,(html没有父元素)
-Anything.prototype.parents = function(select){
-	var i,
-		j,
-		len1 = this.length,
-		parent_node,
-		temp = [];
-
-	//1. 找到所有元素的祖先元素，并过滤掉重复的
-	for( i = 0; i < len1; i++ ){
-		parent_node = this[i].parentNode;
-
-		while( parent_node != document ){
-			for( j = 0; j < temp.length; j++ ){
-				if( parent_node == temp[j] ){
-					break;
-				}
-			}
-			if( j == temp.length ){
-				temp.push( parent_node )
-			} else {
-				parent_node = parent_node.parentNode;
-			}
-		}
-	}
-
-	//2. 如果传了参数，则进行过滤
-	if( typeof select == 'string' ){
-		temp = $(temp).filter(select);
-
-	}
-
-	//3. 将筛选后的结果替换掉this中的元素
-	pushElementsToAnything(this, temp);
-
-	return this;
-}
-
-//***********************************后代元素*****************************************
-//子元素，不包括文本和注释，仅仅选择标签元素
-Anything.prototype.children = function(select){
-	var i,
-		j,
-		len1 = this.length,
-		len2,
-		temp = [];
-
-	//1. 找到所有元素的子元素，文本，注释等其他元素过滤掉
-	for( i = 0; i < len1; i++ ){
-		child_nodes = this[i].childNodes;
-		len2 = child_nodes.length;
-		for( j = 0; j < len2; j++ ){
-			if( child_nodes[j].nodeType == 1){
-				temp.push(child_nodes[j]);
-			}
-		}
-	}
-
-	//2. 如果传了参数，则进行过滤
-	if( typeof select == 'string' ){
-		temp = $(temp).filter(select);
-	}
-
-	//3. 将筛选后的结果替换掉this中的元素
-	pushElementsToAnything(this, temp);
-
-	return this;
-}
-
-//查找后代元素
-Anything.prototype.find = function(select){
-	if( typeof select != 'string') errorArgs();
-
-	var i,
-		j,
-		len1,
-		parent_node = this,
-		temp = [];
-
-	//1. 找到所有元素的后代元素，文本，注释等其他元素过滤掉
-	while( parent_node.length != 0 ){
-		child_nodes = $(parent_node).children();
-		len1 = child_nodes.length;
-		for( i = 0; i < len1; i++ ){
-			temp.push(child_nodes[i]);
-		}
-		parent_node = child_nodes;
-	}
-
-	//2. 通过传入的参数进行过滤
-	temp = $(temp).filter(select);
-
-	//3. 将筛选后的结果替换掉this中的元素
-	pushElementsToAnything(this, temp);
-
-	return this;
-}
-
-//********************************向前查找兄弟元素************************************
-//向前查找当前节点一个兄弟元素
-Anything.prototype.prev = function(select){
-	var i,
-		len1 = this.length,
-		prev_node,
-		temp = [];
-
-	//1. 查找到所有节点的上一兄弟元素
-	for( i = 0; i < len1; i++ ){
-		var prev_node = getPreviousSibling(this[i]);
-		if( prev_node ){
-			temp.push(prev_node);
-		}
-	}
-
-	//2. 当有筛选参数时，进行过滤
-	if( typeof select == 'string' ){
-		temp = $(temp).filter(select);
-	}
-
-	//3. 将筛选后的结果替换掉this中的元素
-	pushElementsToAnything(this, temp);
-
-	return this;
-}
-
-//向前查找当前节点所有兄弟元素
-Anything.prototype.prevAll = function(select){
-	var i,
-		j,
-		len1 = this.length,
-		len2,
-		prev_node,
-		temp = [];
-
-	//1. 查找到所有节点的所有兄弟元素
-	for( i = 0; i < len1; i++ ){
-		var prev_node = getPreviousSibling(this[i]);
-		
-		while ( prev_node ){
-			if( !isInArray(prev_node, temp) ){
-				temp.push(prev_node)
-			}
-			prev_node = getPreviousSibling(prev_node);
-		}
-	}
-
-	//2. 当有筛选参数时，进行过滤
-	if( typeof select == 'string' ){
-		temp = $(temp).filter(select);
-	}
-
-	//3. 将筛选后的结果替换掉this中的元素
-	pushElementsToAnything(this, temp);
-
-	return this;
-}
-
-
-//********************************向后查找兄弟元素************************************
-//向后查找当前节点一个兄弟元素
-Anything.prototype.next = function(select){
-	var i,
-		len1 = this.length,
-		next_node,
-		temp = [];
-
-	//1. 查找到所有节点的上一兄弟元素
-	for( i = 0; i < len1; i++ ){
-		var next_node = getNextSibling(this[i]);
-		if( next_node ){
-			temp.push(next_node);
-		}
-	}
-
-	//2. 当有筛选参数时，进行过滤
-	if( typeof select == 'string' ){
-		temp = $(temp).filter(select);
-	}
-
-	//3. 将筛选后的结果替换掉this中的元素
-	pushElementsToAnything(this, temp);
-
-	return this;
-}
-
-//向后查找当前节点所有兄弟元素
-Anything.prototype.nextAll = function(select){
-	var i,
-		j,
-		len1 = this.length,
-		len2,
-		next_node,
-		temp = [];
-
-	//1. 查找到所有节点的所有兄弟元素
-	for( i = 0; i < len1; i++ ){
-		var next_node = getNextSibling(this[i]);
-		
-		while ( next_node ){
-			if( !isInArray(next_node, temp) ){
-				temp.push(next_node)
-			}
-			next_node = getNextSibling(next_node);
-		}
-	}
-
-	//2. 当有筛选参数时，进行过滤
-	if( typeof select == 'string' ){
-		temp = $(temp).filter(select);
-	}
-
-	//3. 将筛选后的结果替换掉this中的元素
-	pushElementsToAnything(this, temp);
-
-	return this;
-}
-
-//********************************向后查找兄弟元素************************************
-//查找所有兄弟元素
-Anything.prototype.siblings = function(select){
-	var i,
-		j,
-		k,
-		len1 = this.length,
-		len2,
-		len3,
-		prev_nodes,
-		next_nodes,
-		all_nodes,
-		temp = [];
-
-
-	for( i = 0; i < len1; i++ ){
-		prev_nodes = $(this[i]).prevAll();
-		
-		len2 = prev_nodes.length;
-		for( j = 0; j < len2; j++ ){
-			if( !isInArray(prev_nodes[j], temp) ){
-				temp.push(prev_nodes[j]);
-			}
-		}
-
-		next_nodes = $(this[i]).nextAll();
-		len2 = next_nodes.length;
-		for( j = 0; j < len2; j++ ){
-			if( !isInArray(next_nodes[j], temp) ){
-				temp.push(next_nodes[j]);
-			}
-		}
-		
-	}
-
-	//2. 当有筛选参数时，进行过滤
-	if( typeof select == 'string' ){
-		temp = $(temp).filter(select);
-	}
-
-	//3. 将筛选后的结果替换掉this中的元素
-	pushElementsToAnything(this, temp);
-
-	return this;
-}
 
 //***********************************插件函数*****************************************
 //插件入口

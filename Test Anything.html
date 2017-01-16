@@ -142,7 +142,7 @@
 		sss
 		<li class="zs">qqq</li>sss
 		<li class="ss li5">www</li>
-		<li class="li6 li2">eeespan <span class="li1"></span></li>
+		<li class="   li6   li2  ">eeespan <span class="li1"></span></li>
 		<li class="li6" id="zzzz">eeespan <span>zz</span></li>
 		<li class="li6">eeespan <span>zz</span></li>
 	</ul>
@@ -160,10 +160,11 @@ var arr3 = arr1.concat(arr2);   //[1,2,3,4,5,6]
 //console.log(isInArray(1,arr1));	        //6
 //console.log($('#lee li ').hasClass('li5'))
 //console.log(window.parentNode)
-
+var arr = ['','']
+console.log(arr.indexOf('li2'))
 //console.log($(' li').prev().css('color','red'))
-console.log($('.li6').last('zz'))
-console.log($('.li6').eq(-1))
+console.log($('.li6').siblings())
+//console.log($('.li6').eq(-1))
 //console.log($(' .li5').wrapAll('<div></div>'))
 
 
