@@ -185,3 +185,66 @@
 返回值： Anything
 
 示例： $('li').siblings(), $('li').siblings('.red')...
+
+### 4. 节点属性和内容
+#### 4.1 获取和设置属性
+方法名称： $(slelector1).attr(name, [value])
+
+说明： 获取第一个匹配元素的属性或设置所有匹配元素的属性
+
+返回值： String | Anything
+
+示例： $('#link').attr('title'), $('#link').attr('title', 'a link')...
+
+#### 4.2 移除属性
+方法名称： $(slelector1).removeAttr(name)
+
+说明： 移除所有匹配元素的指定属性
+
+返回值： Anything
+
+示例： $('#link').removeAttr('title')...
+
+#### 4.3 获取和设置innerHTML内容
+方法名称： $(slelector1).html([content])
+
+说明： 获取第一个匹配元素的innerHTML内容或设置所有匹配元素的innerHTML内容
+
+返回值： String | Anything
+
+示例： $('p').html(), $('p').html('this is innerHTML')...
+
+#### 4.4 获取和设置innerText内容
+方法名称： $(slelector1).text([content])
+
+说明： 获取或设置所有匹配元素的innerTextL内容
+
+返回值： String | Anything
+
+示例： $('p').text(), $('p').text('this is innerText')...
+
+#### 4.5 获取和设置表单value内容
+方法名称： $(slelector1).val([value])
+
+说明： 获取第一个匹配元素的innerText内容或设置所有匹配元素的innerTextL内容
+
+返回值： String | Anything
+
+示例： $('input').val(), $('input').val('this is value')...
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

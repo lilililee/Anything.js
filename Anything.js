@@ -284,7 +284,7 @@ Anything.prototype.not = function(select){
 		len1 = this.length;
 
 	for( i = 0; i < len1; i++ ){
-		if( elements.indexOf(this[i]) == -1 ){
+		if( ! isInArray(this[i], elements) ){
 			temp.push(this[i]);
 		}
 	}
@@ -329,7 +329,8 @@ Anything.prototype.filter = function(args){
 		elements = $(args);
 
 		for( i = 0; i < len1; i++ ){
-			if( elements.indexOf(this[i]) != -1 ){
+			if( isInArray(this[i], elements) ){
+			//if( elements.indexOf(this[i]) != -1 ){
 				temp.push(this[i]);
 			}
 		}
@@ -363,8 +364,9 @@ Anything.prototype.hasClass = function(class_name){
 
 	for( i = 0; i < len1; i++ ){
 		class_arr = this[i].className.split(' ');
-		
-		if( class_arr.indexOf(class_name) != -1 ){
+
+		if( isInArray(class_name, class_arr) ){
+		//if( class_arr.indexOf(class_name) != -1 ){
 			return true;
 			break;
 		}
@@ -397,7 +399,8 @@ Anything.prototype.is = function(select){
 			}
 		} else {
 			//根据常规选择器判断元素
-			if( elements.indexOf(this[i]) != -1 ){
+			if( isInArray(this[i], elements) ){
+			//if( elements.indexOf(this[i]) != -1 ){
 				return true;
 			}			
 		}
@@ -421,7 +424,8 @@ Anything.prototype.parent = function(select){
 	for( i = 0; i < len1; i++ ){
 		parent_node = this[i].parentNode;
 		
-		if( temp.indexOf(parent_node) == -1 ){
+		if( ! isInArray(parent_node, temp) ){
+		//if( temp.indexOf(parent_node) == -1 ){
 			temp.push(parent_node);
 		}
 	}	
@@ -449,7 +453,8 @@ Anything.prototype.parents = function(select){
 		parent_node = this[i].parentNode;
 
 		while( parent_node != document ){
-			if( temp.indexOf(parent_node) == -1 ){
+			if( ! isInArray(parent_node, temp) ){
+			//if( temp.indexOf(parent_node) == -1 ){
 				temp.push(parent_node);
 			} else {
 				parent_node = parent_node.parentNode;
@@ -572,7 +577,8 @@ Anything.prototype.prevAll = function(select){
 		var prev_node = getPreviousSibling(this[i]);
 		
 		while ( prev_node ){
-			if( temp.indexOf(prev_node) == -1 ){
+			if( ! isInArray(prev_node, temp) ){
+			//if( temp.indexOf(prev_node) == -1 ){
 				temp.push(prev_node);
 			}
 			prev_node = getPreviousSibling(prev_node);
@@ -630,7 +636,8 @@ Anything.prototype.nextAll = function(select){
 		next_node = getNextSibling(this[i]);
 		
 		while ( next_node ){
-			if( temp.indexOf(next_node) ==-1 ){
+			if( ! isInArray(next_node, temp) ){
+			//if( temp.indexOf(next_node) == -1 ){
 				temp.push(next_node);
 			}
 			next_node = getNextSibling(next_node);
@@ -665,7 +672,8 @@ Anything.prototype.siblings = function(select){
 		prev_nodes = $(this[i]).prevAll();		
 		len2 = prev_nodes.length;
 		for( j = 0; j < len2; j++ ){
-			if( temp.indexOf(prev_nodes[j]) == -1 ){
+			if( ! isInArray(prev_nodes[j], temp) ){
+			//if( temp.indexOf(prev_nodes[j]) == -1 ){
 				temp.push(prev_nodes[j]);
 			}
 		}
@@ -673,7 +681,8 @@ Anything.prototype.siblings = function(select){
 		next_nodes = $(this[i]).nextAll();
 		len2 = next_nodes.length;
 		for( j = 0; j < len2; j++ ){
-			if( temp.indexOf(next_nodes[j]) == -1 ){
+			if( ! isInArray(next_nodes, temp) ){
+			//if( temp.indexOf(next_nodes[j]) == -1 ){
 				temp.push(next_nodes[j]);
 			}
 		}
@@ -701,65 +710,102 @@ Anything.prototype.siblings = function(select){
 Anything.prototype.attr = function(name,value){
 	if(typeof name != 'string') errorArgs(); //参数检测
 
-	if(value === undefined){				//当参数只有一个时表示获取属性
-			return this[0].getAttribute(name);		
-	}else{									//当参数有两个时表示设置属性
-		for(var i=0; i<this.length; i++){
+	var i,
+		len1 = this.length;
+
+	//在IE6，7中无法通过class来获取class属性，需要使用className，设置也是一样
+	if(name == 'class' && this[0].getAttribute(name) === null && this[0].getAttribute(name+'Name') != null ) name += 'Name';
+		
+	if( value === undefined ){				//当参数只有一个时表示获取属性
+		//console.log(this[0].getAttribute(name))
+		return this[0].getAttribute(name);		
+	} else {								//当参数有两个时表示设置属性
+		for( i = 0; i < len1; i++ ){
 			this[i].setAttribute(name,value);
-		}		
-		return this;
+		}				
 	}
+
+	return this;
 }
 
 //删除属性
 Anything.prototype.removeAttr = function(name){
 	if(typeof name != 'string') errorArgs(); //参数检测
 
-	for(var i=0; i<this.length; i++){
+	var i,
+		len1 = this.length;
+
+	//在IE6，7中无法通过class来获取class属性，需要使用className，设置也是一样
+	if(name == 'class' && this[0].getAttribute(name) === null && this[0].getAttribute(name+'Name') != null ) name += 'Name';
+
+	for( i = 0; i < len1; i++ ){
 		this[i].removeAttribute(name);
-	}		
+	}	
+
 	return this;
 }
 
 //***********************************内容操作*****************************************
 //获取和设置innerHTML内容
 Anything.prototype.html = function(content){
-	if(arguments.length == 0){
+	var i;
+		len1 = this.length;
+
+	if( typeof content == 'undefined' ){
 		return this[0].innerHTML;
-	}else{
-		for(var i=0; i<this.length; i++){
+	} else {
+
+		for( i = 0; i < len1; i++ ){
 			this[i].innerHTML = content;
-		}		
-		return this;
+		}				
 	}
+
+	return this;
 }
 
 //获取和设置文本内容
 Anything.prototype.text = function(content){
-	if(arguments.length == 0){
-		var result = '';
-		for(var i=0; i<this.length; i++){
+	var i,
+		len1 = this.length;
+
+	if( typeof content == 'undefined' ){		
+		var	result = '';
+
+		for( i = 0; i < len1; i++ ){
 			result += this[i].innerText;
 		}
-	}else{
-		for(var i=0; i<this.length; i++){
+
+		return result;
+	} else {		
+		for( i = 0; i < len1; i++ ){
 			this[i].innerText = content;
-		}		
+		}	
+
 		return this;
 	}
 }
 
 //获取和设置表单内容
 Anything.prototype.val = function(value){
-	if(arguments.length == 0){
+	
+	if( typeof value == 'undefined' ){
 		return this[0].value;
-	}else{
-		for(var i=0; i<this.length; i++){
+	} else {
+		var i,
+			len1 = this.length;
+
+		for( i = 0; i < len1; i++ ){
 			this[i].value = value;
-		}		
+		}	
+
 		return this;
 	}
 }
+
+
+//------------------------------------------------------------------------------------
+//-----------------------------------样式操作-----------------------------------------
+//------------------------------------------------------------------------------------
 
 //***********************************样式操作*****************************************
 //在获取颜色时格式会有差异，ie是原本值，其他是计算后的rgb
@@ -776,9 +822,7 @@ Anything.prototype.css = function(attr,value){
 		return this;
 	}
 }
-//------------------------------------------------------------------------------------
-//-----------------------------------样式操作-----------------------------------------
-//------------------------------------------------------------------------------------
+
 //***********************************类名操作*****************************************
 //添加类名
 Anything.prototype.addClass = function(class_name){
@@ -2241,14 +2285,15 @@ function elementIsMatchSelect(node, select){
 	return is_match;
 }
 
-//判断一个元素是否存在这个数组中
+//判断一个元素是否存在这个数组中,数组indexOf IE8-不支持
 function isInArray(elem, arr){
 	if(!arr instanceof Array) errorArgs();
 	var i,
 		len = arr.length,
 		result = false;
+
 	for( i = 0; i < len; i++ ){
-		if( elem == arr[i] ){
+		if( elem === arr[i] ){
 			result = true;
 			break;
 		}
