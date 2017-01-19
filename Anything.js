@@ -1333,11 +1333,13 @@ Anything.prototype.each = function(callback){
 // });
 //$()中传入document和函数时在document加载后即可运行，其他都是window加载后再运行
 Anything.prototype.ready = function(callback){	
-	if(this[0] == document){
+	if( this[0] == document ){
 		documentReady(callback);
-	}else{
+	} else {
 		addEvent(window,'load',callback);
 	}	
+
+	return this;
 }
 
 //窗口大小变化
@@ -1351,33 +1353,45 @@ Anything.prototype.resize = function(callback){
 //可以按需求来调整addEvent的函数内容（在addEvent中已去除attachEvent方法）
 //单击
 Anything.prototype.click = function(callback){
-	for(var i=0; i<this.length; i++){
+	var i,
+		len1 = this.length;
+
+	for( i = 0; i < len1; i++ ){
 		addEvent(this[i],'click',callback);
 	}
+
 	return this;
 }
 
 //双击，js本身没有双击事件，根据两次click事件的时间间距来实现
 Anything.prototype.dbclick = function(callback){
-	var start = 0;
-	for(var i=0; i<this.length; i++){
+	var i,
+		len1 = this.length,
+		start = 0;
+	
+	for( i = 0; i < len1; i++ ){
 		addEvent(this[i],'click',function(){
-			if(new Date - start < 500){
+			if( new Date - start < 500 ){
 				callback.call(this);	//此处是闭包，导致callback中this指向全局，应指向绑定事件的对象
 				start = 0;
-			}else{
+			} else {
 				start = new Date;
 			}		
 		});
 	}
+
 	return this;
 }
 
 //移入(子节点有移入事件也会触发)
 Anything.prototype.mouseover = function(callback){
-	for(var i=0; i<this.length; i++){
+	var i,
+		len1 = this.length;
+		
+	for( i = 0; i < len1; i++ ){
 		addEvent(this[i],'mouseover',callback);
 	}
+
 	return this;
 }
 
@@ -2509,7 +2523,7 @@ function getViewport(){
 	　　　　　width: document.body.clientWidth,
 　　　　　　　height: document.body.clientHeight
 　　　　}
-　　} else {alert('zzzzzzzz')
+　　} else {
 　　　　return {
 　　　　　　　width: document.documentElement.clientWidth,
 　　　　　　　height: document.documentElement.clientHeight
@@ -2563,6 +2577,7 @@ function documentReady(callback) {
 //添加事件
 //this在事件中使用较多，而绑定多个事件使用较少，权衡利弊，决定不采用attachEvent方法
 function addEvent(obj, type, callback){
+
 	if(obj.addEventListener){
 		obj.addEventListener(type, callback, false);
 	}/*else if(obj.attachEvent){				

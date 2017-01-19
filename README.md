@@ -505,7 +505,7 @@
 
 #### 6.12 遍历节点
 ```
-方法名称： $(slelector1).each(function)
+方法名称： $(slelector1).each(callback)
 
 说明： 遍历匹配元素，传入一个函数进行操作，该函数第一个参数默认为元素下标
 
@@ -513,6 +513,262 @@
 
 示例： $('p').each(function(){ alert(this.tagName) })...
 ```
+
+### 7. 事件
+#### 7.1 加载事件
+```
+方法名称： $(window|document).ready(callback)
+
+说明： window或document加载完成后运行回调函数，建议使用document，运行速度更快
+
+返回值： Anything
+
+示例： $(document).ready(function(){ alert('document is ready') })...
+```
+
+#### 7.2 窗口大小改变事件
+```
+方法名称： $(window).resize(callback)
+
+说明： 浏览器窗口大小改变触发该事件，window才能检测到
+
+返回值： Anything
+
+示例： $(window).resize(function(){ alert('window is resize') })...
+```
+
+#### 7.3 鼠标单击事件
+```
+方法名称： $(slelector1).click(callback)
+
+说明： 鼠标在单击匹配元素后执行回调函数
+
+返回值： Anything
+
+示例： $('#clicktest').click(function(){ alert('a click') })...
+```
+
+#### 7.4 鼠标双击事件
+```
+方法名称： $(slelector1).dbclick(callback)
+
+说明： 鼠标在双击匹配元素后执行回调函数，经测试IE，Chrome，Firefox均无法触发dbclick事件，遂采取click事件来实现
+
+返回值： Anything
+
+示例： $('#dbclicktest').dbclick(function(){ alert('a dbclick') })...
+```
+
+#### 7.5 鼠标移入事件
+```
+方法名称： $(slelector1).mouseover(callback)
+
+说明： 鼠标移入匹配元素后执行回调函数，子节点有移入事件也会触发
+
+返回值： Anything
+
+示例： $('#mouseovertest').mouseover(function(){ alert('a mouseover') })...
+```
+
+#### 7.6 鼠标移出事件
+```
+方法名称： $(slelector1).mouseout(callback)
+
+说明： 鼠标移出匹配元素后执行回调函数，子节点有移出事件也会触发
+
+返回值： Anything
+
+示例： $('#mouseouttest').mouseout(function(){ alert('a mouseout') })...
+```
+
+#### 7.7 鼠标移入事件
+```
+方法名称： $(slelector1).mouseenter(callback)
+
+说明： 鼠标移入匹配元素后执行回调函数，子节点有移入事件不会触发
+
+返回值： Anything
+
+示例： $('#mouseentertest').mouseenter(function(){ alert('a mouseenter') })...
+```
+
+#### 7.8 鼠标移出事件
+```
+方法名称： $(slelector1).mouseleave(callback)
+
+说明： 鼠标移出匹配元素后执行回调函数，子节点有移出事件不会触发
+
+返回值： Anything
+
+示例： $('#mouseleavetest').mouseleave(function(){ alert('a mouseleave') })...
+```
+
+#### 7.9 鼠标按下事件
+```
+方法名称： $(slelector1).mousedown(callback)
+
+说明： 鼠标在匹配元素上按下任意鼠标键后执行回调函数
+
+返回值： Anything
+
+示例： $('#mousedowntest').mousedown(function(){ alert('a mousedown') })...
+```
+
+#### 7.10 鼠标弹起事件
+```
+方法名称： $(slelector1).mouseup(callback)
+
+说明： 鼠标在匹配元素上弹起任意鼠标键后执行回调函数
+
+返回值： Anything
+
+示例： $('#mouseuptest').mouseup(function(){ alert('a mouseup') })...
+```
+
+#### 7.11 鼠标右击事件
+```
+方法名称： $(slelector1).contextmenu(callback)
+
+说明： 鼠标在匹配元素上右击后执行回调函数，监控全局使用document
+
+返回值： Anything
+
+示例： $('#contextmenutest').contextmenu(function(){ alert('a contextmenu') })...
+```
+
+#### 7.12 鼠标滚动事件
+```
+方法名称： $(slelector1).scroll(callback)
+
+说明： 鼠标在匹配元素上滚动后执行回调函数，监控全局使用window
+
+返回值： Anything
+
+示例： $('#scrolltest').scroll(function(){ alert('a scroll') })...
+```
+
+#### 7.13 键盘按下事件
+```
+方法名称： $(slelector1).keydown(callback)
+
+说明： 键盘在匹配元素上按下后执行回调函数，在全局和表单元素有效，监控全局使用document，可以监控字符键和功能键
+
+返回值： Anything
+
+示例： $('#keydowntest').keydown(function(){ alert('a keydown') })...
+```
+
+#### 7.14 键盘按住事件
+```
+方法名称： $(slelector1).keypress(callback)
+
+说明： 键盘在匹配元素上按住后执行回调函数，在全局和表单元素有效，监控全局使用document，只可以监控字符键
+
+返回值： Anything
+
+示例： $('#keypresstest').keypress(function(){ alert('a keypress') })...
+```
+
+#### 7.15 键盘弹起事件
+```
+方法名称： $(slelector1).keyup(callback)
+
+说明： 键盘在匹配元素上弹起后执行回调函数，在全局和表单元素有效，监控全局使用document，可以监控字符键和功能键
+
+返回值： Anything
+
+示例： $('#keyuptest').keyup(function(){ alert('a keyup') })...
+```
+
+#### 7.16 表单获得焦点事件
+```
+方法名称： $(slelector1).focus(callback)
+
+说明： 匹配元素获得焦点后执行回调函数，对表单元素有效
+
+返回值： Anything
+
+示例： $('#focustest').focus(function(){ alert('a focus') })...
+```
+
+#### 7.17 表单失去焦点事件
+```
+方法名称： $(slelector1).blur(callback)
+
+说明： 匹配元素失去焦点后执行回调函数，对表单元素有效
+
+返回值： Anything
+
+示例： $('#blurtest').blur(function(){ alert('a blur') })...
+```
+
+#### 7.18 表单内容改变事件
+```
+方法名称： $(slelector1).change(callback)
+
+说明： 匹配元素内容选择后执行回调函数，对text，textarea，slelect，radio，checkbox表单有效，失去焦点后才会检测触发，注意下拉菜单（select）改变会触发该事件
+
+返回值： Anything
+
+示例： $('#changetest').change(function(){ alert('a change') })...
+```
+
+#### 7.19 表单内容选择事件
+```
+方法名称： $(slelector1).select(callback)
+
+说明： 匹配元素内容选择后执行回调函数，对text，textarea表单有效，在IE8-中每选中一个字符就会触发一次，注意下拉菜单（select）改变不触发该事件
+
+返回值： Anything
+
+示例： $('#selecttest').select(function(){ alert('a select') })...
+```
+
+#### 7.20 通用绑定事件
+```
+方法名称： $(slelector1).on(type, callback)
+
+说明： 为匹配元素绑定指定事件
+
+返回值： Anything
+
+示例： $('#ontest').on('click', function(){ alert('a on') })...
+```
+
+#### 7.21 通用解除事件
+```
+方法名称： $(slelector1).off(type, callback)
+
+说明： 为匹配元素解除指定事件，注意dbclick，mouseenter，mouseleave由click，mouseover，mouseout间接实现，需要解除间接实现的对应事件
+
+返回值： Anything
+
+示例： $('#offtest').off('click', function(){ alert('a off') })...
+```
+
+#### 7.22 合成事件
+```
+方法名称： $(slelector1).hover(callback1, callback2)
+
+说明： 为匹配元素添加合成事件，即添加mouseover和mouseout事件
+
+返回值： Anything
+
+示例： $('#hovertest').hover(function(){ alert('a hover over') , function(){ alert('a hover out') })...
+```
+
+
+#### 7.23 一次事件
+```
+方法名称： $(slelector1).one(callback)
+
+说明： 为匹配元素添加只执行一次的事件
+
+返回值： Anything
+
+示例： $('#onetest').one( function(){ alert('a one') })...
+```
+
 
 
 

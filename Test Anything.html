@@ -157,6 +157,8 @@
 	
 	<input type="text" name="uesrname" id="user" value="wqe"><br>
 	输入字符长度为：<span id="len">0</span>
+	<input type="radio" name="w">11
+	<input type="radio" name="w">22
 	<p>1</p><p>1</p><p>1</p><p>1</p><p>1</p><p>1</p><p>1</p><p>1</p><p>1</p><p>1</p><p>1</p><p>1</p><p>1</p><p>1</p><p>1</p><p>1</p><p>1</p><p>1</p><p>1</p><p>1</p><p>155</p>
 <!-- <script src="http://lib.sinaapp.com/js/jquery/1.9.1/jquery-1.9.1.min.js"></script> -->
 <script src ='Anything.js'></script>
@@ -165,6 +167,7 @@
 var s = [12,23,34];
 console.log(s.shift())
 console.log(s)
+
 //console.log(s.replace('he','zz'))
 //var s = document.getElementById('lee')
 //console.log(s.getAttribute('class'))
@@ -178,10 +181,19 @@ console.log(s)
 //var arr = ['','']	
 //console.log(arr.indexOf('li2'))
 //console.log($(' li').prev().css('color','red'))
+addEvent(document,'dbclick',function(){
+	alert(1112)
+})
+
+// document.onclick = function(){
+// 	alert(1112231231)
+// }
 var s = document.getElementById('lee');
-console.log($('p').each(function(index){
-	console.log(index)
-}))
+console.log($('input').change(function(index){
+	alert(111)
+ }))
+
+//$('p').remove();
 //console.log($('.li6').eq(-1))
 //console.log($(' .li5').wrapAll('<div></div>'))
 
