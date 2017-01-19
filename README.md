@@ -232,6 +232,85 @@
 
 示例： $('input').val(), $('input').val('this is value')...
 
+### 5. 样式操作
+#### 5.1 获取和设置css
+方法名称： $(slelector1).css(property, [value])
+
+说明： 获取第一个匹配元素的对应css属性或设置所有匹配元素的对应css属性
+
+返回值： String | Anything
+
+示例： $('p').css('color'), $('p').css('color', 'red')...
+
+#### 5.2 添加class
+方法名称： $(slelector1).addClass(class_name)
+
+说明： 为所有匹配元素添加一个指定class名，如果已存在，不重复添加
+
+返回值： Anything
+
+示例： $('p').addClass('intro')...
+
+#### 5.3 移除class
+方法名称： $(slelector1).removeClass(class_name)
+
+说明： 为所有匹配元素移除一个指定class名
+
+返回值： Anything
+
+示例： $('p').removeClass('intro')...
+
+#### 5.4 切换class
+方法名称： $(slelector1).toggleClass(class_name)
+
+说明： 为所有匹配元素切换一个指定class名
+
+返回值： Anything
+
+示例： $('p').toggleClass('intro')...
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

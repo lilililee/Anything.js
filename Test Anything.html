@@ -142,7 +142,7 @@
 		sss
 		<li class="zs">qqq</li>sss
 		<li class="ss li5">www</li>
-		<li class="   li6   li2  ">eeespan <span class="li1"></span></li>
+		<li class="   li   li2  " id="lz1">eeespan <span class="li1"></span></li>
 		<li class="li6" id="zzzz">eeespan <span>zz</span></li>
 		<li class="li6">eeespan <span>zz</span></li>
 	</ul>
@@ -154,6 +154,8 @@
 <script src ='Anything.js'></script>
 
 <script>
+var s = 'hello';
+console.log(s.replace('he','zz'))
 //var s = document.getElementById('lee')
 //console.log(s.getAttribute('class'))
 //console.log(s.setAttribute('className','ssss'))
@@ -166,7 +168,7 @@
 //var arr = ['','']
 //console.log(arr.indexOf('li2'))
 //console.log($(' li').prev().css('color','red'))
-console.log($('#user').val('dfsd'))
+console.log($('#lz1').toggleClass('li6'))
 //console.log($('.li6').eq(-1))
 //console.log($(' .li5').wrapAll('<div></div>'))
 

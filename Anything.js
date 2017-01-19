@@ -812,15 +812,21 @@ Anything.prototype.val = function(value){
 //不支持同时设置多个属性，可用连缀来实现
 Anything.prototype.css = function(attr,value){
 	if(typeof attr != 'string') errorArgs(); //参数检测
-	//console.log(111)
-	if(arguments.length == 1){
+	
+	if( typeof value == 'undefined' ){
+
 		return getStyle(this[0],attr);
-	}else{
-		for(var i=0; i<this.length; i++){
+
+	} else {
+		var i,
+			len1 = this.length;
+
+		for( i = 0; i < len1; i++ ){
 			this[i].style[attr] = value;
-		}
-		return this;
+		}		
 	}
+
+	return this;
 }
 
 //***********************************类名操作*****************************************
@@ -828,20 +834,15 @@ Anything.prototype.css = function(attr,value){
 Anything.prototype.addClass = function(class_name){
 	if(typeof class_name != 'string') errorArgs();  //参数检测
 
-	for(var i=0; i<this.length; i++){
-		var temp = this[i].className.split(' ');
-		var flag = false;							//表示未包含当前类名
-		for(var j=0; j<temp.length; j++){			//进行类名检查
-			if(temp[j] == class_name){
-				flag = true;
-				break;
-			}
-		}
-		if(flag == false){
-			temp.push(class_name);
-			this[i].className = temp.join(' ');
-		}
+	var i,
+		len1 = this.length;
+	
+	for( i = 0; i < len1; i++ ){	
+		if( this[i].className.indexOf(class_name) == -1 ){
+			this[i].className += class_name;
+		}	
 	}
+
 	return this;
 }
 
@@ -849,15 +850,13 @@ Anything.prototype.addClass = function(class_name){
 Anything.prototype.removeClass = function(class_name){
 	if(typeof class_name != 'string') errorArgs();  //参数检测
 
-	for(var i=0; i<this.length; i++){
-		var temp = this[i].className.split(' ');
-		for(var j=0; j<temp.length; j++){			//进行类名检查
-			if(temp[j] == class_name){
-				temp[j] = '';
-			}
-		}
-		this[i].className = temp.join(' ');
+	var i,
+		len1 = this.length;
+
+	for( i = 0; i < len1; i++ ){
+		this[i].className = this[i].className.replace(class_name, '');
 	}
+
 	return this;
 }
 
@@ -865,20 +864,17 @@ Anything.prototype.removeClass = function(class_name){
 Anything.prototype.toggleClass = function(class_name){
 	if(typeof class_name != 'string') errorArgs();  //参数检测
 
-	for(var i=0; i<this.length; i++){
-		var temp = this[i].className.split(' ');
-		var flag = false;							//表示未包含当前类名
-		for(var j=0; j<temp.length; j++){			//进行类名检查
-			if(temp[j] == class_name){
-				temp[j] = '';
-				flag = true;
-			}
-		}
-		if(flag == false){
-			temp.push(class_name);			
-		}
-		this[i].className = temp.join(' ');
+	var i,
+		len1 = this.length;
+	
+	for( i = 0; i < len1; i++ ){	
+		if( this[i].className.indexOf(class_name) == -1 ){
+			this[i].className += class_name;
+		} else {
+			this[i].className = this[i].className.replace(class_name, '');
+		}	
 	}
+
 	return this;
 }
 
