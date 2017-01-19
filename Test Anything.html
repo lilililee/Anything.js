@@ -8,6 +8,9 @@
 			margin: 0;
 			padding: 0;
 		}
+		body{
+			font-size:  16px;
+		}
 		.div1{
 			/*width: 200px;*/
 			height: 200px;
@@ -83,6 +86,11 @@
 		.wrapper>span{
 			color: red
 		}
+
+		#lee{
+			border: 100px solid red;
+			padding: 50px;
+		}
 		
 	</style>
 	<script>
@@ -139,7 +147,7 @@
 		<li class="li3">eeezzzzzzzzzzzzzzzzzzzzzzzzzz <p>sssssp <span>zz</span></p></li>
 	</ul>
 	<ul class="ul2" id="lee">
-		sss
+		ssssdsd
 		<li class="zs">qqq</li>sss
 		<li class="ss li5">www</li>
 		<li class="   li   li2  " id="lz1">eeespan <span class="li1"></span></li>
@@ -149,13 +157,15 @@
 	
 	<input type="text" name="uesrname" id="user" value="wqe"><br>
 	输入字符长度为：<span id="len">0</span>
-	<p>1</p><p>1</p><p>1</p><p>1</p><p>1</p><p>1</p><p>1</p><p>1</p><p>1</p><p>1</p><p>1</p><p>1</p><p>1</p><p>1</p><p>1</p><p>1</p><p>1</p><p>1</p><p>1</p><p>1</p><p>1</p>
+	<p>1</p><p>1</p><p>1</p><p>1</p><p>1</p><p>1</p><p>1</p><p>1</p><p>1</p><p>1</p><p>1</p><p>1</p><p>1</p><p>1</p><p>1</p><p>1</p><p>1</p><p>1</p><p>1</p><p>1</p><p>155</p>
 <!-- <script src="http://lib.sinaapp.com/js/jquery/1.9.1/jquery-1.9.1.min.js"></script> -->
 <script src ='Anything.js'></script>
 
 <script>
-var s = 'hello';
-console.log(s.replace('he','zz'))
+var s = [12,23,34];
+console.log(s.shift())
+console.log(s)
+//console.log(s.replace('he','zz'))
 //var s = document.getElementById('lee')
 //console.log(s.getAttribute('class'))
 //console.log(s.setAttribute('className','ssss'))
@@ -165,10 +175,13 @@ console.log(s.replace('he','zz'))
 //console.log(isInArray(1,arr1));	        //6
 //console.log($('#lee li ').hasClass('li5'))
 //console.log(window.parentNode)
-//var arr = ['','']
+//var arr = ['','']	
 //console.log(arr.indexOf('li2'))
 //console.log($(' li').prev().css('color','red'))
-console.log($('#lz1').toggleClass('li6'))
+var s = document.getElementById('lee');
+console.log($('p').each(function(index){
+	console.log(index)
+}))
 //console.log($('.li6').eq(-1))
 //console.log($(' .li5').wrapAll('<div></div>'))
 

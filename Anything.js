@@ -881,39 +881,49 @@ Anything.prototype.toggleClass = function(class_name){
 //***********************************大小操作*****************************************
 //获取和设置元素width
 Anything.prototype.width = function(value){
-	var width = parseInt(getStyle(this[0],'width'));	//将px值转化为number
-	if(arguments.length == 1){
-		this.css('width',value+'px');
-	}else{
-		return width;
+
+	if( typeof value == 'undefined' ){
+		return parseFloat(getStyle(this[0],'width'));
+
+	} else if ( typeof value == 'number' ){
+		this.css('width', value+'px');
+
+	} else {
+		errorArgs();
 	}
+	
 	return this;
 }
 
 //获取和设置元素innerWidth (width+padding)
 Anything.prototype.innerWidth = function(value){
-	//offsetHeight包括边框在内，所有浏览器都支持，所以基于该值来计算
-	var outerWidth = this[0].offsetWidth;	
-	//border距离
-	var border_left = parseFloat(getStyle(this[0],'border-left'));
-	var border_right = parseFloat(getStyle(this[0],'border-right'));
-	var border = border_left + border_right;
-	var innerWidth = outerWidth - border;
-	if(arguments.length == 0){
+		//offsetHeight包括边框在内，所有浏览器都支持，所以基于该值来计算
+	var outerWidth = this[0].offsetWidth,	
+		//border距离
+		border_left = parseFloat(getStyle(this[0],'border-left')),
+		border_right = parseFloat(getStyle(this[0],'border-right')),
+		border = border_left + border_right,
+		innerWidth = outerWidth - border;
+
+	if( typeof value == 'undefined' ){
 		return innerWidth;
-	}else if(typeof arguments[0] == 'number'){
+
+	}else if( typeof value == 'number'){
 		//padding距离
-		var padding_left = parseFloat(getStyle(this[0],'padding-left'));	
-		var padding_right = parseFloat(getStyle(this[0],'padding-right'));	
-		var padding = padding_left + padding_right;
-		if(value > padding){
+		var padding_left = parseFloat(getStyle(this[0],'padding-left')),
+			padding_right = parseFloat(getStyle(this[0],'padding-right')),	
+			padding = padding_left + padding_right;
+
+		if( value > padding ){
 			this.css('width',value-padding+'px');
-		}else{
+		} else {
 			this.css('width','0px');
-		}		
-	}else{
+		}	
+
+	} else {
 		errorArgs();
 	}
+
 	return this;
 }
 
@@ -921,27 +931,30 @@ Anything.prototype.innerWidth = function(value){
 Anything.prototype.outerWidth = function(value){
 	//offsetHeight包括边框在内，所有浏览器都支持，所以基于该值来计算
 	var outerWidth = this[0].offsetWidth;		
-	if(arguments.length == 0){
+	if( typeof value == 'undefined' ){
 		return outerWidth;
-	}else if(typeof arguments[0] == 'number'){	
+
+	}else if( typeof value == 'number' ){	
 		//padding距离
-		var padding_left = parseFloat(getStyle(this[0],'padding-left'));	
-		var padding_right = parseFloat(getStyle(this[0],'padding-right'));	
-		var padding = padding_left + padding_right;
+		var padding_left = parseFloat(getStyle(this[0],'padding-left')),	
+			padding_right = parseFloat(getStyle(this[0],'padding-right')),	
+			padding = padding_left + padding_right,
 		//border距离
-		var border_left = parseFloat(getStyle(this[0],'border-left'));
-		var border_right = parseFloat(getStyle(this[0],'border-right'));
-		var border = border_left + border_right;
+			border_left = parseFloat(getStyle(this[0],'border-left')),
+			border_right = parseFloat(getStyle(this[0],'border-right')),
+			border = border_left + border_right;
 
 		//通过设置Width来控制outerWidth大小，不会改变padding和border大小
-		if(value > padding+border){	
+		if( value > padding+border ){	
 			this.css('width',value-padding-border+'px');
-		}else{
+		} else {
 			this.css('width','0px');
-		}		
-	}else{
+		}	
+
+	} else {
 		errorArgs();
 	}
+
 	return this;
 }
 
@@ -949,67 +962,80 @@ Anything.prototype.outerWidth = function(value){
 
 //获取和设置元素height
 Anything.prototype.height = function(value){
-	var height = parseFloat(getStyle(this[0],'height'));	//将px值转化为number
-	if(arguments.length == 1){
-		this.css('height',value+'px');
-	}else{
-		return height;
+	if( typeof value == 'undefined' ){
+		return parseFloat(getStyle(this[0],'height'));
+
+	} else if ( typeof value == 'number' ){
+		this.css('height', value+'px');
+
+	} else {
+		errorArgs();
 	}
+	
 	return this;
 }
 
 //获取和设置元素innerHeight (height+padding)
 Anything.prototype.innerHeight = function(value){
-	//offsetHeight包括边框在内，所有浏览器都支持，所以基于该值来计算
-	var outerHeight = this[0].offsetHeight;	
-	//border距离
-	var border_top = parseFloat(getStyle(this[0],'border-top'));
-	var border_bottom = parseFloat(getStyle(this[0],'border-bottom'));
-	var border = border_top + border_bottom;
-	var innerHeight = outerHeight - border;
-	if(arguments.length == 0){
+		//offsetHeight包括边框在内，所有浏览器都支持，所以基于该值来计算
+	var outerHeight = this[0].offsetHeight,	
+		//border距离
+		border_top = parseFloat(getStyle(this[0],'border-top')),
+		border_bottom = parseFloat(getStyle(this[0],'border-bottom')),
+		border = border_top + border_bottom,
+		innerHeight = outerHeight - border;
+
+	if( typeof value == 'undefined' ){
 		return innerHeight;
-	}else if(typeof arguments[0] == 'number'){
+
+	} else if ( typeof value == 'number' ){
 		//padding距离
-		var padding_top = parseFloat(getStyle(this[0],'padding-top'));	
-		var padding_bottom = parseFloat(getStyle(this[0],'padding-bottom'));	
-		var padding = padding_top + padding_bottom;
-		if(value > padding){
+		var padding_top = parseFloat(getStyle(this[0],'padding-top')),	
+			padding_bottom = parseFloat(getStyle(this[0],'padding-bottom')),	
+			padding = padding_top + padding_bottom;
+
+		if( value > padding ){
 			this.css('height',value-padding+'px');
-		}else{
+		} else {
 			this.css('height','0px');
-		}		
-	}else{
+		}
+
+	} else {
 		errorArgs();
-	}
+	} 
+
 	return this;
 }
 
 //获取和设置元素outerHeight (height+padding+border)
 Anything.prototype.outerHeight = function(value){
 	//offsetHeight包括边框在内，所有浏览器都支持，所以基于该值来计算
-	var outerHeight = this[0].offsetHeight;		
-	if(arguments.length == 0){
+	var outerHeight = this[0].offsetHeight;	
+
+	if( typeof value == 'undefined' ){
 		return outerHeight;
-	}else if(typeof arguments[0] == 'number'){	
-		//padding距离
-		var padding_top = parseFloat(getStyle(this[0],'padding-top'));	
-		var padding_bottom = parseFloat(getStyle(this[0],'padding-bottom'));	
-		var padding = padding_top + padding_bottom;
-		//border距离
-		var border_top = parseFloat(getStyle(this[0],'border-top'));
-		var border_bottom = parseFloat(getStyle(this[0],'border-bottom'));
-		var border = border_top + border_bottom;
+
+	} else if ( typeof value == 'number' ){	
+			//padding距离
+		var padding_top = parseFloat(getStyle(this[0],'padding-top')),	
+			padding_bottom = parseFloat(getStyle(this[0],'padding-bottom')),	
+			padding = padding_top + padding_bottom,
+			//border距离
+			border_top = parseFloat(getStyle(this[0],'border-top')),
+			border_bottom = parseFloat(getStyle(this[0],'border-bottom')),
+			border = border_top + border_bottom;
 
 		//通过设置height来控制outerHeight大小，不会改变padding和border大小
 		if(value > padding+border){	
 			this.css('height',value-padding-border+'px');
-		}else{
+		} else {
 			this.css('height','0px');
-		}		
-	}else{
+		}	
+
+	} else {
 		errorArgs();
 	}
+
 	return this;
 }
 
@@ -1017,16 +1043,18 @@ Anything.prototype.outerHeight = function(value){
 //***********************************位置操作*****************************************
 //offset(),表示元素在文档中的位置(根据边框左上角外层的点计算)
 Anything.prototype.offset = function(){
-	var parent = this[0].offsetParent;
-	var result = {};	
+	var parent = this[0].offsetParent,
+		result = {};	
+
 	result.left = this[0].offsetLeft;
 	result.top = this[0].offsetTop;
-	//console.log(parent)
-	while(parent !== null){
+	
+	while( parent !== null ){
 		result.left += parent.offsetLeft;
 		result.top += parent.offsetTop;
 		parent = parent.offsetParent;
 	}
+
 	return result;
 }
 
@@ -1042,26 +1070,29 @@ Anything.prototype.position = function(){
 //多数情况下是获取和设置window的scrollTop
 //scollLeft基本不使用，实现原理一样
 Anything.prototype.scrollTop = function(pos){
-	if(pos === undefined){
-		if(this[0] == window){
+	if( typeof pos == 'undefined'){
+		if( this[0] == window ){
 			//获取window的scrollTop
 			return document.documentElement.scrollTop || window.pageYOffset || document.body.scrollTop;
-		}else{
+
+		} else {
 			return this[0].scrollTop;
+
 		}
-	}else{
-		if(this[0] == window){
+	} else {
+		if( this[0] == window ){
 			//设置window的scrollTop
 			document.documentElement.scrollTop = pos;
 			window.pageYOffset = pos;
 			document.body.scrollTop = pos;
-			return this;
-		}else{
+
+		} else {
 			this[0].scrollTop = pos;
-			return this;
+			
 		}
 	}
-	
+
+	return this;
 }
 
 
@@ -1074,14 +1105,20 @@ Anything.prototype.scrollTop = function(pos){
 //示例：$('ul').append('<li>haha</li>');
 //在IE8-中添加非法便签格式便无效，例如<p><li>zz</li></p>
 Anything.prototype.append = function(str){
-	if(typeof str.nodeType == 'number'){		//如果传入一个元素节点转化成字符串
+	var i,
+		len1 = this.length,
+		html;
+
+	if(typeof str.nodeType == 'number' ){		//如果传入一个元素节点转化成字符串
 		str = str.outerHTML;
 	}
-	for(var i=0; i<this.length; i++){
-		var html = this[i].innerHTML;
-		html += str;	
+
+	for( i = 0; i < len1; i++ ){
+		html = this[i].innerHTML;
+		html = html + str;		
 		this[i].innerHTML = html;	
 	}
+
 	return this;
 }
 
@@ -1089,29 +1126,42 @@ Anything.prototype.append = function(str){
 //示例：$('ul').prepend('<li>haha</li>');
 //在IE8-中添加非法便签格式便无效，例如<p><li>zz</li></p>
 Anything.prototype.prepend = function(str){
-	if(typeof str.nodeType == 'number'){
+	var i,
+		len1 = this.length,
+		html;
+
+	if(typeof str.nodeType == 'number' ){		//如果传入一个元素节点转化成字符串
 		str = str.outerHTML;
 	}
-	for(var i=0; i<this.length; i++){
-		var html = this[i].innerHTML;
-		html = str+html;	
-		this[i].innerHTML = html;			
+
+	for( i = 0; i < len1; i++ ){
+		html = this[i].innerHTML;
+		html = str + html;	
+		this[i].innerHTML = html;	
 	}
+
 	return this;
+	
 }
 
 //外部后面插入节点
 //示例：$('ul').prepend('<li>haha</li>');
 //在IE8-中添加非法便签格式便无效，例如<p><li>zz</li></p>
 Anything.prototype.after = function(str){
-	if(typeof str.nodeType == 'number'){
+	var i,
+		len1 = this.length,
+		html;
+
+	if( typeof str.nodeType == 'number' ){		//如果传入一个元素节点转化成字符串
 		str = str.outerHTML;
 	}
-	for(var i=0; i<this.length; i++){
-		var html = this[i].outerHTML;
-		html += str;	
-		this[i].outerHTML = html;			
+
+	for( i = 0; i < len1; i++ ){
+		html = this[i].outerHTML;
+		html = html + str;	
+		this[i].outerHTML = html;	
 	}
+
 	return this;
 }
 
@@ -1119,33 +1169,45 @@ Anything.prototype.after = function(str){
 //示例：$('ul').prepend('<li>haha</li>');
 //在IE8-中添加非法便签格式便无效，例如<p><li>zz</li></p>
 Anything.prototype.before = function(str){
-	if(typeof str.nodeType == 'number'){
+	var i,
+		len1 = this.length,
+		html;
+
+	if( typeof str.nodeType == 'number' ){		//如果传入一个元素节点转化成字符串
 		str = str.outerHTML;
 	}
-	for(var i=0; i<this.length; i++){
-		var html = this[i].outerHTML;
+
+	for( i = 0; i < len1; i++ ){
+		html = this[i].outerHTML;
 		html = str + html;	
-		this[i].outerHTML = html;			
+		this[i].outerHTML = html;	
 	}
+
 	return this;
 }
 
 //***********************************删除节点*****************************************
 //删除所有选中的节点(自身节点和后代节点)，并返回一个删除的节点数组
 Anything.prototype.remove = function(){
-	for(var i=0; i<this.length; i++){
+	var i,
+		len1 = this.length;
+
+	for( i = 0; i < len1; i++ ){
 		this[i].parentNode.removeChild(this[i]);		
 	}
+
 	return this;
 }
 
 //删除选中节点的后代节点（不包括自身）
 Anything.prototype.empty = function(){
-	for(var i=0; i<this.length; i++){
-		console.log(this[i].outerHTML)
-		console.log(this[i].innerHTML)
-		this[i].outerHTML = this[i].outerHTML.replace(this[i].innerHTML,'');		
+	var i,
+		len1 = this.length;
+
+	for( i = 0; i < len1; i++ ){
+		this[i].innerHTML = '';				
 	}
+
 	return this;
 }
 
@@ -1158,74 +1220,96 @@ Anything.prototype.clone = function(flag){
 
 //***********************************替换节点*****************************************
 Anything.prototype.replaceWith = function(str){
-	if(typeof str.nodeType == 'number'){
+	var i,
+		len1 = this.length;
+
+	if( typeof str.nodeType == 'number' ){
 		str = str.outerHTML;
 	}
-	for(var i=0; i<this.length; i++){
-		this[i].outerHTML = str;
+
+	for( i = 0; i < len1; i++ ){
+		this[i].outerHTML = str;		
 	}
+
+	return this;
 }
 
 //***********************************包裹节点*****************************************
 //只能传入字符串，例如：'<div></div>'，只能有一个节点
 //单独包裹每个节点
 Anything.prototype.wrap = function(str){
-	if(typeof str != 'string')	errorArgs();  //参数检测	
-	var temp = str.split('></');
-	if(temp.length != 2)  errorArgs();  	  //参数检测
+	if( typeof str != 'string' )	errorArgs();  //参数检测	
 
-	for(var i=0; i<this.length; i++){
-		var html = this[i].outerHTML;
+	var i,
+		len1 = this.length,
+		html,
+		temp = str.split('></');
+		
+	if(temp.length != 2)  errorArgs();  //参数检测
+
+	for( i = 0; i < len1; i++ ){
+		html = this[i].outerHTML;
 		html = temp[0] + '>' + html + '</' + temp[1]; 
 		this[i].outerHTML = html;
 	}
+
+	return this;
 }
 
 //整体包裹
 //只包裹第一组连续的节点
 //但JQuery会把所有选中的节点放在一起包裹起来，会改变节点位置
 Anything.prototype.wrapAll = function(str){
-	if(typeof str != 'string')	errorArgs();  //参数检测	
-	var temp = str.split('></');
+	if( typeof str != 'string' )	errorArgs();  //参数检测	
+	
+	var i,
+		len1 = this.length,
+		html = '',
+		temp = str.split('></');
+
 	if(temp.length != 2)  errorArgs();  //参数检测
-	//找到第一组连续的节点
-	var html = this[0].outerHTML;
-	for(var i=1; i<this.length; i++){	
-		//根据上一兄弟节点是否为数值上一元素来判断是否连续
-		if(getPreviousSibling(this[i]) == this[i-1]){
-			html += this[i].outerHTML;
-		}else{
-			break;
-		}
+
+	for( i = 0; i < len1; i++ ){
+		html += this[i].outerHTML;
+		this[i].outerHTML = '';
 	}
-	//把连续节点的outerHTML拼接起来，统一作为this[0]的outerHTML,后面的节点删除
-	for(var j=1; j<i; j++){
-		this[j].parentNode.removeChild(this[j]);
-	}
+	
 	this[0].outerHTML = temp[0] + '>' + html + '</' + temp[1];
+
+	return this;
 }
 
 //包裹内部元素
 Anything.prototype.wrapInner = function(str){
 	if(typeof str != 'string')	errorArgs();  //参数检测	
-	var temp = str.split('></');
+	
+	var i,
+		len1 = this.length,
+		temp = str.split('></');
+
 	if(temp.length != 2)  errorArgs();  //参数检测
 
-	for(var i=0; i<this.length; i++){	
+	for( i = 0; i < len1; i++ ){	
 		this[i].innerHTML = temp[0] + '>' + this[i].innerHTML + '</' + temp[1];
 	}
 
+	return this;
 }
 
 //***********************************遍历节点*****************************************
 //callback的第一个参数表示节点数组index
 //callback中this指向当前节点
 Anything.prototype.each = function(callback){
-	for(var i=0; i<this.length; i++){
-		this[i].fn = callback;
-		this[i].fn(i);
-		this[i].fn = null;
+	var i,
+		len1 = this.length;
+
+	for( i = 0; i < len1; i++ ){
+		this[i].eachFn = callback;
+		this[i].eachFn(i);
+		this[i].eachFn = null;
 	}
+
+	return this;
 }
 
 
