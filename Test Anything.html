@@ -107,13 +107,19 @@
 	<div class="scroll">
 		sssssssss
 	</div>
+	<div class="div">
+		<button id="show">显示</button>
+		<button id="hide">隐藏</button>
+		<button id="toggle">切换</button>
+	</div>
+	
 	<div class="wrapper classz">
 		<span class="classz">222</span>
 		<!-- <p></p> -->
-		<h1>绿叶学习网简介<span>111</span><p>zz</p></h1>
+		<h1>绿叶学习网简介</h1>
 		<p>绿叶学习网成立于2015年4月1日，是一个富有活力的技术学习网站。绿叶学习网为广大网络工作者（网页开发人员、站长等）提供各种精品教程以及最精华资料。绿叶学习网跟其他垃圾采集站不一样，绿叶学习网中的每一个课程、每一篇文章，甚至每一个知识点，都凝聚了本人的最辛勤的汗水。多少日日夜夜，本人呕心沥血在一遍一遍地编辑，为的是给广大网站爱好者提供最精华的知识。</p>
 	</div>
-	<ul class="nav">
+	<!-- <ul class="nav">
 		<li>111</li>
 		<li>222</li>sdsdf
 		<li>333</li>
@@ -121,8 +127,7 @@
 		<li>555</li>
 	</ul>
 	<div class="div1">
-		<!-- <div class="div4">111</div>
-		<div class="div2">111</div> -->
+		
 		<div class="div3">22222 <p>d</p><span></span></div>
 	</div>
 	<div id="header">
@@ -159,15 +164,22 @@
 	输入字符长度为：<span id="len">0</span>
 	<input type="radio" name="w">11
 	<input type="radio" name="w">22
-	<p>1</p><p>1</p><p>1</p><p>1</p><p>1</p><p>1</p><p>1</p><p>1</p><p>1</p><p>1</p><p>1</p><p>1</p><p>1</p><p>1</p><p>1</p><p>1</p><p>1</p><p>1</p><p>1</p><p>1</p><p>155</p>
+	<p>1</p><p>1</p><p>1</p><p>1</p><p>1</p><p>1</p><p>1</p><p>1</p><p>1</p><p>1</p><p>1</p><p>1</p><p>1</p><p>1</p><p>1</p><p>1</p><p>1</p><p>1</p><p>1</p><p>1</p><p>155</p> -->
 <!-- <script src="http://lib.sinaapp.com/js/jquery/1.9.1/jquery-1.9.1.min.js"></script> -->
 <script src ='Anything.js'></script>
 
 <script>
-var s = [12,23,34];
-console.log(s.shift())
-console.log(s)
 
+
+$('#show').click(function(){
+	$('.wrapper').slideUp(1000)
+})
+$('#hide').click(function(){
+	$('.wrapper').slideDown(1000)
+})
+$('#toggle').click(function(){
+	$('.wrapper').slideToggle(1000)
+})
 //console.log(s.replace('he','zz'))
 //var s = document.getElementById('lee')
 //console.log(s.getAttribute('class'))
@@ -181,17 +193,17 @@ console.log(s)
 //var arr = ['','']	
 //console.log(arr.indexOf('li2'))
 //console.log($(' li').prev().css('color','red'))
-addEvent(document,'dbclick',function(){
-	alert(1112)
-})
+// addEvent(document,'dbclick',function(){
+// 	alert(1112)
+// })
 
-// document.onclick = function(){
-// 	alert(1112231231)
-// }
-var s = document.getElementById('lee');
-console.log($('input').change(function(index){
-	alert(111)
- }))
+// // document.onclick = function(){
+// // 	alert(1112231231)
+// // }
+// var s = document.getElementById('lee');
+// console.log($('input').change(function(index){
+// 	alert(111)
+//  }))
 
 //$('p').remove();
 //console.log($('.li6').eq(-1))

@@ -757,7 +757,6 @@
 示例： $('#hovertest').hover(function(){ alert('a hover over') , function(){ alert('a hover out') })...
 ```
 
-
 #### 7.23 一次事件
 ```
 方法名称： $(slelector1).one(callback)
@@ -768,6 +767,140 @@
 
 示例： $('#onetest').one( function(){ alert('a one') })...
 ```
+
+### 8. 动画
+#### 8.1 显示
+```
+方法名称： $(slelector1).show([time], [callback])
+
+说明： 为匹配元素执行显示动画，通过增大宽度，高度和透明度实现
+
+返回值： Anything   
+
+示例： $('#showtest').show(), $('#showtest').show(1000), $('#showtest').show(1000, function(){ alert('a show'))...
+```
+
+#### 8.2 隐藏
+```
+方法名称： $(slelector1).hide([time], [callback])
+
+说明： 为匹配元素执行隐藏动画，通过减小宽度，高度和透明度实现
+
+返回值： Anything   
+
+示例： $('#hidetest').hide(), $('#hidetest').hide(1000), $('#hidetest').hide(1000, function(){ alert('a hide'))...
+```
+
+#### 8.3 显示和隐藏切换
+```
+方法名称： $(slelector1).toggle([time], [callback])
+
+说明： 为匹配元素执行显示和隐藏切换动画，通过修改宽度，高度和透明度实现
+
+返回值： Anything   
+
+示例： $('#toggletest').toggle(), $('#toggletest').toggle(1000), $('#toggletest').toggle(1000, function(){ alert('a toggle'))...
+```
+
+#### 8.4 淡入
+```
+方法名称： $(slelector1).fadeIn([time], [callback])
+
+说明： 为匹配元素执行淡入动画，通过透明度增大到1实现
+
+返回值： Anything   
+
+示例： $('#fadeIntest').fadeIn(), $('#fadeIntest').fadeIn(1000), $('#fadeIntest').fadeIn(1000, function(){ alert('a fadeIn'))...
+```
+
+#### 8.5 淡出
+```
+方法名称： $(slelector1).fadeOut([time], [callback])
+
+说明： 为匹配元素执行淡入动画，通过透明度减小到0实现
+
+返回值： Anything   
+
+示例： $('#fadeOuttest').fadeOut(), $('#fadeOuttest').fadeOut(1000), $('#fadeOuttest').fadeOut(1000, function(){ alert('a fadeOut'))...
+```
+
+#### 8.6 淡入淡出到指定透明度
+```
+方法名称： $(slelector1).fadeTo(time, opacity, [callback])
+
+说明： 为匹配元素执行淡入或淡出动画，通过修改透明度到指定值实现
+
+返回值： Anything   
+
+示例： $('#fadeTotest').fadeTo(1000, 0.2), $('#fadeTotest').fadeTo(1000, 0.2, function(){ alert('a fadeTo'))...
+```
+
+#### 8.7 淡入或淡出切换
+```
+方法名称： $(slelector1).fadeToggle([time], [callback])
+
+说明： 为匹配元素执行淡入动画，通过透明度增大或减小实现
+
+返回值： Anything   
+
+示例： $('#fadeToggletest').fadeToggle(), $('#fadeToggletest').fadeToggle(1000), $('#fadeToggletest').fadeToggle(1000, function(){ alert('a fadeToggle'))...
+```
+
+#### 8.8 滑下
+```
+方法名称： $(slelector1).slideDown([time], [callback])
+
+说明： 为匹配元素执行滑下动画，通过增大高度实现
+
+返回值： Anything   
+
+示例： $('#slideDowntest').slideDown(), $('#slideDowntest').slideDown(1000), $('#slideDowntest').slideDown(1000, function(){ alert('a slideDown'))...
+```
+
+#### 8.9 滑上
+```
+方法名称： $(slelector1).slideUp([time], [callback])
+
+说明： 为匹配元素执行滑上动画，通过减小高度实现
+
+返回值： Anything   
+
+示例： $('#slideUptest').slideUp(), $('#slideUptest').slideUp(1000), $('#slideUptest').slideUp(1000, function(){ alert('a slideUp'))...
+```
+
+#### 8.10 滑下和滑上切换
+```
+方法名称： $(slelector1).slidetoggle([time], [callback])
+
+说明： 为匹配元素执行滑上动画，通过减小高度实现
+
+返回值： Anything   
+
+示例： $('#slidetoggletest').slidetoggle(), $('#slidetoggletest').slidetoggle(1000), $('#slidetoggletest').slidetoggle(1000, function(){ alert('a slidetoggle'))...
+```
+
+#### 8.11 通用动画
+```
+方法名称： $(slelector1).animate(obj_attr, [time], [callback])
+
+说明： 为匹配元素执行动画到达参数obj_attr指定属性，time为动画完成时间，callback在动画完成后执行，前面的常用动画后台调用了该方法，时间参数默认500ms
+
+返回值： Anything   
+
+示例： $('#slidetoggletest').animate({width:400px,height:200px;}, 1000), $('#slidetoggletest').animate({width:400px,height:200px;}, 1000, function(){ alert('a slidetoggle'))...
+```
+
+#### 8.12 停止动画
+```
+方法名称： $(slelector1).stop([flag1], [flag2])
+
+说明： 停止匹配元素的当前动画，具体执行由参数确定:a, stop(),等价于stop(false,false)，仅仅停止“当前执行”这段动画，后面的动画还可以继续执行;  b, stop(true),等价于stop(true,false)，停止所有动画，包括当前执行的动画;  c,  stop(true,true),停止所有动画，但是允许执行当前动画;  d, stop(false,true),停止“当前执行”这段动画，然后调到最后一个动画，并且执行最后一个动画。
+
+返回值： Anything   
+
+示例： $('#stoptest').stop(), $('#stoptest').stop(true),$('#stoptest').stop(true,true), $('#stoptest').stop(false,true)
+```
+
 
 
 
