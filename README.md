@@ -883,7 +883,7 @@
 ```
 方法名称： $(slelector1).animate(obj_attr, [time], [callback])
 
-说明： 为匹配元素执行动画到达参数obj_attr指定属性，time为动画完成时间，callback在动画完成后执行，前面的常用动画后台调用了该方法，时间参数默认500ms
+说明： 为匹配元素执行动画到达参数obj_attr指定属性，time为动画完成时间，callback在动画完成后执行，前面的常用动画后台调用了该方法，时间参数默认500ms，所有动画均可以队列形式来按顺序执行
 
 返回值： Anything   
 
@@ -894,11 +894,22 @@
 ```
 方法名称： $(slelector1).stop([flag1], [flag2])
 
-说明： 停止匹配元素的当前动画，具体执行由参数确定:a, stop(),等价于stop(false,false)，仅仅停止“当前执行”这段动画，后面的动画还可以继续执行;  b, stop(true),等价于stop(true,false)，停止所有动画，包括当前执行的动画;  c,  stop(true,true),停止所有动画，但是允许执行当前动画;  d, stop(false,true),停止“当前执行”这段动画，然后调到最后一个动画，并且执行最后一个动画。
+说明： 停止匹配元素的当前动画，具体执行由参数确定:a, stop(),等价于stop(false,false)，仅仅停止“当前执行”这段动画，后面的动画还可以继续执行;  b, stop(true),等价于stop(true,false)，停止所有动画，包括当前执行的动画;  c,  stop(true,true),停止所有动画，但是允许执行当前动画;  d, stop(false,true),停止“当前执行”这段动画，然后调到最后一个动画，并且执行最后一个动画
 
 返回值： Anything   
 
 示例： $('#stoptest').stop(), $('#stoptest').stop(true),$('#stoptest').stop(true,true), $('#stoptest').stop(false,true)
+```
+
+#### 8.13 延时动画
+```
+方法名称： $(slelector1).delay(time)
+
+说明： 为匹配元素执行延时动画，后续动画需等待指定时间方可执行
+
+返回值： Anything   
+
+示例： $('#delaytest').delay(1000)...
 ```
 
 
