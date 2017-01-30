@@ -912,6 +912,88 @@
 示例： $('#delaytest').delay(1000)...
 ```
 
+### 9. Ajax方法
+
+### 10. 常用函数
+#### 10.1 阻止默认事件
+```
+方法名称： $.preventDefault(event)
+
+说明： 阻止默认事件，比如a的跳转，submit的提交，鼠标右击显示菜单等
+
+返回值： undefined   
+
+示例： $(a).click(event){ $.preventDefault(event) }...
+```
+
+#### 10.2 阻止冒泡
+```
+方法名称： $.stopPropagation(event)
+
+说明： 阻止冒泡，当前节点触发的事件不会冒泡到父级节点
+
+返回值： undefined   
+
+示例： $(a).click(event){ $.stopPropagation(event) }...
+```
+
+#### 10.3 获取键码
+```
+方法名称： $.getCharCode(event)
+
+说明： 获取当前按键的键码，可用String.fromCharCode方法将键码转化为按键，尽量不使用keypress事件获取值，不同浏览器有误差，应使用keydown或keyup事件，可输出键盘上A-Z，0-9（无法正确输出其他键）
+
+返回值： undefined   
+
+示例： $(document).keydown( function(event){ alert(String.fromCharCode($.getCharCode(event))) })...
+```
+
+#### 10.4 获取鼠标按键
+```
+方法名称： $.getButton(event)
+
+说明： 在mousedown和mouseup事件中检测按下了哪个键，0表示左键，1表示中间滚轮键，2表示右键
+
+返回值： Number   
+
+示例： $(document).mousedown( function(event){ alert($.getButton(event)) })...
+```
+
+#### 10.4 获取鼠标在浏览器窗口的位置
+```
+方法名称： $.getClientPosition(event)
+
+说明： 获取鼠标在浏览器窗口的位置（在click，contextmenu，mousedown，mouseup中使用）
+
+返回值： Object   
+
+示例： $(document).click( function(event){ var position = $.getClientPosition(event); alert('X:' + positon. left+'px, Y:' + position.top + 'px') })...
+```
+
+#### 10.5 获取鼠标在页面内容的位置
+```
+方法名称： $.getPagePosition(event)
+
+说明： 获取鼠标在页面内容的位置（在click，contextmenu，mousedown，mouseup中使用）
+
+返回值： Object   
+
+示例： $(document).click( function(event){ var position = $.getPagePosition(event); alert('X:' + position. left+'px, Y:' + position.top + 'px') })...
+```
+
+#### 10.6 获取鼠标在整个屏幕的位置
+```
+方法名称： $.getScreenPosition(event)
+
+说明： 获取鼠标在页面内容的位置（在click，contextmenu，mousedown，mouseup中使用）
+
+返回值： Object   
+
+示例： $(document).click( function(event){ var position = $.getScreenPosition(event); alert('X:' + position. left+'px, Y:' + position.top + 'px') })...
+```
+
+
+
 
 
 
