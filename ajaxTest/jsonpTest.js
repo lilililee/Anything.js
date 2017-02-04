@@ -1,0 +1,1 @@
+flightHandler({ msg : '我是远程数据~~'});

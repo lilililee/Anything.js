@@ -913,6 +913,15 @@
 ```
 
 ### 9. Ajax方法
+```
+方法名称： $.ajax(ajax)
+
+说明： 动态请求数据，传入一个参数对象：a. type : 请求方式，get或post，默认为get; b. url : 发送请求的地址; c. data : 发送的数据，为数组格式; d. success : 请求成功后的回调函数
+
+返回值： undefined   
+
+示例： $('ajaxtest').click(event){ $.ajax({ type : 'post', url : 'http://127.0.0.1/ajaxTest/data.php?rand='+Math.random(), data : [{ name : 'lee', age : '23' }], success : function(data){ alert(data);}}); }...
+```
 
 ### 10. 常用函数
 #### 10.1 阻止默认事件

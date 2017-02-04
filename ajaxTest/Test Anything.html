@@ -93,15 +93,10 @@
 		}
 		
 	</style>
-	<!-- <script>
-		var callback = function(data){
-		alert(data.msg);
-	}
+	<script>
+		
+		
 	</script>
-	<script src="http://127.0.0.1:100/ajaxTest/jsonpTest.js">
-		
-		
-	</script> -->
 	
 </head>
 <body class="z">
@@ -173,19 +168,14 @@
 	<input type="radio" name="w">11
 	<input type="radio" name="w">22
 	<p>1</p><p>1</p><p>1</p><p>1</p><p>1</p><p>1</p><p>1</p><p>1</p><p>1</p><p>1</p><p>1</p><p>1</p><p>1</p><p>1</p><p>1</p><p>1</p><p>1</p><p>1</p><p>1</p><p>1</p><p>155</p>
-<script src="http://lib.sinaapp.com/js/jquery/1.9.1/jquery-1.9.1.min.js"></script>
-<!-- <script src ='Anything.js'></script> -->
+<!-- <script src="http://lib.sinaapp.com/js/jquery/1.9.1/jquery-1.9.1.min.js"></script> -->
+<script src ='Anything.js'></script>
 
 <script>
-//$('head').append('<script src="http://127.0.0.1:100/ajaxTest/jsonpTest.js"><\/script>')
-
-$(function(){
-
-
 
  function GetData(){
              var xhr=new XMLHttpRequest();
-             xhr.open("get","http://localhost:1337/",true);
+             xhr.open("GET","./data.php",true);
              xhr.onreadystatechange=function(){
                  if(xhr.readyState==4){
                      if(xhr.status==200){
@@ -196,41 +186,37 @@ $(function(){
              }
              xhr.send(null);
          }
-
-
-
-
+//alert(11);
 $('.ajaxbut').click(function(){
-	//GetData();
-	// var xhr = new XMLHttpRequest();
+// 	//GetData();
+// 	// var xhr = new XMLHttpRequest();
 
-	// xhr.open('GET','localhost:1337',true);
+// 	// xhr.open('GET','localhost:1337',true);
 
-	// xhr.onreadychange = function(){
-	// 	if(xhr.readyState == 4){
-	// 		if(xhr.status == 200){
-	// 			//alert(xhr.responseText);
-	// 			alert(11)
-	// 		}
-	// 	}
-	// }
-	// xhr.send(null);
-	// $.ajax({
-	// 	url : 'localhost:1337',
-	// 	success : 
-	// });
-
-	//jsonp:
+// 	// xhr.onreadychange = function(){
+// 	// 	if(xhr.readyState == 4){
+// 	// 		if(xhr.status == 200){
+// 	// 			//alert(xhr.responseText);
+// 	// 			alert(11)
+// 	// 		}
+// 	// 	}
+// 	// }
+// 	// xhr.send(null);
 	$.ajax({
-		url : 'http://127.0.0.1/ajaxTest/jsonpTest.js',
-		dataType : 'jsonp',
-		jsonp : 'callback',
-		jsonpCallback:"flightHandler",
+		url : 'http://127.0.0.1/ajaxTest/data.php?rand='+Math.random(),
+		type : 'post',
+		data : [{
+			name : 'lee',
+			age : '23'
+		}],
+		// dataType : 'jsonp',
+		// jsonp : 'callback',
+		// jsonpCallback:"flightHandler",
 		success : function(data){
-			alert(data)
+
+			alert(data);
 		}
 	});
-
 });
 
 
@@ -340,7 +326,7 @@ $('#toggle').click(function(){
 // console.log(a)
 // var b =[];
 // b.say()
-})
+
 </script>
 </body>
 </html>
