@@ -2444,11 +2444,132 @@ $.doAnimate = function(node, obj_attr, time, callback, delay, type, start_fn){
 }
 
 
-//***********************************插件函数*****************************************
-//插件入口
-Anything.prototype.extend = function (name, fn) {
-	Anything.prototype[name] = fn;
-};
+
+//------------------------------------------------------------------------------------
+//---------------------------------------Ajax-----------------------------------------
+//------------------------------------------------------------------------------------
+//AJAX封装
+$.Ajax(obj){
+	//参数判断
+	if( typeof obj.method != 'string' )  throw new Error('method参数不合法！');
+	if( typeof obj.url != 'string' )     throw new Error('url参数不合法！');
+	if( !(obj.data instanceof Array) )   throw new Error('data参数不合法！必须为数组');
+	if( typeof obj.async != 'boolean' )  throw new Error('async参数不合法！');
+
+
+	var xhr = createXHR(),
+		post_data = null;
+
+	//判断method
+	if( obj.method === 'get' ){
+		obj.url += obj.url.indexOf('?')==-1? '?':'&';
+		obj.url += dealDate(obj.data);
+		//alert(obj.url);
+	} else if (obj.method === 'post'){
+		post_data = dealDate(obj.data);
+		//alert(post_data);
+	} else {
+		throw new Error('method参数必须为get或post');
+	}
+
+	//如果为异步，绑定onreadystatechange事件
+	if( obj.async === true ){
+		xhr.onreadystatechange = function(){
+			if( xhr.readyState == 4 ){
+				callback();
+			}
+		};
+	}
+
+	//准备发送请求
+	xhr.open(obj.method,obj.url,obj.async);
+	if( obj.method == 'post' ){
+		//为post方式设置头信息模拟表单提交
+		xhr.setRequestHeader('Content-Type','application/x-www-form-urlencoded');
+	}
+
+	//发送请求
+	xhr.send(post_data);
+
+	//如果为同步，在send后执行输出
+	if( obj.async === false ){
+		callback();
+	}
+
+	function createXHR() {
+		if ( typeof XMLHttpRequest != 'undefined' ) {
+			return new XMLHttpRequest();
+
+		} else if (typeof ActiveXObject != 'undefined') {
+			var versions = [
+				'MSXML2.XMLHttp.6.0',
+				'MSXML2.XMLHttp.3.0',
+				'MSXML2.XMLHttp'
+			];
+
+			for ( var i = 0; i < versions.length; i++ ) {
+				try {
+					return new ActiveXObject(version[i]);
+				} catch (e) {
+				//跳过
+				}
+			}
+
+		} else {
+			throw new Error('您的浏览器不支持XHR 对象！');
+		}
+	}
+
+	function callback(){
+		if( xhr.status == 200 ){
+			//函数回调,本来在addEvent中调用runAjax，现在又在runAjax中回调addEvent中的函数
+			obj.success(xhr.responseText);	
+		} else {
+			alert('数据返回失败！错误代码：'+xhr.status+'错误信息：'+xhr.statusText);
+		}
+	}
+
+	//将包含多个对象的数组转化为字符串，格式为'name=lee&age=22&name=qee&age=11';
+	function dealDate(data){		
+		var result = '';
+		var current_obj = {};
+		for(var i=0;i<data.length;i++){
+			current_obj = data[i];
+			for(var property in current_obj){
+				result += encodeURIComponent(property)+'='+encodeURIComponent(current_obj[property])+'&';
+			}
+		}
+		//var str = result.slice(0,-1);
+		result = result.slice(0,-1);
+		return result;
+	}	
+}
+//AJAX调用模版
+/*
+addEvent(document,'click',function(){
+	runAjax({
+		method : 'get',
+		url : 'ajax.php?rand='+Math.random(),
+		data : [				//可以直接传对象，不用数组，需修改dealData()
+			{
+				name : 'l&ee',
+				age : 22
+			}//,
+			//{
+			//	name : 'qee',
+			//	age : 11				//传递属性名一样的数据时，前面的会被覆盖
+			//}
+		],
+		async : true,
+
+		success : function(content){
+			alert(content);
+		}
+	});
+	
+});
+
+*/
 
 
 //------------------------------------------------------------------------------------
@@ -2592,7 +2713,7 @@ $.getDefaultDisplay = function(node){
 	}else if(/^(LI)$/.test(tag)){
 		return 'list-item';
 	}else{
-		return 'inline'
+		return 'inline';
 	}
 
 }
@@ -2852,3 +2973,12 @@ $.getScreenPosition = function(event){
 		top : e.screenY
 	}
 }
+
+
+//------------------------------------------------------------------------------------
+//-----------------------------------插    件-----------------------------------------
+//------------------------------------------------------------------------------------
+//插件入口
+Anything.prototype.extend = function (name, fn) {
+	Anything.prototype[name] = fn;
+};
