@@ -93,15 +93,10 @@
 		}
 		
 	</style>
-	<!-- <script>
-		var callback = function(data){
-		alert(data.msg);
-	}
+	<script>
+		
+		
 	</script>
-	<script src="http://127.0.0.1:100/ajaxTest/jsonpTest.js">
-		
-		
-	</script> -->
 	
 </head>
 <body class="z">
@@ -177,15 +172,10 @@
 <!-- <script src ='Anything.js'></script> -->
 
 <script>
-//$('head').append('<script src="http://127.0.0.1:100/ajaxTest/jsonpTest.js"><\/script>')
-
-$(function(){
-
-
 
  function GetData(){
              var xhr=new XMLHttpRequest();
-             xhr.open("get","http://localhost:1337/",true);
+             xhr.open("GET","./data.php",true);
              xhr.onreadystatechange=function(){
                  if(xhr.readyState==4){
                      if(xhr.status==200){
@@ -196,12 +186,6 @@ $(function(){
              }
              xhr.send(null);
          }
-
-
-
-
-
-
 
 $('.ajaxbut').click(function(){
 	//GetData();
@@ -218,22 +202,14 @@ $('.ajaxbut').click(function(){
 	// 	}
 	// }
 	// xhr.send(null);
-	// $.ajax({
-	// 	url : 'localhost:1337',
-	// 	success : 
-	// });
-
-	//jsonp:
 	$.ajax({
-		url : 'http://127.0.0.1:100/ajaxTest/jsonpTest.js',
+		url : 'http://127.0.0.1:1337',
 		dataType : 'jsonp',
-		jsonp : 'callback',
-		jsonpCallback:"flightHandler",
 		success : function(data){
-			alert(data)
+
+			alert(data);
 		}
 	});
-
 });
 
 
@@ -343,7 +319,7 @@ $('#toggle').click(function(){
 // console.log(a)
 // var b =[];
 // b.say()
-})
+
 </script>
 </body>
 </html>
