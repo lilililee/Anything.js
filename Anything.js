@@ -2648,6 +2648,29 @@ $.isInArray = function(elem, arr){
 	
 	return result;
 }
+
+//获取一个元素在数组的下标
+$.getIndexOf = function(elem, arr){
+	if(!arr instanceof Array) $.errorArgs();
+
+	//优先使用indexOf方法
+	if( typeof arr.indexOf == 'function'){
+		return arr.indexOf(elem);
+	}
+	//兼容IE8-，循环遍历
+	var i,
+		len = arr.length,
+		result = -1;
+
+	for( i = 0; i < len; i++ ){
+		if( elem === arr[i] ){
+			result = i;
+			break;
+		}
+	}
+	return result;
+}
+
 //***********************************dom节点函数***************************************
 //获取节点计算样式
 //该函数始终返回的是一个带单位的字符串，如果要进行数值处理的话需要用parseFloat处理一下！！
