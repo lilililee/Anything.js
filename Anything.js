@@ -11,7 +11,7 @@ function Anything(args) {
 	//1. 参数为字符串时
 	if(typeof args == 'string'){
 		//1.1 优先使用querySelectorAll方法
-		if (document.querySelectorAll  === 'dddddddddddddddddddddd') {	//IE8+
+		if (document.querySelectorAll) {	//IE8+
 			$.pushElementsToAnything(this, document.querySelectorAll(args));//this = document.querySelectorAll(args);
 		}
 		//1.2 使用自写的选择符匹配，兼容IE6，7
@@ -2286,6 +2286,7 @@ Anything.prototype.stop = function(flag1 , flag2){
 			}
 		}
 	}
+	return this;
 }
 
 
@@ -2670,6 +2671,8 @@ $.getIndexOf = function(elem, arr){
 	}
 	return result;
 }
+
+
 
 //***********************************dom节点函数***************************************
 //获取节点计算样式
